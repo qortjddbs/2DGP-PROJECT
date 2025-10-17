@@ -1,17 +1,16 @@
 from pico2d import *
+from rooks import Rooks
 
-running = True
-
-open_canvas()
 
 def reset_world():
     global world
-    global player
+    global rooks
 
     world = []
 
+    rooks = Rooks()
+    world.append(rooks)
 
-reset_world()
 # game loop
 def handle_events():
     global running
@@ -37,6 +36,10 @@ def render_world():
     update_canvas()
 
 
+running = True
+
+open_canvas()
+reset_world()
 while running:
     handle_events()
     update_world()
