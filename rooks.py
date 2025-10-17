@@ -1,12 +1,7 @@
-import os
 from pico2d import load_image
 
 class Rooks:
     def __init__(self):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        img_path = os.path.join(base_dir, 'Rooks', '1.png')
-        if not os.path.exists(img_path):
-            raise FileNotFoundError(f"Image not found: {img_path}")
         self.x, self.y = 400, 90
         self.frame = 0
         self.face_dir = 1
