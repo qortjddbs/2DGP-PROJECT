@@ -1,6 +1,5 @@
 from pico2d import *
 
-
 running = True
 
 open_canvas()
