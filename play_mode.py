@@ -6,7 +6,7 @@ import game_world
 
 from rooks import Rooks
 
-boy = None
+rooks = None
 
 def handle_events():
     event_list = get_events()
@@ -16,10 +16,10 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         else:
-            boy.handle_event(event)
+            rooks.handle_event(event)
 
 def init():
-    global boy
+    global rooks
 
     rooks = Rooks()
     game_world.add_object(rooks, 1)
