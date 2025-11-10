@@ -6,21 +6,6 @@ import game_world
 
 from state_machine import StateMachine
 
-def a_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
-
-def d_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_d
-
-def a_up(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_a
-
-def d_up(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_d
-
-def space_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
-
 PIXEL_PER_METER = (10.0 / 0.3) # 10 pixel 30 cm
 RUN_SPEED_KMPH = 20.0 # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
@@ -35,10 +20,10 @@ class Idle:
     def __init__(self, rooks):
         self.rooks = rooks
 
-    def enter(self, event):
+    def enter(self, e):
         pass
 
-    def exit(self, event):
+    def exit(self, e):
         pass
 
     def do(self):
@@ -56,9 +41,9 @@ class Run:
         self.rooks = rooks
 
     def enter(self, e):
-        if a_down(e) or d_up(e):
+        if self.rooks.left_down(e) or self.rooks.right_up(e):
             self.rooks.dir = self.rooks.face_dir = -1
-        elif d_down(e) or a_up(e):
+        elif self.rooks.right_down(e) or self.rooks.left_up(e):
             self.rooks.dir = self.rooks.face_dir = 1
 
 
@@ -79,10 +64,10 @@ class Attack:
     def __init__(self, rooks):
         self.rooks = rooks
 
-    def enter(self, event):
+    def enter(self, e):
         self.rooks.frame = 0
 
-    def exit(self, event):
+    def exit(self, e):
         pass
 
     def do(self):
@@ -99,10 +84,10 @@ class Skill:
     def __init__(self, rooks):
         self.rooks = rooks
 
-    def enter(self, event):
+    def enter(self, e):
         self.rooks.frame = 0
 
-    def exit(self, event):
+    def exit(self, e):
         pass
 
     def do(self):
@@ -119,10 +104,10 @@ class Ult:
     def __init__(self, rooks):
         self.rooks = rooks
 
-    def enter(self, event):
+    def enter(self, e):
         self.rooks.frame = 0
 
-    def exit(self, event):
+    def exit(self, e):
         pass
 
     def do(self):
@@ -150,12 +135,24 @@ class Rooks:
             # Ult: 15장 (1~15)
             Rooks.images['Ult'] = [load_image(f"./Rooks/Ult ({i}).png") for i in range(1, 16)]
 
-    def __init__(self):
+    def __init__(self, player_num=1):
         self.x, self.y = 400, 200
         self.load_images()
         self.dir = 0
         self.frame = 0
         self.face_dir = 1
+        self.player_num = player_num
+
+        # 플레이어별 키 설정
+        if self.player_num == 1:
+            self.left_key = SDLK_a
+            self.right_key = SDLK_d
+            self.attack_key = SDLK_SPACE
+        elif self.player_num == 2:
+            from sdl2 import SDLK_LEFT, SDLK_RIGHT, SDLK_RETURN
+            self.left_key = SDLK_LEFT
+            self.right_key = SDLK_RIGHT
+            self.attack_key = SDLK_RETURN
 
         self.IDLE = Idle(self)
         self.RUN = Run(self)
@@ -165,13 +162,28 @@ class Rooks:
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE : {a_down: self.RUN, d_down: self.RUN, space_down: self.ATTACK, a_up: self.RUN, d_up: self.RUN},
-                self.RUN : {a_up: self.IDLE, d_up: self.IDLE, a_down: self.IDLE, d_down: self.IDLE},
-                self.ATTACK : {a_down: self.RUN, d_down: self.RUN},
+                self.IDLE : {self.left_down: self.RUN, self.right_down: self.RUN, self.space_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
+                self.RUN : {self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
+                self.ATTACK : {self.left_down: self.RUN, self.right_down: self.RUN},
                 self.SKILL : {},
                 self.ULT : {},
             }
         )
+
+    def left_down(self, e):
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.left_key
+
+    def right_down(self, e):
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.right_key
+
+    def left_up(self, e):
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == self.left_key
+
+    def right_up(self, e):
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == self.right_key
+
+    def space_down(self, e):
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
 
     def get_bb(self):
         return self.x - 25, self.y - 80, self.x + 25, self.y - 45
