@@ -252,13 +252,13 @@ class Rooks:
         if Rooks.images == None:
             Rooks.images = {}
             # Idle: 1장
-            Rooks.images['Idle'] = [load_image("./Rooks/Idle (1).png")]
+            Rooks.images['Idle'] = [load_image("./Character/Rooks/Idle (1).png")]
             # Attack: 11장 (1~11)
-            Rooks.images['Attack'] = [load_image(f"./Rooks/Attack ({i}).png") for i in range(1, 12)]
+            Rooks.images['Attack'] = [load_image(f"./Character/Rooks/Attack ({i}).png") for i in range(1, 12)]
             # Skill: 14장 (1~14)
-            Rooks.images['Skill'] = [load_image(f"./Rooks/Skill ({i}).png") for i in range(1, 15)]
+            Rooks.images['Skill'] = [load_image(f"./Character/Rooks/Skill ({i}).png") for i in range(1, 15)]
             # Ult: 15장 (1~15)
-            Rooks.images['Ult'] = [load_image(f"./Rooks/Ult ({i}).png") for i in range(1, 16)]
+            Rooks.images['Ult'] = [load_image(f"./Character/Rooks/Ult ({i}).png") for i in range(1, 16)]
 
     def __init__(self, player_num=1):
         self.x, self.y = 400, 135
