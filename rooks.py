@@ -1,5 +1,6 @@
 from pico2d import load_image, get_time, load_font, draw_rectangle
 from sdl2 import *
+import ctypes
 
 import game_framework
 import game_world
@@ -95,8 +96,18 @@ class Attack:
 
         if self.rooks.frame >= 10.9:
             self.rooks.frame = 0
+
+            # 키보드 상태 직접 확인
+            keys = SDL_GetKeyboardState(None)
+
+            # 공격 키가 여전히 눌려있으면 다시 공격
+            if keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
+                self.rooks.state_machine.cur_state = self.rooks.ATTACK
+            # 스킬 키가 눌려있으면 스킬로
+            elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
+                self.rooks.state_machine.cur_state = self.rooks.SKILL
             # dir이 0이 아니면 RUN으로, 0이면 IDLE로
-            if self.rooks.dir != 0:
+            elif self.rooks.dir != 0:
                 self.rooks.state_machine.cur_state = self.rooks.RUN
             else:
                 self.rooks.state_machine.cur_state = self.rooks.IDLE
@@ -116,13 +127,46 @@ class Skill:
         self.rooks = rooks
 
     def enter(self, e):
-        self.rooks.frame = 0
+        # 새로운 공격이면 프레임 초기화
+        if self.rooks.frame >= 13.9 or self.rooks.frame == 0:
+            self.rooks.frame = 0
+
+        # 공격 중 이동 키 입력 처리
+        if self.rooks.left_down(e):
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif self.rooks.right_down(e):
+            self.rooks.dir = self.rooks.face_dir = 1
+        elif self.rooks.left_up(e) and self.rooks.dir == -1:
+            self.rooks.dir = 0
+        elif self.rooks.right_up(e) and self.rooks.dir == 1:
+            self.rooks.dir = 0
 
     def exit(self, e):
         pass
 
     def do(self):
-        self.rooks.frame = (self.rooks.frame + 14 * ACTION_PER_TIME * game_framework.frame_time) % 14
+        # 공격하면서도 이동
+        self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+
+        self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+
+        if self.rooks.frame >= 13.9:
+            self.rooks.frame = 0
+
+            # 키보드 상태 직접 확인
+            keys = SDL_GetKeyboardState(None)
+
+            # 스킬 키가 여전히 눌려있으면 다시 스킬
+            if keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
+                self.rooks.state_machine.cur_state = self.rooks.SKILL
+            # 공격 키가 눌려있으면 공격으로
+            elif keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
+                self.rooks.state_machine.cur_state = self.rooks.ATTACK
+            # dir이 0이 아니면 RUN으로, 0이면 IDLE로
+            elif self.rooks.dir != 0:
+                self.rooks.state_machine.cur_state = self.rooks.RUN
+            else:
+                self.rooks.state_machine.cur_state = self.rooks.IDLE
 
     def draw(self):
         frame_index = min(int(self.rooks.frame), 13)
@@ -204,13 +248,16 @@ class Rooks:
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE : {self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
-                self.RUN : {self.attack_down: self.ATTACK, self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
+                self.IDLE : {self.skill_down: self.SKILL, self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
+                self.RUN : {self.skill_down: self.SKILL, self.attack_down: self.ATTACK, self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
                 self.ATTACK : {self.left_down: self.ATTACK, self.right_down: self.ATTACK, self.left_up: self.ATTACK, self.right_up: self.ATTACK},
-                self.SKILL : {},
+                self.SKILL : {self.left_down: self.SKILL, self.right_down: self.SKILL, self.left_up: self.SKILL, self.right_up: self.SKILL},
                 self.ULT : {},
             }
         )
+
+    def skill_down(self, e):
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.skill_key
 
     def left_down(self, e):
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.left_key
@@ -239,4 +286,3 @@ class Rooks:
 
     def handle_event(self, event):
         self.state_machine.handle_state_event(('INPUT', event))
-
