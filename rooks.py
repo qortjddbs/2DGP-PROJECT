@@ -75,20 +75,46 @@ class Attack:
         if self.rooks.frame >= 10.9 or self.rooks.frame == 0:
             self.rooks.frame = 0
 
-        # 공격 중 이동 키 입력 처리
-        if self.rooks.left_down(e):
-            self.rooks.dir = self.rooks.face_dir = -1
-        elif self.rooks.right_down(e):
-            self.rooks.dir = self.rooks.face_dir = 1
-        elif self.rooks.left_up(e) and self.rooks.dir == -1:
+        # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
+        if left_pressed and right_pressed:
+            # 둘 다 눌려있으면 멈추되, 바라보는 방향은 마지막 누른 키로
             self.rooks.dir = 0
-        elif self.rooks.right_up(e) and self.rooks.dir == 1:
+            if self.rooks.left_down(e):
+                self.rooks.face_dir = -1
+            elif self.rooks.right_down(e):
+                self.rooks.face_dir = 1
+        elif left_pressed and not right_pressed:
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif right_pressed and not left_pressed:
+            self.rooks.dir = self.rooks.face_dir = 1
+        else:
+            # 둘 다 안 눌려있으면 멈춤
             self.rooks.dir = 0
 
     def exit(self, e):
         pass
 
     def do(self):
+        # 공격 중에도 현재 키 상태 확인하여 이동
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
+        if left_pressed and right_pressed:
+            # 둘 다 눌려있으면 멈춤
+            self.rooks.dir = 0
+        elif left_pressed and not right_pressed:
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif right_pressed and not left_pressed:
+            self.rooks.dir = self.rooks.face_dir = 1
+        else:
+            # 둘 다 안 눌려있으면 멈춤
+            self.rooks.dir = 0
+
         # 공격하면서도 이동
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
 
@@ -96,9 +122,6 @@ class Attack:
 
         if self.rooks.frame >= 10.9:
             self.rooks.frame = 0
-
-            # 키보드 상태 직접 확인
-            keys = SDL_GetKeyboardState(None)
 
             # 공격 키가 여전히 눌려있으면 다시 공격
             if keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
@@ -127,34 +150,57 @@ class Skill:
         self.rooks = rooks
 
     def enter(self, e):
-        # 새로운 공격이면 프레임 초기화
+        # 새로운 스킬이면 프레임 초기화
         if self.rooks.frame >= 13.9 or self.rooks.frame == 0:
             self.rooks.frame = 0
 
-        # 공격 중 이동 키 입력 처리
-        if self.rooks.left_down(e):
-            self.rooks.dir = self.rooks.face_dir = -1
-        elif self.rooks.right_down(e):
-            self.rooks.dir = self.rooks.face_dir = 1
-        elif self.rooks.left_up(e) and self.rooks.dir == -1:
+        # 스킬 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
+        if left_pressed and right_pressed:
+            # 둘 다 눌려있으면 멈추되, 바라보는 방향은 마지막 누른 키로
             self.rooks.dir = 0
-        elif self.rooks.right_up(e) and self.rooks.dir == 1:
+            if self.rooks.left_down(e):
+                self.rooks.face_dir = -1
+            elif self.rooks.right_down(e):
+                self.rooks.face_dir = 1
+        elif left_pressed and not right_pressed:
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif right_pressed and not left_pressed:
+            self.rooks.dir = self.rooks.face_dir = 1
+        else:
+            # 둘 다 안 눌려있으면 멈춤
             self.rooks.dir = 0
 
     def exit(self, e):
         pass
 
     def do(self):
-        # 공격하면서도 이동
+        # 스킬 중에도 현재 키 상태 확인하여 이동
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
+        if left_pressed and right_pressed:
+            # 둘 다 눌려있으면 멈춤
+            self.rooks.dir = 0
+        elif left_pressed and not right_pressed:
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif right_pressed and not left_pressed:
+            self.rooks.dir = self.rooks.face_dir = 1
+        else:
+            # 둘 다 안 눌려있으면 멈춤
+            self.rooks.dir = 0
+
+        # 스킬 사용하면서도 이동
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
 
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         if self.rooks.frame >= 13.9:
             self.rooks.frame = 0
-
-            # 키보드 상태 직접 확인
-            keys = SDL_GetKeyboardState(None)
 
             # 스킬 키가 여전히 눌려있으면 다시 스킬
             if keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
