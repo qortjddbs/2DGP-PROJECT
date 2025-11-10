@@ -261,7 +261,7 @@ class Rooks:
             Rooks.images['Ult'] = [load_image(f"./Rooks/Ult ({i}).png") for i in range(1, 16)]
 
     def __init__(self, player_num=1):
-        self.x, self.y = 400, 200
+        self.x, self.y = 400, 135
         self.load_images()
         self.dir = 0
         self.frame = 0

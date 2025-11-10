@@ -5,6 +5,7 @@ import game_framework
 import game_world
 
 from rooks import Rooks
+from wilderness import Wilderness
 
 rooks = None
 
@@ -23,6 +24,9 @@ def init():
 
     rooks = Rooks()
     game_world.add_object(rooks, 1)
+
+    wilderness = Wilderness()
+    game_world.add_object(wilderness, 0)
 
 
 def update():
