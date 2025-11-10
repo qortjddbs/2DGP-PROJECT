@@ -294,13 +294,16 @@ class Rooks:
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE : {self.skill_down: self.SKILL, self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
+                self.IDLE : {self.ult_down: self.ULT, self.skill_down: self.SKILL, self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
                 self.RUN : {self.skill_down: self.SKILL, self.attack_down: self.ATTACK, self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
                 self.ATTACK : {self.left_down: self.ATTACK, self.right_down: self.ATTACK, self.left_up: self.ATTACK, self.right_up: self.ATTACK},
                 self.SKILL : {self.left_down: self.SKILL, self.right_down: self.SKILL, self.left_up: self.SKILL, self.right_up: self.SKILL},
                 self.ULT : {},
             }
         )
+
+    def ult_down(self, e):
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.ult_key
 
     def skill_down(self, e):
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.skill_key
