@@ -36,7 +36,7 @@ class Idle:
         self.rooks = rooks
 
     def enter(self, event):
-        self.rooks.dir = 0
+        pass
 
     def exit(self, event):
         pass
@@ -45,10 +45,10 @@ class Idle:
         self.rooks.frame = (self.rooks.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 1
 
     def draw(self):
-        if self.rooks.face_dir == 1:
-            self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
+        if self.rooks.face_dir == -1:
+            self.rooks.images['Idle'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
-            self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y)
 
 
 class Run:
@@ -168,7 +168,7 @@ class Rooks:
             {
                 self.IDLE : {a_down: self.RUN, d_down: self.RUN, space_down: self.ATTACK},
                 self.RUN : {a_up: self.IDLE, d_up: self.IDLE},
-                self.ATTACK : {},
+                self.ATTACK : {a_down: self.RUN, d_down: self.RUN},
                 self.SKILL : {},
                 self.ULT : {},
             }
