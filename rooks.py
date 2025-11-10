@@ -175,7 +175,7 @@ class Rooks:
         )
 
     def get_bb(self):
-        return self.x - 25, self.y - 80, self.x + 20, self.y - 40
+        return self.x - 25, self.y - 80, self.x + 20, self.y - 45
 
     def update(self):
         self.state_machine.update()
