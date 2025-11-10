@@ -1,5 +1,5 @@
 from pico2d import load_image, get_time, load_font, draw_rectangle
-from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_a, SDLK_d, SDL_KEYUP, SDLK_e
+from sdl2 import *
 
 import game_framework
 import game_world
@@ -14,9 +14,10 @@ RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 
 TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
-FRAMES_PER_ACTION = 11
 
 class Idle:
+    FRAMES_PER_ACTION = 1
+
     def __init__(self, rooks):
         self.rooks = rooks
 
@@ -27,20 +28,23 @@ class Idle:
         pass
 
     def do(self):
-        self.rooks.frame = (self.rooks.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 1
+        pass
 
     def draw(self):
         if self.rooks.face_dir == -1:
-            self.rooks.images['Idle'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][0].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
-            self.rooks.images['Idle'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
 
 
 class Run:
+    FRAMES_PER_ACTION = 1
+
     def __init__(self, rooks):
         self.rooks = rooks
 
     def enter(self, e):
+        self.rooks.frame = 0
         if self.rooks.left_down(e) or self.rooks.right_up(e):
             self.rooks.dir = self.rooks.face_dir = -1
         elif self.rooks.right_down(e) or self.rooks.left_up(e):
@@ -55,12 +59,14 @@ class Run:
 
     def draw(self):
         if self.rooks.face_dir == -1:
-            self.rooks.images['Idle'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][0].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
-            self.rooks.images['Idle'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
 
 
 class Attack:
+    FRAMES_PER_ACTION = 11
+
     def __init__(self, rooks):
         self.rooks = rooks
 
@@ -68,16 +74,21 @@ class Attack:
         self.rooks.frame = 0
 
     def exit(self, e):
-        pass
+        self.rooks.frame = 0
 
     def do(self):
-        self.rooks.frame = (self.rooks.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 11
+        self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+
+        if self.rooks.frame >= 10.9:
+            self.rooks.frame = 0
+            self.rooks.state_machine.cur_state = self.rooks.IDLE
 
     def draw(self):
+        frame_index = min(int(self.rooks.frame), 10)
         if self.rooks.face_dir == -1:
-            self.rooks.images['Attack'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Attack'][frame_index].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
-            self.rooks.images['Attack'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Attack'][frame_index].draw(self.rooks.x, self.rooks.y)
 
 
 class Skill:
@@ -111,7 +122,7 @@ class Ult:
         pass
 
     def do(self):
-        self.rooks.frame = (self.rooks.frame + 15 * ACTION_PER_TIME * game_framework.frame_time) % 15
+        self.rooks.frame = (self.rooks.frame + 15 * ACTION_PER_TIME * game_framework.frame_time)
 
     def draw(self):
         if self.rooks.face_dir == -1:
@@ -148,23 +159,28 @@ class Rooks:
             self.left_key = SDLK_a
             self.right_key = SDLK_d
             self.attack_key = SDLK_e
+            self.skill_key = SDLK_r
+            self.ult_key = SDLK_s
         elif self.player_num == 2:
             from sdl2 import SDLK_LEFT, SDLK_RIGHT, SDLK_RETURN
             self.left_key = SDLK_LEFT
             self.right_key = SDLK_RIGHT
             self.attack_key = SDLK_RETURN
+            self.skill_key = SDLK_RSHIFT
+            self.ult_key = SDLK_DOWN
 
         self.IDLE = Idle(self)
         self.RUN = Run(self)
         self.ATTACK = Attack(self)
         self.SKILL = Skill(self)
         self.ULT = Ult(self)
+
         self.state_machine = StateMachine(
             self.IDLE,
             {
                 self.IDLE : {self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
-                self.RUN : {self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
-                self.ATTACK : {self.left_down: self.RUN, self.right_down: self.RUN},
+                self.RUN : {self.attack_down: self.ATTACK, self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
+                self.ATTACK : {},
                 self.SKILL : {},
                 self.ULT : {},
             }
