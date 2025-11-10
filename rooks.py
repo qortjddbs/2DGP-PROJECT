@@ -1,5 +1,5 @@
 from pico2d import load_image, get_time, load_font, draw_rectangle
-from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_a, SDLK_d, SDL_KEYUP
+from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_a, SDLK_d, SDL_KEYUP, SDLK_e
 
 import game_framework
 import game_world
@@ -147,7 +147,7 @@ class Rooks:
         if self.player_num == 1:
             self.left_key = SDLK_a
             self.right_key = SDLK_d
-            self.attack_key = SDLK_SPACE
+            self.attack_key = SDLK_e
         elif self.player_num == 2:
             from sdl2 import SDLK_LEFT, SDLK_RIGHT, SDLK_RETURN
             self.left_key = SDLK_LEFT
@@ -162,7 +162,7 @@ class Rooks:
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE : {self.left_down: self.RUN, self.right_down: self.RUN, self.space_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
+                self.IDLE : {self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
                 self.RUN : {self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
                 self.ATTACK : {self.left_down: self.RUN, self.right_down: self.RUN},
                 self.SKILL : {},
@@ -182,8 +182,8 @@ class Rooks:
     def right_up(self, e):
         return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == self.right_key
 
-    def space_down(self, e):
-        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
+    def attack_down(self, e):
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.attack_key
 
     def get_bb(self):
         return self.x - 25, self.y - 80, self.x + 25, self.y - 45
