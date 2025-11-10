@@ -321,7 +321,7 @@ class Rooks:
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.attack_key
 
     def get_bb(self):
-        return self.x - 25, self.y - 80, self.x + 25, self.y - 45
+        return self.x - 15, self.y - 75, self.x + 15, self.y - 50
 
     def update(self):
         self.state_machine.update()
