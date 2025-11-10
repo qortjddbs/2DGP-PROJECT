@@ -55,15 +55,14 @@ class Run:
     def __init__(self, rooks):
         self.rooks = rooks
 
-    def enter(self, event):
-        if a_down(event):
-            self.rooks.dir = -1
-            self.rooks.face_dir = -1
-        elif d_down(event):
-            self.rooks.dir = 1
-            self.rooks.face_dir = 1
+    def enter(self, e):
+        if a_down(e) or d_up(e):
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif d_down(e) or a_up(e):
+            self.rooks.dir = self.rooks.face_dir = 1
 
-    def exit(self, event):
+
+    def exit(self, e):
         pass
 
     def do(self):
@@ -166,8 +165,8 @@ class Rooks:
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE : {a_down: self.RUN, d_down: self.RUN, space_down: self.ATTACK},
-                self.RUN : {a_up: self.IDLE, d_up: self.IDLE},
+                self.IDLE : {a_down: self.RUN, d_down: self.RUN, space_down: self.ATTACK, a_up: self.RUN, d_up: self.RUN},
+                self.RUN : {a_up: self.IDLE, d_up: self.IDLE, a_down: self.IDLE, d_down: self.IDLE},
                 self.ATTACK : {a_down: self.RUN, d_down: self.RUN},
                 self.SKILL : {},
                 self.ULT : {},
@@ -175,7 +174,7 @@ class Rooks:
         )
 
     def get_bb(self):
-        return self.x - 25, self.y - 80, self.x + 20, self.y - 45
+        return self.x - 25, self.y - 80, self.x + 25, self.y - 45
 
     def update(self):
         self.state_machine.update()
