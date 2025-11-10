@@ -71,9 +71,9 @@ class Run:
 
     def draw(self):
         if self.rooks.face_dir == -1:
-            self.rooks.images['Idle'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y, 200, 200)
+            self.rooks.images['Idle'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
-            self.rooks.images['Idle'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y, 200, 200)
+            self.rooks.images['Idle'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y)
 
 
 class Attack:
@@ -91,9 +91,9 @@ class Attack:
 
     def draw(self):
         if self.rooks.face_dir == -1:
-            self.rooks.images['Attack'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y, 200, 200)
+            self.rooks.images['Attack'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
-            self.rooks.images['Attack'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y, 200, 200)
+            self.rooks.images['Attack'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y)
 
 
 class Skill:
@@ -111,9 +111,9 @@ class Skill:
 
     def draw(self):
         if self.rooks.face_dir == -1:
-            self.rooks.images['Skill'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y, 200, 200)
+            self.rooks.images['Skill'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
-            self.rooks.images['Skill'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y, 200, 200)
+            self.rooks.images['Skill'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y)
 
 
 class Ult:
@@ -131,9 +131,9 @@ class Ult:
 
     def draw(self):
         if self.rooks.face_dir == -1:
-            self.rooks.images['Ult'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y, 200, 200)
+            self.rooks.images['Ult'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
-            self.rooks.images['Ult'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y, 200, 200)
+            self.rooks.images['Ult'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y)
 
 
 class Rooks:
