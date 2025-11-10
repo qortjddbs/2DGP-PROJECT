@@ -22,7 +22,7 @@ class Idle:
         self.rooks = rooks
 
     def enter(self, e):
-        pass
+        self.rooks.dir = 0
 
     def exit(self, e):
         pass
@@ -50,7 +50,6 @@ class Run:
         elif self.rooks.right_down(e) or self.rooks.left_up(e):
             self.rooks.dir = self.rooks.face_dir = 1
 
-
     def exit(self, e):
         pass
 
@@ -71,17 +70,36 @@ class Attack:
         self.rooks = rooks
 
     def enter(self, e):
-        self.rooks.frame = 0
+        # 새로운 공격이면 프레임 초기화
+        if self.rooks.frame >= 10.9 or self.rooks.frame == 0:
+            self.rooks.frame = 0
+
+        # 공격 중 이동 키 입력 처리
+        if self.rooks.left_down(e):
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif self.rooks.right_down(e):
+            self.rooks.dir = self.rooks.face_dir = 1
+        elif self.rooks.left_up(e) and self.rooks.dir == -1:
+            self.rooks.dir = 0
+        elif self.rooks.right_up(e) and self.rooks.dir == 1:
+            self.rooks.dir = 0
 
     def exit(self, e):
-        self.rooks.frame = 0
+        pass
 
     def do(self):
+        # 공격하면서도 이동
+        self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         if self.rooks.frame >= 10.9:
             self.rooks.frame = 0
-            self.rooks.state_machine.cur_state = self.rooks.IDLE
+            # dir이 0이 아니면 RUN으로, 0이면 IDLE로
+            if self.rooks.dir != 0:
+                self.rooks.state_machine.cur_state = self.rooks.RUN
+            else:
+                self.rooks.state_machine.cur_state = self.rooks.IDLE
 
     def draw(self):
         frame_index = min(int(self.rooks.frame), 10)
@@ -92,6 +110,8 @@ class Attack:
 
 
 class Skill:
+    FRAMES_PER_ACTION = 14
+
     def __init__(self, rooks):
         self.rooks = rooks
 
@@ -105,13 +125,16 @@ class Skill:
         self.rooks.frame = (self.rooks.frame + 14 * ACTION_PER_TIME * game_framework.frame_time) % 14
 
     def draw(self):
+        frame_index = min(int(self.rooks.frame), 13)
         if self.rooks.face_dir == -1:
-            self.rooks.images['Skill'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Skill'][frame_index].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
-            self.rooks.images['Skill'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Skill'][frame_index].draw(self.rooks.x, self.rooks.y)
 
 
 class Ult:
+    FRAMES_PER_ACTION = 15
+
     def __init__(self, rooks):
         self.rooks = rooks
 
@@ -125,10 +148,11 @@ class Ult:
         self.rooks.frame = (self.rooks.frame + 15 * ACTION_PER_TIME * game_framework.frame_time)
 
     def draw(self):
+        frame_index = min(int(self.rooks.frame), 14)
         if self.rooks.face_dir == -1:
-            self.rooks.images['Ult'][int(self.rooks.frame)].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Ult'][frame_index].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
-            self.rooks.images['Ult'][int(self.rooks.frame)].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Ult'][frame_index].draw(self.rooks.x, self.rooks.y)
 
 
 class Rooks:
@@ -169,18 +193,20 @@ class Rooks:
             self.skill_key = SDLK_RSHIFT
             self.ult_key = SDLK_DOWN
 
+        # 상태 객체들 먼저 생성
         self.IDLE = Idle(self)
         self.RUN = Run(self)
         self.ATTACK = Attack(self)
         self.SKILL = Skill(self)
         self.ULT = Ult(self)
 
+        # 상태 머신 초기화
         self.state_machine = StateMachine(
             self.IDLE,
             {
                 self.IDLE : {self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
                 self.RUN : {self.attack_down: self.ATTACK, self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
-                self.ATTACK : {},
+                self.ATTACK : {self.left_down: self.ATTACK, self.right_down: self.ATTACK, self.left_up: self.ATTACK, self.right_up: self.ATTACK},
                 self.SKILL : {},
                 self.ULT : {},
             }
@@ -213,3 +239,4 @@ class Rooks:
 
     def handle_event(self, event):
         self.state_machine.handle_state_event(('INPUT', event))
+
