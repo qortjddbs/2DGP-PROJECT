@@ -82,16 +82,20 @@ class Jump:
             self.rooks.dir = 0
 
         # 공중에서도 x 이동 적용
-        self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
-        if self.rooks.x < 20:
-            self.rooks.x = 20
-        elif self.rooks.x > 530:
-            self.rooks.x = 530
+        if not self.rooks.x_locked:
+            self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+            if self.rooks.x < 20:
+                self.rooks.x = 20
+            elif self.rooks.x > 530:
+                self.rooks.x = 530
+        else:
+            self.rooks.dir = 0
 
         # 3. 착지 확인
         if self.rooks.y <= self.rooks.ground_y:
 
             # 땅에 닿음
+            self.rooks.x_locked = False
             self.rooks.y = self.rooks.ground_y  # 땅에 정확히 안착
             self.rooks.y_velocity = 0
 
@@ -198,21 +202,39 @@ class Attack:
 
         # 공격하면서도 이동
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+        # NEW: 중력 및 착지 로직 추가 (Jump.do()에서 복사)
+        is_airborne = self.rooks.y > self.rooks.ground_y
+        if is_airborne:
+            self.rooks.y_velocity -= GRAVITY * game_framework.frame_time * 150
+            self.rooks.y += self.rooks.y_velocity * game_framework.frame_time
+
+            # 착지했는지 검사
+            if self.rooks.y <= self.rooks.ground_y:
+                self.rooks.y = self.rooks.ground_y
+                self.rooks.y_velocity = 0
+                is_airborne = False  # 방금 착지함
 
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         if self.rooks.frame >= 10.9:
             self.rooks.frame = 0
 
-            # 공격 키가 여전히 눌려있으면 다시 공격
+            # 1. 만약 아직 공중이라면, JUMP 상태로 복귀
+            if is_airborne:
+                self.rooks.state_machine.cur_state = self.rooks.JUMP
+                self.rooks.JUMP.enter(('FINISH_AIR_ATTACK', None))
+                return  # do() 함수 즉시 종료
+
+            # 2. (is_airborne == False) 땅이라면, 기존 로직 수행
+            keys = SDL_GetKeyboardState(None)  # (위에서 이미 선언했지만, 명확성을 위해)
             if keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
                 self.rooks.state_machine.cur_state = self.rooks.ATTACK
-            # 스킬 키가 눌려있으면 스킬로
             elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
                 self.rooks.state_machine.cur_state = self.rooks.SKILL
-            # dir이 0이 아니면 RUN으로, 0이면 IDLE로
             elif self.rooks.dir != 0:
                 self.rooks.state_machine.cur_state = self.rooks.RUN
+            elif keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]:
+                self.rooks.state_machine.cur_state = self.rooks.JUMP
             else:
                 self.rooks.state_machine.cur_state = self.rooks.IDLE
 
@@ -279,17 +301,35 @@ class Skill:
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
 
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+        # NEW: 중력 및 착지 로직 추가 (Jump.do()에서 복사)
+        is_airborne = self.rooks.y > self.rooks.ground_y
+        if is_airborne:
+            self.rooks.y_velocity -= GRAVITY * game_framework.frame_time * 150
+            self.rooks.y += self.rooks.y_velocity * game_framework.frame_time
+
+            # 착지했는지 검사
+            if self.rooks.y <= self.rooks.ground_y:
+                self.rooks.y = self.rooks.ground_y
+                self.rooks.y_velocity = 0
+                is_airborne = False  # 방금 착지함
+
+        self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         if self.rooks.frame >= 13.9:
             self.rooks.frame = 0
 
-            # 스킬 키가 여전히 눌려있으면 다시 스킬
-            if keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
-                self.rooks.state_machine.cur_state = self.rooks.SKILL
-            # 공격 키가 눌려있으면 공격으로
-            elif keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
+            # 1. 만약 아직 공중이라면, JUMP 상태로 복귀
+            if is_airborne:
+                self.rooks.state_machine.cur_state = self.rooks.JUMP
+                self.rooks.JUMP.enter(('FINISH_AIR_SKILL', None))
+                return  # do() 함수 즉시 종료
+
+            # 2. (is_airborne == False) 땅이라면, 기존 로직 수행
+            keys = SDL_GetKeyboardState(None)  # (위에서 이미 선언했지만, 명확성을 위해)
+            if keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
                 self.rooks.state_machine.cur_state = self.rooks.ATTACK
-            # dir이 0이 아니면 RUN으로, 0이면 IDLE로
+            elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
+                self.rooks.state_machine.cur_state = self.rooks.SKILL
             elif self.rooks.dir != 0:
                 self.rooks.state_machine.cur_state = self.rooks.RUN
             else:
@@ -314,25 +354,27 @@ class Ult:
         if self.rooks.frame >= 14.9 or self.rooks.frame == 0:
             self.rooks.frame = 0
 
-        # 스킬 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
-        keys = SDL_GetKeyboardState(None)
-        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
-        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+            # NEW: 공중에서 사용했다면 x_locked 플래그 설정
+            if self.rooks.y > self.rooks.ground_y:
+                self.rooks.x_locked = True
 
-        if left_pressed and right_pressed:
-            # 둘 다 눌려있으면 멈추되, 바라보는 방향은 마지막 누른 키로
+            # 궁극기는 항상 제자리에서 사용 (dir = 0)
             self.rooks.dir = 0
-            if self.rooks.left_down(e):
+
+            # (기존의 dir 설정 로직은 얼굴 방향 설정용으로만 사용)
+            keys = SDL_GetKeyboardState(None)
+            left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+            right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
+            if left_pressed and right_pressed:
+                if self.rooks.left_down(e):
+                    self.rooks.face_dir = -1
+                elif self.rooks.right_down(e):
+                    self.rooks.face_dir = 1
+            elif left_pressed and not right_pressed:
                 self.rooks.face_dir = -1
-            elif self.rooks.right_down(e):
+            elif right_pressed and not left_pressed:
                 self.rooks.face_dir = 1
-        elif left_pressed and not right_pressed:
-            self.rooks.dir = self.rooks.face_dir = -1
-        elif right_pressed and not left_pressed:
-            self.rooks.dir = self.rooks.face_dir = 1
-        else:
-            # 둘 다 안 눌려있으면 멈춤
-            self.rooks.dir = 0
 
     def exit(self, e):
         pass
@@ -353,6 +395,16 @@ class Ult:
         else:
             # 둘 다 안 눌려있으면 멈춤
             self.rooks.dir = 0
+
+        is_airborne = self.rooks.y > self.rooks.ground_y
+        if is_airborne:
+            self.rooks.y_velocity -= GRAVITY * game_framework.frame_time * 150
+            self.rooks.y += self.rooks.y_velocity * game_framework.frame_time
+
+            if self.rooks.y <= self.rooks.ground_y:
+                self.rooks.y = self.rooks.ground_y
+                self.rooks.y_velocity = 0
+                is_airborne = False
 
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
@@ -398,6 +450,8 @@ class Rooks:
         self.y_velocity = 0
         self.ground_y = 135
 
+        self.x_locked = False
+
         # 플레이어별 키 설정
         if self.player_num == 1:
             self.left_key = SDLK_a
@@ -429,10 +483,10 @@ class Rooks:
             {
                 self.IDLE : {self.jump_down: self.JUMP, self.ult_down: self.ULT, self.skill_down: self.SKILL, self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
                 self.RUN : {self.jump_down: self.JUMP, self.ult_down: self.ULT, self.skill_down: self.SKILL, self.attack_down: self.ATTACK, self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
-                self.ATTACK : {self.left_down: self.ATTACK, self.right_down: self.ATTACK, self.left_up: self.ATTACK, self.right_up: self.ATTACK},
+                self.ATTACK : {self.jump_down: self.JUMP, self.left_down: self.ATTACK, self.right_down: self.ATTACK, self.left_up: self.ATTACK, self.right_up: self.ATTACK},
                 self.SKILL : {self.left_down: self.SKILL, self.right_down: self.SKILL, self.left_up: self.SKILL, self.right_up: self.SKILL},
                 self.ULT : {},
-                self.JUMP : {}
+                self.JUMP : {self.attack_down: self.ATTACK, self.skill_down: self.SKILL, self.ult_down: self.ULT}
             }
         )
 
