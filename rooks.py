@@ -7,12 +7,13 @@ import game_world
 
 from state_machine import StateMachine
 
-PIXEL_PER_METER = (10.0 / 0.3) # 10 pixel 30 cm
+PIXEL_PER_METER = (10.0 / 0.3) # 10 pixel 30 cm / # 1pixel = 3cm, 1m = 33.33 pixel
 RUN_SPEED_KMPH = 20.0 # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 
+GRAVITY = 9.8   # 중력 가속도 (m/s²)
 TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 
@@ -44,17 +45,62 @@ class Jump:
         self.rooks = rooks
 
     def enter(self, e):
+        self.rooks.y_velocity = 250
         self.rooks.frame = 0
-        if self.rooks.left_down(e) or self.rooks.right_up(e):
+        print(f'점프 시작!')
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
+        if left_pressed and not right_pressed:
             self.rooks.dir = self.rooks.face_dir = -1
-        elif self.rooks.right_down(e) or self.rooks.left_up(e):
+        elif right_pressed and not left_pressed:
             self.rooks.dir = self.rooks.face_dir = 1
+        else:
+            self.rooks.dir = 0
 
     def exit(self, e):
         pass
 
     def do(self):
+        # 1. 중력 적용
+        self.rooks.y_velocity -= GRAVITY * game_framework.frame_time
+        self.rooks.y += self.rooks.y_velocity * game_framework.frame_time
+
+        # 2. 공중에서 좌우 이동 (Air Control)
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
+        if left_pressed and not right_pressed:
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif right_pressed and not left_pressed:
+            self.rooks.dir = self.rooks.face_dir = 1
+        else:
+            # 키를 떼면 공중에서 해당 방향으로의 이동을 멈춤
+            # (Attack/Skill 클래스처럼 dir=0으로 설정)
+            self.rooks.dir = 0
+
+        # 공중에서도 x 이동 적용
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+
+        # 3. 착지 확인
+        if self.rooks.y <= self.rooks.ground_y:
+            print("점프 끝!")
+            # 땅에 닿음
+            self.rooks.y = self.rooks.ground_y  # 땅에 정확히 안착
+            self.rooks.y_velocity = 0
+
+            # Attack/Skill 클래스에서 하던 것처럼,
+            # do() 내부에서 직접 다음 상태로 전이
+            if left_pressed or right_pressed:
+                # 키가 눌려있으면 RUN 상태로
+                self.rooks.state_machine.cur_state = self.rooks.RUN
+                self.rooks.RUN.enter(('LAND', None))  # RUN 상태의 enter를 수동 호출
+            else:
+                # 아무것도 안 눌려있으면 IDLE 상태로
+                self.rooks.state_machine.cur_state = self.rooks.IDLE
+                self.rooks.IDLE.enter(('LAND', None))  # IDLE 상태의 enter를 수동 호출
 
     def draw(self):
         if self.rooks.face_dir == -1:
@@ -80,6 +126,9 @@ class Run:
 
     def do(self):
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+        if self.rooks.y < 135:
+            self.rooks.y = 135
+            self.rooks.state_machine.cur_state = self.rooks.RUN
 
     def draw(self):
         if self.rooks.face_dir == -1:
@@ -338,6 +387,9 @@ class Rooks:
         self.face_dir = 1
         self.player_num = player_num
 
+        self.y_velocity = 0
+        self.ground_y = 135
+
         # 플레이어별 키 설정
         if self.player_num == 1:
             self.left_key = SDLK_a
@@ -367,8 +419,8 @@ class Rooks:
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE : {self.ult_down: self.ULT, self.skill_down: self.SKILL, self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
-                self.RUN : {self.skill_down: self.SKILL, self.attack_down: self.ATTACK, self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
+                self.IDLE : {self.jump_down: self.JUMP, self.ult_down: self.ULT, self.skill_down: self.SKILL, self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
+                self.RUN : {self.jump_down: self.JUMP, self.ult_down: self.ULT, self.skill_down: self.SKILL, self.attack_down: self.ATTACK, self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
                 self.ATTACK : {self.left_down: self.ATTACK, self.right_down: self.ATTACK, self.left_up: self.ATTACK, self.right_up: self.ATTACK},
                 self.SKILL : {self.left_down: self.SKILL, self.right_down: self.SKILL, self.left_up: self.SKILL, self.right_up: self.SKILL},
                 self.ULT : {},
