@@ -3,6 +3,7 @@ from pico2d import *
 
 import game_framework
 import game_world
+import pause_mode
 
 from rooks import Rooks
 from wilderness import Wilderness
@@ -15,7 +16,7 @@ def handle_events():
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
-            game_framework.quit()
+            game_framework.push_mode(pause_mode)
         else:
             rooks.handle_event(event)
 
