@@ -45,9 +45,9 @@ class Jump:
         self.rooks = rooks
 
     def enter(self, e):
-        self.rooks.y_velocity = 250
+        self.rooks.y_velocity = 500
         self.rooks.frame = 0
-        print(f'점프 시작!')
+
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
@@ -64,13 +64,14 @@ class Jump:
 
     def do(self):
         # 1. 중력 적용
-        self.rooks.y_velocity -= GRAVITY * game_framework.frame_time
+        self.rooks.y_velocity -= GRAVITY * game_framework.frame_time * 150
         self.rooks.y += self.rooks.y_velocity * game_framework.frame_time
 
         # 2. 공중에서 좌우 이동 (Air Control)
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+        up_preesed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
 
         if left_pressed and not right_pressed:
             self.rooks.dir = self.rooks.face_dir = -1
@@ -78,7 +79,6 @@ class Jump:
             self.rooks.dir = self.rooks.face_dir = 1
         else:
             # 키를 떼면 공중에서 해당 방향으로의 이동을 멈춤
-            # (Attack/Skill 클래스처럼 dir=0으로 설정)
             self.rooks.dir = 0
 
         # 공중에서도 x 이동 적용
@@ -86,7 +86,7 @@ class Jump:
 
         # 3. 착지 확인
         if self.rooks.y <= self.rooks.ground_y:
-            print("점프 끝!")
+
             # 땅에 닿음
             self.rooks.y = self.rooks.ground_y  # 땅에 정확히 안착
             self.rooks.y_velocity = 0
@@ -97,6 +97,9 @@ class Jump:
                 # 키가 눌려있으면 RUN 상태로
                 self.rooks.state_machine.cur_state = self.rooks.RUN
                 self.rooks.RUN.enter(('LAND', None))  # RUN 상태의 enter를 수동 호출
+            elif up_preesed:
+                self.rooks.state_machine.cur_state = self.rooks.JUMP
+                self.rooks.JUMP.enter(('LAND', None))  # JUMP 상태의 enter를 수동 호출
             else:
                 # 아무것도 안 눌려있으면 IDLE 상태로
                 self.rooks.state_machine.cur_state = self.rooks.IDLE
