@@ -71,7 +71,7 @@ class Jump:
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
-        up_preesed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
+        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
 
         if left_pressed and not right_pressed:
             self.rooks.dir = self.rooks.face_dir = -1
@@ -98,7 +98,7 @@ class Jump:
             # Attack/Skill 클래스에서 하던 것처럼,
             # do() 내부에서 직접 다음 상태로 전이
 
-            if up_preesed:
+            if up_pressed:
                 self.rooks.state_machine.cur_state = self.rooks.JUMP
                 self.rooks.JUMP.enter(('LAND', None))  # JUMP 상태의 enter를 수동 호출
             elif left_pressed or right_pressed:
