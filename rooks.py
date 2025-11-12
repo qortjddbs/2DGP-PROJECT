@@ -37,6 +37,30 @@ class Idle:
         else:
             self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
 
+class Jump:
+    FRAMES_PER_ACTION = 1
+
+    def __init__(self, rooks):
+        self.rooks = rooks
+
+    def enter(self, e):
+        self.rooks.frame = 0
+        if self.rooks.left_down(e) or self.rooks.right_up(e):
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif self.rooks.right_down(e) or self.rooks.left_up(e):
+            self.rooks.dir = self.rooks.face_dir = 1
+
+    def exit(self, e):
+        pass
+
+    def do(self):
+        self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+
+    def draw(self):
+        if self.rooks.face_dir == -1:
+            self.rooks.images['Idle'][0].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+        else:
+            self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
 
 class Run:
     FRAMES_PER_ACTION = 1
@@ -321,6 +345,7 @@ class Rooks:
             self.attack_key = SDLK_e
             self.skill_key = SDLK_r
             self.ult_key = SDLK_s
+            self.jump_key = SDLK_w
         elif self.player_num == 2:
             from sdl2 import SDLK_LEFT, SDLK_RIGHT, SDLK_RETURN
             self.left_key = SDLK_LEFT
@@ -328,9 +353,11 @@ class Rooks:
             self.attack_key = SDLK_RETURN
             self.skill_key = SDLK_RSHIFT
             self.ult_key = SDLK_DOWN
+            self.jump_key = SDLK_UP
 
         # 상태 객체들 먼저 생성
         self.IDLE = Idle(self)
+        self.JUMP = Jump(self)
         self.RUN = Run(self)
         self.ATTACK = Attack(self)
         self.SKILL = Skill(self)
@@ -345,8 +372,12 @@ class Rooks:
                 self.ATTACK : {self.left_down: self.ATTACK, self.right_down: self.ATTACK, self.left_up: self.ATTACK, self.right_up: self.ATTACK},
                 self.SKILL : {self.left_down: self.SKILL, self.right_down: self.SKILL, self.left_up: self.SKILL, self.right_up: self.SKILL},
                 self.ULT : {},
+                self.JUMP : {}
             }
         )
+
+    def jump_down(self, e):
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.jump_key
 
     def ult_down(self, e):
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.ult_key
