@@ -229,13 +229,59 @@ class Ult:
         self.rooks = rooks
 
     def enter(self, e):
-        self.rooks.frame = 0
+        # 새로운 스킬이면 프레임 초기화
+        if self.rooks.frame >= 14.9 or self.rooks.frame == 0:
+            self.rooks.frame = 0
+
+        # 스킬 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
+        if left_pressed and right_pressed:
+            # 둘 다 눌려있으면 멈추되, 바라보는 방향은 마지막 누른 키로
+            self.rooks.dir = 0
+            if self.rooks.left_down(e):
+                self.rooks.face_dir = -1
+            elif self.rooks.right_down(e):
+                self.rooks.face_dir = 1
+        elif left_pressed and not right_pressed:
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif right_pressed and not left_pressed:
+            self.rooks.dir = self.rooks.face_dir = 1
+        else:
+            # 둘 다 안 눌려있으면 멈춤
+            self.rooks.dir = 0
 
     def exit(self, e):
         pass
 
     def do(self):
-        self.rooks.frame = (self.rooks.frame + 15 * ACTION_PER_TIME * game_framework.frame_time)
+        # 스킬 중에도 현재 키 상태 확인하여 이동
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
+        if left_pressed and right_pressed:
+            # 둘 다 눌려있으면 멈춤
+            self.rooks.dir = 0
+        elif left_pressed and not right_pressed:
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif right_pressed and not left_pressed:
+            self.rooks.dir = self.rooks.face_dir = 1
+        else:
+            # 둘 다 안 눌려있으면 멈춤
+            self.rooks.dir = 0
+
+        self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+
+        if self.rooks.frame >= 14.9:
+            self.rooks.frame = 0
+
+            if self.rooks.dir != 0:
+                self.rooks.state_machine.cur_state = self.rooks.RUN
+            else:
+                self.rooks.state_machine.cur_state = self.rooks.IDLE
 
     def draw(self):
         frame_index = min(int(self.rooks.frame), 14)
