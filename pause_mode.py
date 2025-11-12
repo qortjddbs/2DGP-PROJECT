@@ -41,4 +41,4 @@ def draw():
     update_canvas()
 
 def update():
-    game_world.update()
+    pass
