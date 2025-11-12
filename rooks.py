@@ -83,6 +83,10 @@ class Jump:
 
         # 공중에서도 x 이동 적용
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+        if self.rooks.x < 20:
+            self.rooks.x = 20
+        elif self.rooks.x > 530:
+            self.rooks.x = 530
 
         # 3. 착지 확인
         if self.rooks.y <= self.rooks.ground_y:
