@@ -129,9 +129,10 @@ class Run:
 
     def do(self):
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
-        if self.rooks.y < 135:
-            self.rooks.y = 135
-            self.rooks.state_machine.cur_state = self.rooks.RUN
+        if self.rooks.x < 20:
+            self.rooks.x = 20
+        elif self.rooks.x > 530:
+            self.rooks.x = 530
 
     def draw(self):
         if self.rooks.face_dir == -1:
