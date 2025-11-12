@@ -97,13 +97,14 @@ class Jump:
 
             # Attack/Skill 클래스에서 하던 것처럼,
             # do() 내부에서 직접 다음 상태로 전이
-            if left_pressed or right_pressed:
+
+            if up_preesed:
+                self.rooks.state_machine.cur_state = self.rooks.JUMP
+                self.rooks.JUMP.enter(('LAND', None))  # JUMP 상태의 enter를 수동 호출
+            elif left_pressed or right_pressed:
                 # 키가 눌려있으면 RUN 상태로
                 self.rooks.state_machine.cur_state = self.rooks.RUN
                 self.rooks.RUN.enter(('LAND', None))  # RUN 상태의 enter를 수동 호출
-            elif up_preesed:
-                self.rooks.state_machine.cur_state = self.rooks.JUMP
-                self.rooks.JUMP.enter(('LAND', None))  # JUMP 상태의 enter를 수동 호출
             else:
                 # 아무것도 안 눌려있으면 IDLE 상태로
                 self.rooks.state_machine.cur_state = self.rooks.IDLE
@@ -173,7 +174,6 @@ class Attack:
         elif right_pressed and not left_pressed:
             self.rooks.dir = self.rooks.face_dir = 1
         else:
-            # 둘 다 안 눌려있으면 멈춤
             self.rooks.dir = 0
 
     def exit(self, e):
