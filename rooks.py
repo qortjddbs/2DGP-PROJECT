@@ -499,6 +499,14 @@ class Rooks:
         self.y_velocity -= GRAVITY * game_framework.frame_time * 150
         self.y += self.y_velocity * game_framework.frame_time
 
+    def check_landing(self):
+        if self.y <= self.ground_y:
+            self.x_locked = False
+            self.y = self.ground_y
+            self.y_velocity = 0
+            return True
+        return False
+
     def jump_down(self, e):
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.jump_key
 
