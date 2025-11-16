@@ -190,8 +190,18 @@ class Attack:
 
     def enter(self, e):
         print('Attack State Entered with event:', e)
+        # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
+
         if self.rooks.y > self.rooks.ground_y:
             self.rooks.is_air_action = True
+        elif up_pressed:
+            self.rooks.is_air_action = True
+            self.rooks.y_velocity = 500
+            self.rooks.apply_gravity()
         else:
             self.rooks.is_air_action = False
             self.rooks.y_velocity = 0
@@ -199,11 +209,6 @@ class Attack:
         # 새로운 공격이면 프레임 초기화
         if self.rooks.frame >= 10.9 or self.rooks.frame == 0:
             self.rooks.frame = 0
-
-        # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
-        keys = SDL_GetKeyboardState(None)
-        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
-        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
 
         if left_pressed and right_pressed:
             # 둘 다 눌려있으면 멈추되, 바라보는 방향은 마지막 누른 키로
@@ -233,8 +238,13 @@ class Attack:
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
 
-        if left_pressed and right_pressed:
+        if up_pressed and not self.rooks.is_air_action:
+            self.rooks.is_air_action = True
+            self.rooks.y_velocity = 500
+            self.rooks.apply_gravity()
+        elif left_pressed and right_pressed:
             # 둘 다 눌려있으면 멈춤
             self.rooks.dir = 0
         elif left_pressed and not right_pressed:
