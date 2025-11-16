@@ -454,6 +454,7 @@ class Rooks:
         self.y_velocity = 0
         self.ground_y = 135
 
+        self.is_air_action = False
         self.x_locked = False
 
         # 플레이어별 키 설정
@@ -493,6 +494,10 @@ class Rooks:
                 self.JUMP : {self.attack_down: self.ATTACK, self.skill_down: self.SKILL, self.ult_down: self.ULT}
             }
         )
+
+    def apply_gravity(self):
+        self.y_velocity -= GRAVITY * game_framework.frame_time * 150
+        self.y += self.y_velocity * game_framework.frame_time
 
     def jump_down(self, e):
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.jump_key
