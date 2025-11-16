@@ -151,6 +151,12 @@ class Attack:
         self.rooks = rooks
 
     def enter(self, e):
+        if self.rooks.y > self.rooks.ground_y:
+            self.rooks.is_air_action = True
+        else:
+            self.rooks.is_air_action = False
+            self.rooks.y_velocity = 0
+
         # 새로운 공격이면 프레임 초기화
         if self.rooks.frame >= 10.9 or self.rooks.frame == 0:
             self.rooks.frame = 0
@@ -178,7 +184,13 @@ class Attack:
         pass
 
     def do(self):
-        # 공격 중에도 현재 키 상태 확인하여 이동
+        # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
+        if self.rooks.is_air_action:
+            self.rooks.apply_gravity()
+            if self.rooks.check_landing():
+                pass
+
+        # 2. 좌우 이동 로직
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
@@ -196,41 +208,30 @@ class Attack:
 
         # 공격하면서도 이동
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
-        # NEW: 중력 및 착지 로직 추가 (Jump.do()에서 복사)
-        is_airborne = self.rooks.y > self.rooks.ground_y
-        if is_airborne:
-            self.rooks.y_velocity -= GRAVITY * game_framework.frame_time * 150
-            self.rooks.y += self.rooks.y_velocity * game_framework.frame_time
 
-            # 착지했는지 검사
-            if self.rooks.y <= self.rooks.ground_y:
-                self.rooks.y = self.rooks.ground_y
-                self.rooks.y_velocity = 0
-                is_airborne = False  # 방금 착지함
-
+        # 3. 애니메이션 프레임 업데이트 (기존과 동일)
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
+        # 4. 애니메이션 종료 체크
         if self.rooks.frame >= 10.9:
             self.rooks.frame = 0
 
-            # 1. 만약 아직 공중이라면, JUMP 상태로 복귀
-            if is_airborne:
+            # 5. 종료 시점에 공중이었는지, 지상이었는지 체크
+            if self.rooks.is_air_action:
                 self.rooks.state_machine.cur_state = self.rooks.JUMP
                 self.rooks.JUMP.enter(('FINISH_AIR_ATTACK', None))
-                return  # do() 함수 즉시 종료
-
-            # 2. (is_airborne == False) 땅이라면, 기존 로직 수행
-            keys = SDL_GetKeyboardState(None)  # (위에서 이미 선언했지만, 명확성을 위해)
-            if keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
-                self.rooks.state_machine.cur_state = self.rooks.ATTACK
-            elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
-                self.rooks.state_machine.cur_state = self.rooks.SKILL
-            elif self.rooks.dir != 0:
-                self.rooks.state_machine.cur_state = self.rooks.RUN
-            elif keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]:
-                self.rooks.state_machine.cur_state = self.rooks.JUMP
             else:
-                self.rooks.state_machine.cur_state = self.rooks.IDLE
+                keys = SDL_GetKeyboardState(None)  # (위에서 이미 선언했지만, 명확성을 위해)
+                if keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
+                    self.rooks.state_machine.cur_state = self.rooks.ATTACK
+                elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
+                    self.rooks.state_machine.cur_state = self.rooks.SKILL
+                elif self.rooks.dir != 0:
+                    self.rooks.state_machine.cur_state = self.rooks.RUN
+                elif keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]:
+                    self.rooks.state_machine.cur_state = self.rooks.JUMP
+                else:
+                    self.rooks.state_machine.cur_state = self.rooks.IDLE
 
     def draw(self):
         frame_index = min(int(self.rooks.frame), 10)
