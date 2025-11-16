@@ -77,6 +77,8 @@ class Jump:
             left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
             right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
             up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
+            attack_pressed = keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]
+            skill_pressed = keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]
 
             if left_pressed and not right_pressed:
                 self.rooks.dir = self.rooks.face_dir = -1
@@ -94,12 +96,20 @@ class Jump:
             left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
             right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
             up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
+            attack_pressed = keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]
+            skill_pressed = keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]
 
         # 3. 착지 확인
         if self.rooks.check_landing():
             if up_pressed:
                 self.rooks.state_machine.cur_state = self.rooks.JUMP
                 self.rooks.JUMP.enter(('LAND', None))  # JUMP 상태의 enter를 수동 호출
+            elif attack_pressed:
+                self.rooks.state_machine.cur_state = self.rooks.ATTACK
+                self.rooks.ATTACK.enter(('LAND', None))  # ATTACK 상태의 enter를 수동 호출
+            elif skill_pressed:
+                self.rooks.state_machine.cur_state = self.rooks.SKILL
+                self.rooks.SKILL.enter(('LAND', None))  # SKILL 상태의 enter를 수동 호출
             elif left_pressed or right_pressed:
                 # 키가 눌려있으면 RUN 상태로
                 self.rooks.state_machine.cur_state = self.rooks.RUN
@@ -184,7 +194,25 @@ class Attack:
             self.rooks.dir = 0
 
     def exit(self, e):
-        pass
+        # 공격 상태를 나갈 때 공중이었다면
+        if self.rooks.y > self.rooks.ground_y:
+            self.rooks.is_air_action = True
+            self.rooks.state_machine.cur_state = self.rooks.JUMP
+            self.rooks.JUMP.enter(('FINISH_AIR_ATTACK', None))
+        else:
+            keys = SDL_GetKeyboardState(None)
+            if keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]:
+                self.rooks.state_machine.cur_state = self.rooks.JUMP
+                self.rooks.JUMP.enter(('FINISH_GROUND_ATTACK', None))
+            elif keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
+                self.rooks.state_machine.cur_state = self.rooks.ATTACK
+            elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
+                self.rooks.state_machine.cur_state = self.rooks.SKILL
+            elif self.rooks.dir != 0:
+                self.rooks.state_machine.cur_state = self.rooks.RUN
+            else:
+                self.rooks.state_machine.cur_state = self.rooks.IDLE
+
 
     def do(self):
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
@@ -218,23 +246,8 @@ class Attack:
         # 4. 애니메이션 종료 체크
         if self.rooks.frame >= 10.9:
             self.rooks.frame = 0
-
-            # 5. 종료 시점에 공중이었는지, 지상이었는지 체크
-            if self.rooks.is_air_action:
-                self.rooks.state_machine.cur_state = self.rooks.JUMP
-                self.rooks.JUMP.enter(('FINISH_AIR_ATTACK', None))
-            else:
-                keys = SDL_GetKeyboardState(None)  # (위에서 이미 선언했지만, 명확성을 위해)
-                if keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
-                    self.rooks.state_machine.cur_state = self.rooks.ATTACK
-                elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
-                    self.rooks.state_machine.cur_state = self.rooks.SKILL
-                elif self.rooks.dir != 0:
-                    self.rooks.state_machine.cur_state = self.rooks.RUN
-                elif keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]:
-                    self.rooks.state_machine.cur_state = self.rooks.JUMP
-                else:
-                    self.rooks.state_machine.cur_state = self.rooks.IDLE
+            self.exit(('ANIMATION_END', None))
+            return
 
     def draw(self):
         frame_index = min(int(self.rooks.frame), 10)
