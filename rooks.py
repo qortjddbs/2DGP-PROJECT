@@ -48,6 +48,7 @@ class Jump:
 
     def enter(self, e):
         self.rooks.y_velocity = 500
+        self.is_air_action = True
         self.rooks.frame = 0
 
         keys = SDL_GetKeyboardState(None)
@@ -66,8 +67,7 @@ class Jump:
 
     def do(self):
         # 1. 중력 적용
-        self.rooks.y_velocity -= GRAVITY * game_framework.frame_time * 150
-        self.rooks.y += self.rooks.y_velocity * game_framework.frame_time
+        self.rooks.apply_gravity()
 
         # 2. 공중에서 좌우 이동 (Air Control)
         keys = SDL_GetKeyboardState(None)
