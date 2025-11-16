@@ -327,21 +327,33 @@ class Attack:
 
     def get_hitbox(self):
         frame = int(self.rooks.frame)
+        x, y = self.rooks.x, self.rooks.y
+        face_dir = self.rooks.face_dir
 
-        if 2 <= frame <= 7:
-            x, y = self.rooks.x, self.rooks.y
-            face_dir = self.rooks.face_dir
+        # 프레임별 히트박스 정의 (캐릭터 중심 기준)
+        hitbox_data = {
+            0: None,  # 준비 동작
+            1: None,  # 준비 동작
+            2: (50, -10, 70, 40),  # 공격 시작
+            3: (60, -5, 90, 50),  # 휘두르기 시작
+            4: (70, 0, 100, 55),  # 중간 단계
+            5: (80, 5, 110, 60),  # 최대 범위
+            6: (75, 3, 105, 58),  # 감속 시작
+            7: (65, 0, 95, 52),  # 공격 끝
+            8: (50, -5, 80, 45),  # 회수 시작
+            9: None,  # 회수 중
+            10: None  # 대기 복귀
+        }
 
-            # [!] 이 좌표 값은 직접 조정하세요 [!]
-            # (오른쪽 볼 때) Rooks의 오른쪽으로 80px, 위/아래 50px 크기
-            if face_dir == 1:
-                return x + 10, y - 50, x + 90, y + 50
-            # (왼쪽 볼 때) Rooks의 왼쪽으로 80px, 위/아래 50px 크기
-            else:
-                return x - 90, y - 50, x - 10, y + 50
+        if frame not in hitbox_data or hitbox_data[frame] is None:
+            return None
 
-        # 그 외 프레임에서는 히트박스 없음
-        return None
+        dx, dy, width, height = hitbox_data[frame]
+
+        if face_dir == 1:  # 오른쪽
+            return x + dx, y + dy, x + width, y + height
+        else:  # 왼쪽
+            return x - width, y + dy, x - dx, y + height
 
 
 class Skill:
