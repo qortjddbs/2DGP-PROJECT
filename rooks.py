@@ -445,7 +445,7 @@ class Skill:
         else:
             self.rooks.images['Skill'][frame_index].draw(self.rooks.x, self.rooks.y)
 
-
+# 기력 50소모
 class Ult:
     FRAMES_PER_ACTION = 15
 
