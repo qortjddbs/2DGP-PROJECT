@@ -4,6 +4,6 @@ import title_mode
 import play_mode
 
 open_canvas(550, 400)
-game_framework.run(title_mode)
+game_framework.run(play_mode)
 close_canvas()
 
