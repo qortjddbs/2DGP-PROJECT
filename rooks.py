@@ -557,7 +557,7 @@ class Rooks:
             Rooks.images['Ult'] = [load_image(f"./Character/Rooks/Ult ({i}).png") for i in range(1, 16)]
 
     def __init__(self, player_num=1):
-        # 2p : 400, 135에 생성
+        # p1 : 150, 135 / 2p : 400, 135에 생성
         self.x, self.y = 150, 135
         self.load_images()
         self.dir = 0
