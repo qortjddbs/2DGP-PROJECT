@@ -38,6 +38,8 @@ class Idle:
         else:
             self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
 
+
+
 class Jump:
     FRAMES_PER_ACTION = 1
 
@@ -119,6 +121,8 @@ class Jump:
             self.rooks.images['Idle'][0].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
             self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
+
+
 
 class Run:
     FRAMES_PER_ACTION = 1
