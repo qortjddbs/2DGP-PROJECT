@@ -302,6 +302,9 @@ class Attack:
                 elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.SKILL
                     self.rooks.SKILL.enter(('ATTACK_TO_SKILL', None))
+                elif keys[SDL_GetScancodeFromKey(self.rooks.ult_key)]:
+                    self.rooks.state_machine.cur_state = self.rooks.ULT
+                    self.rooks.ULT.enter(('ATTACK_TO_ULT', None))
                 elif self.rooks.dir != 0:
                     self.rooks.state_machine.cur_state = self.rooks.RUN
                     self.rooks.RUN.enter(('ATTACK_TO_RUN', None))
@@ -424,6 +427,9 @@ class Skill:
                 elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.SKILL
                     self.rooks.SKILL.enter(('RE_SKILL', None))
+                elif keys[SDL_GetScancodeFromKey(self.rooks.ult_key)]:
+                    self.rooks.state_machine.cur_state = self.rooks.ULT
+                    self.rooks.ULT.enter(('SKILL_TO_ULT', None))
                 elif self.rooks.dir != 0:
                     self.rooks.state_machine.cur_state = self.rooks.RUN
                     self.rooks.RUN.enter(('SKILL_TO_RUN', None))
@@ -516,6 +522,9 @@ class Ult:
                 elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.SKILL
                     self.rooks.SKILL.enter(('ULT_TO_SKILL', None))
+                elif keys[SDL_GetScancodeFromKey(self.rooks.ult_key)]:
+                    self.rooks.state_machine.cur_state = self.rooks.ULT
+                    self.rooks.ULT.enter(('RE_ULT', None))
                 elif left_pressed or right_pressed:
                     self.rooks.state_machine.cur_state = self.rooks.RUN
                     self.rooks.RUN.enter(('ULT_TO_RUN', None))
