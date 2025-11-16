@@ -40,6 +40,8 @@ class Idle:
         else:
             self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
 
+    def get_hitbox(self):
+        return None
 
 
 class Jump:
@@ -150,7 +152,8 @@ class Jump:
         else:
             self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
 
-
+    def get_hitbox(self):
+        return None
 
 class Run:
     FRAMES_PER_ACTION = 1
@@ -195,6 +198,8 @@ class Run:
         else:
             self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
 
+    def get_hitbox(self):
+        return None
 
 class Attack:
     FRAMES_PER_ACTION = 11
@@ -319,6 +324,24 @@ class Attack:
             self.rooks.images['Attack'][frame_index].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
             self.rooks.images['Attack'][frame_index].draw(self.rooks.x, self.rooks.y)
+
+    def get_hitbox(self):
+        frame = int(self.rooks.frame)
+
+        if 2 <= frame <= 7:
+            x, y = self.rooks.x, self.rooks.y
+            face_dir = self.rooks.face_dir
+
+            # [!] 이 좌표 값은 직접 조정하세요 [!]
+            # (오른쪽 볼 때) Rooks의 오른쪽으로 80px, 위/아래 50px 크기
+            if face_dir == 1:
+                return x + 10, y - 50, x + 90, y + 50
+            # (왼쪽 볼 때) Rooks의 왼쪽으로 80px, 위/아래 50px 크기
+            else:
+                return x - 90, y - 50, x - 10, y + 50
+
+        # 그 외 프레임에서는 히트박스 없음
+        return None
 
 
 class Skill:
@@ -648,12 +671,19 @@ class Rooks:
     def get_bb(self):
         return self.x - 15, self.y - 75, self.x + 15, self.y - 50
 
+    def get_hitbox(self):
+        return self.state_machine.cur_state.get_hitbox()
+
     def update(self):
         self.state_machine.update()
 
     def draw(self):
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
+
+        hitbox = self.get_hitbox()
+        if hitbox:
+            draw_rectangle(*hitbox)
 
     def handle_event(self, event):
         self.state_machine.handle_state_event(('INPUT', event))
