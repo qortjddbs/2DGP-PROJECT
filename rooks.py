@@ -24,6 +24,7 @@ class Idle:
         self.rooks = rooks
 
     def enter(self, e):
+        print('Idle State Entered with event:', e)
         self.rooks.dir = 0
 
     def exit(self, e):
@@ -47,6 +48,7 @@ class Jump:
         self.rooks = rooks
 
     def enter(self, e):
+        print('Jump State Entered with event:', e)
         if self.rooks.y == self.rooks.ground_y:
             self.rooks.y_velocity = 500
             self.rooks.apply_gravity()
@@ -156,6 +158,7 @@ class Run:
         self.rooks = rooks
 
     def enter(self, e):
+        print('Run State Entered with event:', e)
         self.rooks.frame = 0
         if self.rooks.left_down(e) or self.rooks.right_up(e):
             self.rooks.dir = self.rooks.face_dir = -1
@@ -186,6 +189,7 @@ class Attack:
         self.rooks = rooks
 
     def enter(self, e):
+        print('Attack State Entered with event:', e)
         if self.rooks.y > self.rooks.ground_y:
             self.rooks.is_air_action = True
         else:
@@ -291,6 +295,7 @@ class Skill:
         self.rooks = rooks
 
     def enter(self, e):
+        print('Skill State Entered with event:', e)
         # 새로운 스킬이면 프레임 초기화
         if self.rooks.frame >= 13.9 or self.rooks.frame == 0:
             self.rooks.frame = 0
@@ -338,7 +343,6 @@ class Skill:
         # 스킬 사용하면서도 이동
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
 
-        self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
         # NEW: 중력 및 착지 로직 추가 (Jump.do()에서 복사)
         is_airborne = self.rooks.y > self.rooks.ground_y
         if is_airborne:
@@ -388,6 +392,7 @@ class Ult:
         self.rooks = rooks
 
     def enter(self, e):
+        print('Ult State Entered with event:', e)
         # 새로운 스킬이면 프레임 초기화
         if self.rooks.frame >= 14.9 or self.rooks.frame == 0:
             self.rooks.frame = 0
