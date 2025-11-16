@@ -170,6 +170,19 @@ class Run:
         pass
 
     def do(self):
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+        if left_pressed and right_pressed:
+            # 둘 다 눌려있으면 멈춤
+            self.rooks.dir = 0
+        elif left_pressed and not right_pressed:
+            self.rooks.dir = self.rooks.face_dir = -1
+        elif right_pressed and not left_pressed:
+            self.rooks.dir = self.rooks.face_dir = 1
+        else:
+            # 둘 다 안 눌려있으면 멈춤
+            self.rooks.dir = 0
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
         if self.rooks.x < 20:
             self.rooks.x = 20
@@ -491,21 +504,24 @@ class Ult:
             else:
                 # (지상) -> 키 눌림 상태에 따라 다음 상태 결정
                 keys = SDL_GetKeyboardState(None)
+                left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+                right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
                 if keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.JUMP
-                    self.rooks.JUMP.enter(('FINISH_GROUND_SKILL_JUMP', None))
+                    self.rooks.JUMP.enter(('FINISH_GROUND_ULT_JUMP', None))
                 elif keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.ATTACK
-                    self.rooks.ATTACK.enter(('SKILL_TO_ATTACK', None))  # 연속 공격
+                    self.rooks.ATTACK.enter(('ULT_TO_ATTACK', None))  # 연속 공격
                 elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.SKILL
-                    self.rooks.SKILL.enter(('RE_SKILL', None))
-                elif self.rooks.dir != 0:
+                    self.rooks.SKILL.enter(('ULT_TO_SKILL', None))
+                elif left_pressed or right_pressed:
                     self.rooks.state_machine.cur_state = self.rooks.RUN
-                    self.rooks.RUN.enter(('SKILL_TO_RUN', None))
+                    self.rooks.RUN.enter(('ULT_TO_RUN', None))
                 else:
                     self.rooks.state_machine.cur_state = self.rooks.IDLE
-                    self.rooks.IDLE.enter(('SKILL_TO_IDLE', None))
+                    self.rooks.IDLE.enter(('ULT_TO_IDLE', None))
             return  # do() 종료
 
     def draw(self):
