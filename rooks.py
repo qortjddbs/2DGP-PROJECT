@@ -312,14 +312,29 @@ class Skill:
 
     def enter(self, e):
         print('Skill State Entered with event:', e)
-        # 새로운 스킬이면 프레임 초기화
-        if self.rooks.frame >= 13.9 or self.rooks.frame == 0:
-            self.rooks.frame = 0
-
-        # 스킬 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
+        # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
         keys = SDL_GetKeyboardState(None)
+        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+
+        if self.rooks.y == self.rooks.ground_y and up_pressed:
+            # Attack 상태 진입을 취소하고 JUMP로 감
+            self.rooks.state_machine.cur_state = self.rooks.JUMP
+            self.rooks.JUMP.enter(('SKILL_CANCEL_JUMP', None))
+            return
+
+        # (점프가 안 눌렸거나, 공중 공격일 때만 아래 로직 실행)
+        if self.rooks.y > self.rooks.ground_y:
+            self.rooks.is_air_action = True
+        # (이하 원본 코드의 else/elif는 버그를 유발하므로 삭제)
+        else:
+            self.rooks.is_air_action = False
+            self.rooks.y_velocity = 0
+
+        # 새로운 공격이면 프레임 초기화
+        if self.rooks.frame >= 13.9 or self.rooks.frame == 0:
+            self.rooks.frame = 0
 
         if left_pressed and right_pressed:
             # 둘 다 눌려있으면 멈추되, 바라보는 방향은 마지막 누른 키로
@@ -333,18 +348,30 @@ class Skill:
         elif right_pressed and not left_pressed:
             self.rooks.dir = self.rooks.face_dir = 1
         else:
-            # 둘 다 안 눌려있으면 멈춤
             self.rooks.dir = 0
 
     def exit(self, e):
         pass
 
     def do(self):
-        # 스킬 중에도 현재 키 상태 확인하여 이동
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
 
+        if not self.rooks.is_air_action and up_pressed:
+            # 지상에서 공격 중에 점프 키가 눌렸다면, 공격 취소하고 JUMP로 감
+            self.rooks.state_machine.cur_state = self.rooks.JUMP
+            self.rooks.JUMP.enter(('SKILL_CANCEL_JUMP', None))
+            return
+
+        # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
+        if self.rooks.is_air_action:
+            self.rooks.apply_gravity()
+            if self.rooks.check_landing():
+                pass
+
+        # 2. 좌우 이동 로직
         if left_pressed and right_pressed:
             # 둘 다 눌려있으면 멈춤
             self.rooks.dir = 0
@@ -356,42 +383,40 @@ class Skill:
             # 둘 다 안 눌려있으면 멈춤
             self.rooks.dir = 0
 
-        # 스킬 사용하면서도 이동
+        # 공격하면서도 이동
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
 
-        # NEW: 중력 및 착지 로직 추가 (Jump.do()에서 복사)
-        is_airborne = self.rooks.y > self.rooks.ground_y
-        if is_airborne:
-            self.rooks.y_velocity -= GRAVITY * game_framework.frame_time * 150
-            self.rooks.y += self.rooks.y_velocity * game_framework.frame_time
-
-            # 착지했는지 검사
-            if self.rooks.y <= self.rooks.ground_y:
-                self.rooks.y = self.rooks.ground_y
-                self.rooks.y_velocity = 0
-                is_airborne = False  # 방금 착지함
-
+        # 3. 애니메이션 프레임 업데이트 (기존과 동일)
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
+        # 4. 애니메이션 종료 체크
         if self.rooks.frame >= 13.9:
             self.rooks.frame = 0
 
-            # 1. 만약 아직 공중이라면, JUMP 상태로 복귀
-            if is_airborne:
+            # 5. 종료 시점에 공중이었는지, 지상이었는지 체크
+            if self.rooks.is_air_action:
+                # (아직 공중) -> JUMP 상태로 복귀
                 self.rooks.state_machine.cur_state = self.rooks.JUMP
                 self.rooks.JUMP.enter(('FINISH_AIR_SKILL', None))
-                return  # do() 함수 즉시 종료
-
-            # 2. (is_airborne == False) 땅이라면, 기존 로직 수행
-            keys = SDL_GetKeyboardState(None)  # (위에서 이미 선언했지만, 명확성을 위해)
-            if keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
-                self.rooks.state_machine.cur_state = self.rooks.ATTACK
-            elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
-                self.rooks.state_machine.cur_state = self.rooks.SKILL
-            elif self.rooks.dir != 0:
-                self.rooks.state_machine.cur_state = self.rooks.RUN
             else:
-                self.rooks.state_machine.cur_state = self.rooks.IDLE
+                # (지상) -> 키 눌림 상태에 따라 다음 상태 결정
+                keys = SDL_GetKeyboardState(None)
+                if keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]:
+                    self.rooks.state_machine.cur_state = self.rooks.JUMP
+                    self.rooks.JUMP.enter(('FINISH_GROUND_SKILL_JUMP', None))
+                elif keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
+                    self.rooks.state_machine.cur_state = self.rooks.ATTACK
+                    self.rooks.ATTACK.enter(('SKILL_TO_ATTACK', None))  # 연속 공격
+                elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
+                    self.rooks.state_machine.cur_state = self.rooks.SKILL
+                    self.rooks.SKILL.enter(('RE_SKILL', None))
+                elif self.rooks.dir != 0:
+                    self.rooks.state_machine.cur_state = self.rooks.RUN
+                    self.rooks.RUN.enter(('SKILL_TO_RUN', None))
+                else:
+                    self.rooks.state_machine.cur_state = self.rooks.IDLE
+                    self.rooks.IDLE.enter(('SKILL_TO_IDLE', None))
+            return  # do() 종료
 
     def draw(self):
         frame_index = min(int(self.rooks.frame), 13)
