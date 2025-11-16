@@ -443,11 +443,9 @@ class Ult:
             self.rooks.is_air_action = False
             self.rooks.y_velocity = 0
 
-        self.rooks.x_locked = True  # 지상 궁극기는 고정 안 함
+        self.rooks.x_locked = True
         self.rooks.frame = 0  # 항상 프레임 리셋
         self.rooks.dir = 0  # 궁극기는 항상 제자리
-            #궁극기는 항상 제자리에서 사용 (dir = 0)
-        self.rooks.dir = 0
 
         # (기존의 dir 설정 로직은 얼굴 방향 설정용으로만 사용)
         keys = SDL_GetKeyboardState(None)
@@ -473,7 +471,6 @@ class Ult:
         if self.rooks.is_air_action:
             self.rooks.apply_gravity()
             if self.rooks.check_landing():
-                # check_landing이 is_air_action과 x_locked를 False로 바꿔줌
                 pass
 
         # [FIX 5] Ult는 좌우 이동 불가 (dir=0이므로 관련 로직 불필요)
@@ -595,7 +592,6 @@ class Rooks:
 
     def check_landing(self):
         if self.y <= self.ground_y:
-            self.x_locked = False
             self.y = self.ground_y
             self.y_velocity = 0
             self.is_air_action = False
