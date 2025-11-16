@@ -48,7 +48,7 @@ class Jump:
 
     def enter(self, e):
         self.rooks.y_velocity = 500
-        self.is_air_action = True
+        self.rooks.is_air_action = True
         self.rooks.frame = 0
 
         keys = SDL_GetKeyboardState(None)
@@ -70,40 +70,30 @@ class Jump:
         self.rooks.apply_gravity()
 
         # 2. 공중에서 좌우 이동 (Air Control)
-        keys = SDL_GetKeyboardState(None)
-        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
-        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
-        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
-
-        if left_pressed and not right_pressed:
-            self.rooks.dir = self.rooks.face_dir = -1
-        elif right_pressed and not left_pressed:
-            self.rooks.dir = self.rooks.face_dir = 1
-        else:
-            # 키를 떼면 공중에서 해당 방향으로의 이동을 멈춤
-            self.rooks.dir = 0
-
-        # 공중에서도 x 이동 적용
         if not self.rooks.x_locked:
+            keys = SDL_GetKeyboardState(None)
+            left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+            right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+            up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
+
+            if left_pressed and not right_pressed:
+                self.rooks.dir = self.rooks.face_dir = -1
+            elif right_pressed and not left_pressed:
+                self.rooks.dir = self.rooks.face_dir = 1
+            else:
+                # 키를 떼면 공중에서 해당 방향으로의 이동을 멈춤
+                self.rooks.dir = 0
+
             self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
-            if self.rooks.x < 20:
-                self.rooks.x = 20
-            elif self.rooks.x > 530:
-                self.rooks.x = 530
-        else:
+        else:   # x_locked 상태면 좌우 이동 불가
             self.rooks.dir = 0
+            keys = SDL_GetKeyboardState(None)
+            left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+            right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+            up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
 
         # 3. 착지 확인
-        if self.rooks.y <= self.rooks.ground_y:
-
-            # 땅에 닿음
-            self.rooks.x_locked = False
-            self.rooks.y = self.rooks.ground_y  # 땅에 정확히 안착
-            self.rooks.y_velocity = 0
-
-            # Attack/Skill 클래스에서 하던 것처럼,
-            # do() 내부에서 직접 다음 상태로 전이
-
+        if self.rooks.check_landing():
             if up_pressed:
                 self.rooks.state_machine.cur_state = self.rooks.JUMP
                 self.rooks.JUMP.enter(('LAND', None))  # JUMP 상태의 enter를 수동 호출
