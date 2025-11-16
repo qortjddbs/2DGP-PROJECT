@@ -90,9 +90,6 @@ class Jump:
         skill_pressed = keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]
         ult_pressed = keys[SDL_GetScancodeFromKey(self.rooks.ult_key)]
 
-        # 1. 중력 적용
-        self.rooks.apply_gravity()
-
         # JUMP 상태 전이 테이블(JUMP -> ATTACK)과 동일한 로직을 'do'에 추가
         # (이벤트가 아닌, '눌린 상태'로)
         if attack_pressed:
@@ -107,6 +104,9 @@ class Jump:
             self.rooks.state_machine.cur_state = self.rooks.ULT
             self.rooks.ULT.enter(('AIR_ULT_HELD', None))
             return  # JUMP.do()를 즉시 종료
+
+        # 1. 중력 적용
+        self.rooks.apply_gravity()
 
         # 2. 공중에서 좌우 이동 (Air Control)
         if not self.rooks.x_locked:
@@ -192,16 +192,20 @@ class Attack:
         print('Attack State Entered with event:', e)
         # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
         keys = SDL_GetKeyboardState(None)
+        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
-        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
 
+        if self.rooks.y == self.rooks.ground_y and up_pressed:
+            # Attack 상태 진입을 취소하고 JUMP로 감
+            self.rooks.state_machine.cur_state = self.rooks.JUMP
+            self.rooks.JUMP.enter(('ATTACK_CANCEL_JUMP', None))
+            return  # Attack.enter()를 여기서 중단
+
+        # (점프가 안 눌렸거나, 공중 공격일 때만 아래 로직 실행)
         if self.rooks.y > self.rooks.ground_y:
             self.rooks.is_air_action = True
-        elif up_pressed:
-            self.rooks.is_air_action = True
-            self.rooks.y_velocity = 500
-            self.rooks.apply_gravity()
+        # (이하 원본 코드의 else/elif는 버그를 유발하므로 삭제)
         else:
             self.rooks.is_air_action = False
             self.rooks.y_velocity = 0
@@ -238,13 +242,8 @@ class Attack:
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
-        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
 
-        if up_pressed and not self.rooks.is_air_action:
-            self.rooks.is_air_action = True
-            self.rooks.y_velocity = 500
-            self.rooks.apply_gravity()
-        elif left_pressed and right_pressed:
+        if left_pressed and right_pressed:
             # 둘 다 눌려있으면 멈춤
             self.rooks.dir = 0
         elif left_pressed and not right_pressed:
