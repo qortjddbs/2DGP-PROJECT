@@ -1,4 +1,5 @@
 from pico2d import load_image, get_time, load_font, draw_rectangle
+from pygame.examples.testsprite import update_rects
 from sdl2 import *
 import ctypes
 
@@ -434,71 +435,84 @@ class Ult:
 
     def enter(self, e):
         print('Ult State Entered with event:', e)
-        # 새로운 스킬이면 프레임 초기화
-        if self.rooks.frame >= 14.9 or self.rooks.frame == 0:
-            self.rooks.frame = 0
+        # [FIX 1] 공중/지상 체크를 프레임 체크 밖으로 이동
+        # Attack/Skill.enter와 동일한 구조
+        if self.rooks.y > self.rooks.ground_y:
+            self.rooks.is_air_action = True
+        else:
+            self.rooks.is_air_action = False
+            self.rooks.y_velocity = 0
 
-            # NEW: 공중에서 사용했다면 x_locked 플래그 설정
-            if self.rooks.y > self.rooks.ground_y:
-                self.rooks.x_locked = True
+        self.rooks.x_locked = True  # 지상 궁극기는 고정 안 함
+        self.rooks.frame = 0  # 항상 프레임 리셋
+        self.rooks.dir = 0  # 궁극기는 항상 제자리
+            #궁극기는 항상 제자리에서 사용 (dir = 0)
+        self.rooks.dir = 0
 
-            # 궁극기는 항상 제자리에서 사용 (dir = 0)
-            self.rooks.dir = 0
-
-            # (기존의 dir 설정 로직은 얼굴 방향 설정용으로만 사용)
-            keys = SDL_GetKeyboardState(None)
-            left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
-            right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
-
-            if left_pressed and right_pressed:
-                if self.rooks.left_down(e):
-                    self.rooks.face_dir = -1
-                elif self.rooks.right_down(e):
-                    self.rooks.face_dir = 1
-            elif left_pressed and not right_pressed:
-                self.rooks.face_dir = -1
-            elif right_pressed and not left_pressed:
-                self.rooks.face_dir = 1
-
-    def exit(self, e):
-        pass
-
-    def do(self):
-        # 스킬 중에도 현재 키 상태 확인하여 이동
+        # (기존의 dir 설정 로직은 얼굴 방향 설정용으로만 사용)
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
-
         if left_pressed and right_pressed:
-            # 둘 다 눌려있으면 멈춤
-            self.rooks.dir = 0
+            if self.rooks.left_down(e):
+                self.rooks.face_dir = -1
+            elif self.rooks.right_down(e):
+                self.rooks.face_dir = 1
         elif left_pressed and not right_pressed:
-            self.rooks.dir = self.rooks.face_dir = -1
+            self.rooks.face_dir = -1
         elif right_pressed and not left_pressed:
-            self.rooks.dir = self.rooks.face_dir = 1
-        else:
-            # 둘 다 안 눌려있으면 멈춤
-            self.rooks.dir = 0
+            self.rooks.face_dir = 1
 
-        is_airborne = self.rooks.y > self.rooks.ground_y
-        if is_airborne:
-            self.rooks.y_velocity -= GRAVITY * game_framework.frame_time * 150
-            self.rooks.y += self.rooks.y_velocity * game_framework.frame_time
+    def exit(self, e):
+        self.rooks.x_locked = False
 
-            if self.rooks.y <= self.rooks.ground_y:
-                self.rooks.y = self.rooks.ground_y
-                self.rooks.y_velocity = 0
-                is_airborne = False
+    def do(self):
+        # [FIX 3] Ult는 점프로 캔슬 불가 (state_machine 정의에 따름)
 
+        # [FIX 4] 공중 궁극기일 경우에만 중력 적용
+        if self.rooks.is_air_action:
+            self.rooks.apply_gravity()
+            if self.rooks.check_landing():
+                # check_landing이 is_air_action과 x_locked를 False로 바꿔줌
+                pass
+
+        # [FIX 5] Ult는 좌우 이동 불가 (dir=0이므로 관련 로직 불필요)
+
+        # 3. 애니메이션 프레임 업데이트
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
+        # 4. 애니메이션 종료 체크
         if self.rooks.frame >= 14.9:
             self.rooks.frame = 0
+            self.rooks.x_locked = False  # 애니메이션 끝났으니 잠금 해제
 
-            if self.rooks.dir != 0:
-                self.rooks.state_machine.cur_state = self.rooks.RUN
+            # [FIX 6] 종료 시점에 공중/지상 체크 (Attack/Skill.do와 동일)
+            if self.rooks.is_air_action:
+                # (아직 공중) -> JUMP 상태로 복귀
+                self.rooks.state_machine.cur_state = self.rooks.JUMP
+                self.rooks.JUMP.enter(('FINISH_AIR_ULT', None))
             else:
-                self.rooks.state_machine.cur_state = self.rooks.IDLE
+                # (지상) -> 키 눌림 상태에 따라 다음 상태 결정
+                keys = SDL_GetKeyboardState(None)
+                left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+                right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+                up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
+                if up_pressed:
+                    self.rooks.state_machine.cur_state = self.rooks.JUMP
+                    self.rooks.JUMP.enter(('FINISH_GROUND_ULT_JUMP', None))
+                elif left_pressed:
+                    self.rooks.state_machine.cur_state = self.rooks.RUN
+                    self.rooks.RUN.enter(('ULT_TO_RUN', None))
+                elif right_pressed:
+                    self.rooks.state_machine.cur_state = self.rooks.RUN
+                    self.rooks.RUN.enter(('ULT_TO_RUN', None))
+                elif self.rooks.dir != 0:  # (항상 0이겠지만, 혹시 모르니)
+                    self.rooks.state_machine.cur_state = self.rooks.RUN
+                    self.rooks.RUN.enter(('ULT_TO_RUN', None))
+                else:
+                    self.rooks.state_machine.cur_state = self.rooks.IDLE
+                    self.rooks.IDLE.enter(('ULT_TO_IDLE', None))
+            return  # do() 종료
 
     def draw(self):
         frame_index = min(int(self.rooks.frame), 14)
