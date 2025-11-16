@@ -47,7 +47,9 @@ class Jump:
         self.rooks = rooks
 
     def enter(self, e):
-        self.rooks.y_velocity = 500
+        if self.rooks.y == self.rooks.ground_y:
+            self.rooks.y_velocity = 500
+
         self.rooks.is_air_action = True
         self.rooks.frame = 0
 
@@ -85,6 +87,7 @@ class Jump:
                 self.rooks.dir = 0
 
             self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+
         else:   # x_locked 상태면 좌우 이동 불가
             self.rooks.dir = 0
             keys = SDL_GetKeyboardState(None)
@@ -495,6 +498,7 @@ class Rooks:
             self.x_locked = False
             self.y = self.ground_y
             self.y_velocity = 0
+            self.is_air_action = False
             return True
         return False
 
