@@ -232,6 +232,17 @@ class Attack:
         pass
 
     def do(self):
+        keys = SDL_GetKeyboardState(None)
+        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
+        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
+
+        if not self.rooks.is_air_action and up_pressed:
+            # 지상에서 공격 중에 점프 키가 눌렸다면, 공격 취소하고 JUMP로 감
+            self.rooks.state_machine.cur_state = self.rooks.JUMP
+            self.rooks.JUMP.enter(('ATTACK_CANCEL_JUMP', None))
+            return  # Attack.do()를 여기서 중단
+
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
         if self.rooks.is_air_action:
             self.rooks.apply_gravity()
@@ -239,10 +250,6 @@ class Attack:
                 pass
 
         # 2. 좌우 이동 로직
-        keys = SDL_GetKeyboardState(None)
-        left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
-        right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
-
         if left_pressed and right_pressed:
             # 둘 다 눌려있으면 멈춤
             self.rooks.dir = 0
