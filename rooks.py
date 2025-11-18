@@ -139,6 +139,9 @@ class Jump:
             if up_pressed:
                 self.rooks.state_machine.cur_state = self.rooks.JUMP
                 self.rooks.JUMP.enter(('LAND_JUMP', None))  # enter에서 y==ground_y 체크
+            elif left_pressed and right_pressed:
+                self.rooks.state_machine.cur_state = self.rooks.IDLE
+                self.rooks.IDLE.enter(('LAND_IDLE', None))
             elif left_pressed or right_pressed:
                 self.rooks.state_machine.cur_state = self.rooks.RUN
                 self.rooks.RUN.enter(('LAND_RUN', None))
@@ -334,13 +337,13 @@ class Attack:
         hitbox_data = {
             0: None,  # 준비 동작
             1: None,  # 준비 동작
-            2: (50, -10, 70, 40),  # 공격 시작
-            3: (60, -5, 90, 50),  # 휘두르기 시작
-            4: (70, 0, 100, 55),  # 중간 단계
-            5: (80, 5, 110, 60),  # 최대 범위
-            6: (75, 3, 105, 58),  # 감속 시작
-            7: (65, 0, 95, 52),  # 공격 끝
-            8: (50, -5, 80, 45),  # 회수 시작
+            2: (-25, -75, -15, -65),  # 공격 시작
+            3: (-10, -72, 0, -62),  # 휘두르기 시작
+            4: (-5, -69, 5, -59),  # 중간 단계
+            5: (7, -66, 17, -56),  # 최대 범위
+            6: (7, -63, 17, -53),  # 감속 시작
+            7: (55, -10, 65, 0),  # 공격 끝
+            8: (55, -10, 65, 0),  # 회수 시작
             9: None,  # 회수 중
             10: None  # 대기 복귀
         }
@@ -480,6 +483,9 @@ class Skill:
         else:
             self.rooks.images['Skill'][frame_index].draw(self.rooks.x, self.rooks.y)
 
+    def get_hitbox(self):
+        pass
+
 # 기력 50소모
 class Ult:
     FRAMES_PER_ACTION = 15
@@ -574,6 +580,9 @@ class Ult:
             self.rooks.images['Ult'][frame_index].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
         else:
             self.rooks.images['Ult'][frame_index].draw(self.rooks.x, self.rooks.y)
+
+    def get_hitbox(self):
+        pass
 
 
 class Rooks:
