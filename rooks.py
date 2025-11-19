@@ -461,6 +461,8 @@ class Skill:
 
         # 3. 애니메이션 프레임 업데이트 (기존과 동일)
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+        if int(self.rooks.frame) == 10:
+
 
         # 4. 애니메이션 종료 체크
         if self.rooks.frame >= 13.9:
