@@ -374,9 +374,11 @@ class Skill:
     FRAMES_PER_ACTION = 14
 
     def __init__(self, rooks):
+        self.dash_applied = False
         self.rooks = rooks
 
     def enter(self, e):
+        dash_applied = False
         print('Skill State Entered with event:', e)
         # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
         keys = SDL_GetKeyboardState(None)
@@ -417,7 +419,7 @@ class Skill:
             self.rooks.dir = 0
 
     def exit(self, e):
-        pass
+        dash_applied = False
 
     def do(self):
         if self.rooks.manual_frame:
@@ -459,15 +461,18 @@ class Skill:
         elif self.rooks.x > 530:
             self.rooks.x = 530
 
-        # 3. 애니메이션 프레임 업데이트 (기존과 동일)
+        prev_frame = int(self.rooks.frame)
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
-        if int(self.rooks.frame) == 13:
-            self.rooks.x += 71 * self.rooks.face_dir  # 스킬 도중 앞으로 살짝 이동
+        curr_frame = int(self.rooks.frame)
+        
+        # 프레임이 12에서 13으로 넘어갈 때 한 번만 대쉬 적용
+        if prev_frame == 12 and curr_frame == 13 and not self.dash_applied:
+            self.rooks.x += 30 * self.rooks.face_dir  # 이동 거리 조정 (71 -> 30)
             if self.rooks.x < 20:
                 self.rooks.x = 20
             elif self.rooks.x > 530:
                 self.rooks.x = 530
-
+            self.dash_applied = True
 
         # 4. 애니메이션 종료 체크
         if self.rooks.frame >= 13.9:
