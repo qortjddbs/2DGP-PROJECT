@@ -642,7 +642,37 @@ class Ult:
             self.rooks.images['Ult'][frame_index].draw(self.rooks.x, self.rooks.y)
 
     def get_hitbox(self):
-        pass
+        frame = int(self.rooks.frame)
+        x, y = self.rooks.x, self.rooks.y
+        face_dir = self.rooks.face_dir
+
+        # 프레임별 히트박스 정의 (캐릭터 중심 기준)
+        hitbox_data = {
+            0: None,  # 준비 동작
+            1: None,  # 75 ~ 80, 65 ~ 70
+            2: None,  # 80 -> 90, 65 -> 68
+            3: None,  # 휘두르기 시작
+            4: None,  # 93 -> 100, 72 -> 75
+            5: None,  # 93 -> 100, 72 -> 75
+            6: (-28, -90, 52, -40),  # 62 ~ 142, 45 ~ 95
+            7: (-28, -90, 92, -40),  # 62 ~ 182, 45 ~ 95
+            8: (15, -90, 92, -40),  # 105 ~ 182, 45 ~ 95
+            9: (50, -90, 92, -40),  # 140 ~ 182, 45 ~ 95
+            10: None,  # 대기 복귀
+            11: None,
+            12: None,
+            13: None
+        }
+
+        if frame not in hitbox_data or hitbox_data[frame] is None:
+            return None
+
+        dx, dy, width, height = hitbox_data[frame]
+
+        if face_dir == 1:  # 오른쪽
+            return x + dx, y + dy, x + width, y + height
+        else:  # 왼쪽
+            return x - width, y + dy, x - dx, y + height
 
 
 class Rooks:
