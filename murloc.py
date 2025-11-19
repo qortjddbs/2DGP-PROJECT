@@ -613,7 +613,33 @@ class Ult:
             self.murloc.images['Ult'][frame_index].draw(self.murloc.x + 78, self.murloc.y)
 
     def get_hitbox(self):
-        pass
+        frame = int(self.murloc.frame)
+        x, y = self.murloc.x, self.murloc.y
+        face_dir = self.murloc.face_dir
+
+        # 프레임별 히트박스 정의 (캐릭터 중심 기준)
+        hitbox_data = {
+            0: None,  # 준비 동작
+            1: (45, -20, 65, -10),  # 준비 동작
+            2: (62, -20, 82, -10),  # 공격 시작
+            3: (62, -20, 82, -10),  # 휘두르기 시작
+            4: (62, -20, 82, -10),  # 중간 단계
+            5: (62, -20, 82, -10),  # 최대 범위
+            6: (62, -20, 82, -10),  # 감속 시작
+            7: (62, -20, 82, -10),  # 공격 끝
+            8: (45, -20, 65, -10),  # 회수 시작
+            9: None,  # 회수 중
+        }
+
+        if frame not in hitbox_data or hitbox_data[frame] is None:
+            return None
+
+        dx, dy, width, height = hitbox_data[frame]
+
+        if face_dir == 1:  # 오른쪽
+            return x + dx, y + dy, x + width, y + height
+        else:  # 왼쪽
+            return x - width, y + dy, x - dx, y + height
 
 class Murloc:
     images = None
