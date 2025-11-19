@@ -600,13 +600,12 @@ class Rooks:
             # Ult: 15장 (1~15)
             Rooks.images['Ult'] = [load_image(f"./Character/Rooks/Ult ({i}).png") for i in range(1, 16)]
 
-    def __init__(self, player_num=1):
+    def __init__(self, player_num=2):
         # p1 : 150, 135 / 2p : 400, 135에 생성
-        self.x, self.y = 150, 135
         self.load_images()
         self.dir = 0
         self.frame = 0
-        self.face_dir = 1
+
         self.player_num = player_num
 
         self.y_velocity = 0
@@ -617,6 +616,8 @@ class Rooks:
 
         # 플레이어별 키 설정
         if self.player_num == 1:
+            self.x, self.y = 90, 135
+            self.face_dir = 1
             self.left_key = SDLK_a
             self.right_key = SDLK_d
             self.attack_key = SDLK_e
@@ -625,6 +626,8 @@ class Rooks:
             self.jump_key = SDLK_w
         elif self.player_num == 2:
             from sdl2 import SDLK_LEFT, SDLK_RIGHT, SDLK_RETURN
+            self.x, self.y = 450, 135
+            self.face_dir = -1
             self.left_key = SDLK_LEFT
             self.right_key = SDLK_RIGHT
             self.attack_key = SDLK_RETURN
@@ -690,7 +693,10 @@ class Rooks:
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.attack_key
 
     def get_bb(self):
-        return self.x - 15, self.y - 75, self.x + 15, self.y - 50
+        if self.face_dir == 1:
+            return self.x - 17, self.y - 76, self.x + 10, self.y - 48
+        else:
+            return self.x - 12, self.y - 76, self.x + 16, self.y - 48
 
     def get_hitbox(self):
         return self.state_machine.cur_state.get_hitbox()

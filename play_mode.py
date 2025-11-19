@@ -20,15 +20,15 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.push_mode(pause_mode)
         else:
-            # rooks.handle_event(event)
+            rooks.handle_event(event)
             murloc.handle_event(event)
 
 def init():
-    # global rooks
+    global rooks
     global murloc
 
-    # rooks = Rooks()
-    # game_world.add_object(rooks, 1)
+    rooks = Rooks()
+    game_world.add_object(rooks, 1)
 
     murloc = Murloc()
     game_world.add_object(murloc, 1)
