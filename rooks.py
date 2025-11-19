@@ -519,6 +519,9 @@ class Skill:
             8: (15, -90, 92, -40),  # 105 ~ 182, 45 ~ 95
             9: (50, -90, 92, -40),  # 140 ~ 182, 45 ~ 95
             10: None  # 대기 복귀
+            11: None,
+            12: None,
+            13: None
         }
 
         if frame not in hitbox_data or hitbox_data[frame] is None:
