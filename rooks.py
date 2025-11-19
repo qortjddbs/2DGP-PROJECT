@@ -502,7 +502,34 @@ class Skill:
             self.rooks.images['Skill'][frame_index].draw(self.rooks.x, self.rooks.y)
 
     def get_hitbox(self):
-        pass
+        frame = int(self.rooks.frame)
+        x, y = self.rooks.x, self.rooks.y
+        face_dir = self.rooks.face_dir
+
+        # 프레임별 히트박스 정의 (캐릭터 중심 기준)
+        hitbox_data = {
+            0: None,  # 준비 동작
+            1: (-16, -71, -8, -64),  # 75 ~ 80, 65 ~ 70
+            2: (-6, -68, 1, -61),  # 80 -> 90, 65 -> 68
+            3: (2, -65, 10, -56),  # 휘두르기 시작
+            4: (10, -60, 18, -52),  # 93 -> 100, 72 -> 75
+            5: (10, -60, 18, -52),  # 93 -> 100, 72 -> 75
+            6: (10, -60, 18, -52),  # 감속 시작
+            7: None,  # 공격 끝
+            8: None,  # 회수 시작
+            9: None,  # 회수 중
+            10: None  # 대기 복귀
+        }
+
+        if frame not in hitbox_data or hitbox_data[frame] is None:
+            return None
+
+        dx, dy, width, height = hitbox_data[frame]
+
+        if face_dir == 1:  # 오른쪽
+            return x + dx, y + dy, x + width, y + height
+        else:  # 왼쪽
+            return x - width, y + dy, x - dx, y + height
 
 # 기력 50소모
 class Ult:
