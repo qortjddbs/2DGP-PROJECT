@@ -125,6 +125,10 @@ class Jump:
                 self.rooks.dir = 0
 
             self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+            if self.rooks.x < 20:
+                self.rooks.x = 20
+            elif self.rooks.x > 530:
+                self.rooks.x = 530
 
         else:   # x_locked 상태면 좌우 이동 불가
             self.rooks.dir = 0
@@ -254,6 +258,9 @@ class Attack:
         pass
 
     def do(self):
+        if self.rooks.manual_frame:
+            return
+
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
@@ -285,6 +292,10 @@ class Attack:
 
         # 공격하면서도 이동
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+        if self.rooks.x < 20:
+            self.rooks.x = 20
+        elif self.rooks.x > 530:
+            self.rooks.x = 530
 
         # 3. 애니메이션 프레임 업데이트 (기존과 동일)
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -409,6 +420,9 @@ class Skill:
         pass
 
     def do(self):
+        if self.rooks.manual_frame:
+            return
+
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
@@ -440,6 +454,10 @@ class Skill:
 
         # 공격하면서도 이동
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
+        if self.rooks.x < 20:
+            self.rooks.x = 20
+        elif self.rooks.x > 530:
+            self.rooks.x = 530
 
         # 3. 애니메이션 프레임 업데이트 (기존과 동일)
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -525,7 +543,8 @@ class Ult:
         self.rooks.x_locked = False
 
     def do(self):
-        # [FIX 3] Ult는 점프로 캔슬 불가 (state_machine 정의에 따름)
+        if self.rooks.manual_frame:
+            return
 
         # [FIX 4] 공중 궁극기일 경우에만 중력 적용
         if self.rooks.is_air_action:
@@ -600,8 +619,13 @@ class Rooks:
             # Ult: 15장 (1~15)
             Rooks.images['Ult'] = [load_image(f"./Character/Rooks/Ult ({i}).png") for i in range(1, 16)]
 
-    def __init__(self, player_num=2):
-        # p1 : 150, 135 / 2p : 400, 135에 생성
+    def __init__(self, player_num=1):
+        # 디버그 모드 추가
+        self.debug_mode = False  # F1 키로 토글
+        self.manual_frame = False  # F2 키로 토글
+        self.frame_step = 0.0  # 수동 프레임 값
+        self.last_click_pos = None  # 마지막 클릭 좌표
+
         self.load_images()
         self.dir = 0
         self.frame = 0
@@ -706,11 +730,99 @@ class Rooks:
 
     def draw(self):
         self.state_machine.draw()
+
+        # 캐릭터 바운딩 박스
         draw_rectangle(*self.get_bb())
 
+        # 히트박스
         hitbox = self.get_hitbox()
         if hitbox:
-            draw_rectangle(*hitbox)
+            from pico2d import draw_rectangle as draw_rect
+            x1, y1, x2, y2 = hitbox
+            draw_rect(x1, y1, x2, y2)
+
+        # 디버그 정보 표시
+        if self.debug_mode:
+            state_name = self.state_machine.cur_state.__class__.__name__
+            frame_num = int(self.frame)
+            max_frame = self.state_machine.cur_state.FRAMES_PER_ACTION - 1
+
+            # 상태 및 프레임 정보
+            info1 = f"P{self.player_num} {state_name}"
+            info2 = f"Frame: {frame_num}/{max_frame}"
+            info3 = f"Pos: ({int(self.x)}, {int(self.y)})"
+            info4 = f"FaceDir: {'RIGHT' if self.face_dir == 1 else 'LEFT'}"
+
+            if hitbox:
+                info5 = f"Hitbox: ({int(x1)},{int(y1)})-({int(x2)},{int(y2)})"
+            else:
+                info5 = "Hitbox: None"
+
+            if self.manual_frame:
+                info6 = "MANUAL MODE (</> to change frame)"
+            else:
+                info6 = "AUTO MODE (F2 to toggle)"
+
+            # 마우스 클릭 좌표
+            if self.last_click_pos:
+                info7 = f"Last Click: ({self.last_click_pos[0]}, {self.last_click_pos[1]})"
+            else:
+                info7 = "Last Click: None"
+
+            if not hasattr(self, 'font'):
+                self.font = load_font('ENCR10B.TTF', 14)
+
+            y_offset = self.y + 60
+            self.font.draw(self.x - 60, y_offset, info1, (255, 255, 0))
+            self.font.draw(self.x - 60, y_offset - 15, info2, (255, 255, 0))
+            self.font.draw(self.x - 60, y_offset - 30, info3, (255, 255, 0))
+            self.font.draw(self.x - 60, y_offset - 45, info4, (255, 255, 0))
+            self.font.draw(self.x - 60, y_offset - 60, info5, (255, 255, 0))
+            self.font.draw(self.x - 60, y_offset - 75, info6, (0, 255, 255))
+            self.font.draw(self.x - 60, y_offset - 90, info7, (255, 100, 100))
+
+            # 클릭 위치에 십자선 표시
+            if self.last_click_pos:
+                from pico2d import draw_line
+                cx, cy = self.last_click_pos
+                draw_line(cx - 10, cy, cx + 10, cy)
+                draw_line(cx, cy - 10, cx, cy + 10)
 
     def handle_event(self, event):
+        # 디버그 키 처리
+        if event.type == SDL_KEYDOWN:
+            if event.key == SDLK_F1:
+                self.debug_mode = not self.debug_mode
+                print(f"Debug Mode: {'ON' if self.debug_mode else 'OFF'}")
+                return
+            elif event.key == SDLK_F2:
+                self.manual_frame = not self.manual_frame
+                if self.manual_frame:
+                    self.frame_step = 0.0
+                print(f"Manual Frame Mode: {'ON' if self.manual_frame else 'OFF'}")
+                return
+            elif self.manual_frame:
+                # 수동 프레임 진행
+                if event.key == SDLK_PERIOD:  # '>' 키
+                    max_frame = self.state_machine.cur_state.FRAMES_PER_ACTION - 1
+                    self.frame_step = min(self.frame_step + 1, max_frame)
+                    self.frame = self.frame_step
+                    print(f"Frame: {int(self.frame_step)}")
+                    return
+                elif event.key == SDLK_COMMA:  # '<' 키
+                    self.frame_step = max(self.frame_step - 1, 0)
+                    self.frame = self.frame_step
+                    print(f"Frame: {int(self.frame_step)}")
+                    return
+
+        # 마우스 클릭 처리
+        if self.debug_mode and event.type == SDL_MOUSEBUTTONDOWN:
+            # pico2d의 이벤트는 SDL2 이벤트를 래핑한 것
+            # x, y 좌표는 event.x, event.y로 직접 접근
+            mouse_x = getattr(event, 'x', 0)
+            mouse_y = getattr(event, 'y', 0)
+            self.last_click_pos = (mouse_x, 400 - mouse_y)  # Y좌표 반전
+            print(f"Mouse Click: ({self.last_click_pos[0]}, {self.last_click_pos[1]})")
+            return
+
         self.state_machine.handle_state_event(('INPUT', event))
