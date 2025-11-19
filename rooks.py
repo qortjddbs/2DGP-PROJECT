@@ -215,6 +215,7 @@ class Attack:
         self.rooks = rooks
 
     def enter(self, e):
+        self.rooks.hit_log.clear()  # 새 공격 시작 시 로그 초기화
         print('Attack State Entered with event:', e)
         # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
         keys = SDL_GetKeyboardState(None)
@@ -378,6 +379,7 @@ class Skill:
         self.rooks = rooks
 
     def enter(self, e):
+        self.rooks.hit_log.clear()  # 새 스킬 시작 시 로그 초기화
         self.dash_applied = False
         print('Skill State Entered with event:', e)
         # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
@@ -553,6 +555,7 @@ class Ult:
         self.rooks = rooks
 
     def enter(self, e):
+        self.rooks.hit_log.clear()  # 새 스킬 시작 시 로그 초기화
         print('Ult State Entered with event:', e)
         # [FIX 1] 공중/지상 체크를 프레임 체크 밖으로 이동
         # Attack/Skill.enter와 동일한 구조
