@@ -378,7 +378,7 @@ class Skill:
         self.rooks = rooks
 
     def enter(self, e):
-        dash_applied = False
+        self.dash_applied = False
         print('Skill State Entered with event:', e)
         # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
         keys = SDL_GetKeyboardState(None)
@@ -419,7 +419,7 @@ class Skill:
             self.rooks.dir = 0
 
     def exit(self, e):
-        dash_applied = False
+        self.dash_applied = False
 
     def do(self):
         if self.rooks.manual_frame:
