@@ -462,16 +462,16 @@ class Skill:
         # 3. 애니메이션 프레임 업데이트 (기존과 동일)
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
         if int(self.rooks.frame) == 13:
-            self.rooks.x += 5 * self.rooks.face_dir  # 스킬 도중 앞으로 살짝 이동
+            self.rooks.x += 71 * self.rooks.face_dir  # 스킬 도중 앞으로 살짝 이동
             if self.rooks.x < 20:
                 self.rooks.x = 20
             elif self.rooks.x > 530:
                 self.rooks.x = 530
-            self.rooks.frame = 0
+
 
         # 4. 애니메이션 종료 체크
         if self.rooks.frame >= 13.9:
-
+            self.rooks.frame = 0
             # 5. 종료 시점에 공중이었는지, 지상이었는지 체크
             if self.rooks.is_air_action:
                 # (아직 공중) -> JUMP 상태로 복귀
