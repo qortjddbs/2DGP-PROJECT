@@ -197,7 +197,7 @@ class Run:
 
 
 class Attack:
-    FRAMES_PER_ACTION = 11
+    FRAMES_PER_ACTION = 10
 
     def __init__(self, murloc):
         self.murloc = murloc
@@ -225,7 +225,7 @@ class Attack:
             self.murloc.y_velocity = 0
 
         # 새로운 공격이면 프레임 초기화
-        if self.murloc.frame >= 10.9 or self.murloc.frame == 0:
+        if self.murloc.frame >= 9.9 or self.murloc.frame == 0:
             self.murloc.frame = 0
 
         if left_pressed and right_pressed:
@@ -282,7 +282,7 @@ class Attack:
         self.murloc.frame = (self.murloc.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         # 4. 애니메이션 종료 체크
-        if self.murloc.frame >= 10.9:
+        if self.murloc.frame >= 9.9:
             self.murloc.frame = 0
 
             # 5. 종료 시점에 공중이었는지, 지상이었는지 체크
@@ -314,7 +314,7 @@ class Attack:
             return  # do() 종료
 
     def draw(self):
-        frame_index = min(int(self.murloc.frame), 10)
+        frame_index = min(int(self.murloc.frame), 9)
         if self.murloc.face_dir == -1:
             self.murloc.images['Attack'][frame_index].composite_draw(0, 'h', self.murloc.x, self.murloc.y)
         else:
@@ -322,7 +322,7 @@ class Attack:
 
 
 class Skill:
-    FRAMES_PER_ACTION = 14
+    FRAMES_PER_ACTION = 17
 
     def __init__(self, murloc):
         self.murloc = murloc
@@ -350,7 +350,7 @@ class Skill:
             self.murloc.y_velocity = 0
 
         # 새로운 공격이면 프레임 초기화
-        if self.murloc.frame >= 13.9 or self.murloc.frame == 0:
+        if self.murloc.frame >= 16.9 or self.murloc.frame == 0:
             self.murloc.frame = 0
 
         if left_pressed and right_pressed:
@@ -407,7 +407,7 @@ class Skill:
         self.murloc.frame = (self.murloc.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         # 4. 애니메이션 종료 체크
-        if self.murloc.frame >= 13.9:
+        if self.murloc.frame >= 16.9:
             self.murloc.frame = 0
 
             # 5. 종료 시점에 공중이었는지, 지상이었는지 체크
@@ -439,7 +439,7 @@ class Skill:
             return  # do() 종료
 
     def draw(self):
-        frame_index = min(int(self.murloc.frame), 13)
+        frame_index = min(int(self.murloc.frame), 16)
         if self.murloc.face_dir == -1:
             self.murloc.images['Skill'][frame_index].composite_draw(0, 'h', self.murloc.x, self.murloc.y)
         else:
@@ -447,7 +447,7 @@ class Skill:
 
 # 기력 50소모
 class Ult:
-    FRAMES_PER_ACTION = 15
+    FRAMES_PER_ACTION = 12
 
     def __init__(self, murloc):
         self.murloc = murloc
@@ -498,7 +498,7 @@ class Ult:
         self.murloc.frame = (self.murloc.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         # 4. 애니메이션 종료 체크
-        if self.murloc.frame >= 14.9:
+        if self.murloc.frame >= 11.9:
             self.murloc.frame = 0
             self.murloc.x_locked = False  # 애니메이션 끝났으니 잠금 해제
 
@@ -534,7 +534,7 @@ class Ult:
             return  # do() 종료
 
     def draw(self):
-        frame_index = min(int(self.murloc.frame), 14)
+        frame_index = min(int(self.murloc.frame), 11)
         if self.murloc.face_dir == -1:
             self.murloc.images['Ult'][frame_index].composite_draw(0, 'h', self.murloc.x, self.murloc.y)
         else:
@@ -549,12 +549,12 @@ class Murloc:
             Murloc.images = {}
             # Idle: 1장
             Murloc.images['Idle'] = [load_image("./Character/murloc/Idle (1).png")]
-            # Attack: 11장 (1~11)
-            Murloc.images['Attack'] = [load_image(f"./Character/murloc/Attack ({i}).png") for i in range(1, 12)]
-            # Skill: 14장 (1~14)
-            Murloc.images['Skill'] = [load_image(f"./Character/murloc/Skill ({i}).png") for i in range(1, 15)]
-            # Ult: 15장 (1~15)
-            Murloc.images['Ult'] = [load_image(f"./Character/murloc/Ult ({i}).png") for i in range(1, 16)]
+            # Attack: 10장
+            Murloc.images['Attack'] = [load_image(f"./Character/murloc/Attack ({i}).png") for i in range(1, 11)]
+            # Skill: 17장
+            Murloc.images['Skill'] = [load_image(f"./Character/murloc/Skill ({i}).png") for i in range(1, 18)]
+            # Ult: 12장
+            Murloc.images['Ult'] = [load_image(f"./Character/murloc/Ult ({i}).png") for i in range(1, 13)]
 
     def __init__(self, player_num=1):
         # p1 : 150, 135 / 2p : 400, 135에 생성

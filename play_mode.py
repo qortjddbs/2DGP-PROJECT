@@ -6,9 +6,11 @@ import game_world
 import pause_mode
 
 from rooks import Rooks
+from murloc import Murloc
 from wilderness import Wilderness
 
 rooks = None
+murloc = None
 
 def handle_events():
     event_list = get_events()
@@ -18,13 +20,18 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.push_mode(pause_mode)
         else:
-            rooks.handle_event(event)
+            # rooks.handle_event(event)
+            murloc.handle_event(event)
 
 def init():
-    global rooks
+    # global rooks
+    global murloc
 
-    rooks = Rooks()
-    game_world.add_object(rooks, 1)
+    # rooks = Rooks()
+    # game_world.add_object(rooks, 1)
+
+    murloc = Murloc()
+    game_world.add_object(murloc, 1)
 
     wilderness = Wilderness()
     game_world.add_object(wilderness, 0)
