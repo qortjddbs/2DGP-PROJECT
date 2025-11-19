@@ -661,7 +661,8 @@ class Ult:
             10: None,  # 대기 복귀
             11: None,
             12: None,
-            13: None
+            13: None,
+            14: None
         }
 
         if frame not in hitbox_data or hitbox_data[frame] is None:
