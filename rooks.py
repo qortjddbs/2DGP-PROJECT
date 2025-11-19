@@ -470,6 +470,7 @@ class Skill:
         if self.rooks.frame >= 13.9:
             if not self.dash_applied:
                 self.rooks.x += 71 * self.rooks.face_dir  # 이동 거리 조정 (71 -> 30)
+
             if self.rooks.x < 20:
                 self.rooks.x = 20
             elif self.rooks.x > 530:
