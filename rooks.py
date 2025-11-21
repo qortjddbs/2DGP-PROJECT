@@ -590,13 +590,11 @@ class Ult:
         if self.rooks.manual_frame:
             return
 
-        # [FIX 4] 공중 궁극기일 경우에만 중력 적용
+        # 공중 궁극기일 경우에만 중력 적용
         if self.rooks.is_air_action:
             self.rooks.apply_gravity()
             if self.rooks.check_landing():
                 pass
-
-        # [FIX 5] Ult는 좌우 이동 불가 (dir=0이므로 관련 로직 불필요)
 
         # 3. 애니메이션 프레임 업데이트
         self.rooks.frame = (self.rooks.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
@@ -606,7 +604,7 @@ class Ult:
             self.rooks.frame = 0
             self.rooks.x_locked = False  # 애니메이션 끝났으니 잠금 해제
 
-            # [FIX 6] 종료 시점에 공중/지상 체크 (Attack/Skill.do와 동일)
+            # 종료 시점에 공중/지상 체크
             if self.rooks.is_air_action:
                 # (아직 공중) -> JUMP 상태로 복귀
                 self.rooks.state_machine.cur_state = self.rooks.JUMP
@@ -622,7 +620,7 @@ class Ult:
                     self.rooks.JUMP.enter(('FINISH_GROUND_ULT_JUMP', None))
                 elif keys[SDL_GetScancodeFromKey(self.rooks.attack_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.ATTACK
-                    self.rooks.ATTACK.enter(('ULT_TO_ATTACK', None))  # 연속 공격
+                    self.rooks.ATTACK.enter(('ULT_TO_ATTACK', None))
                 elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.SKILL
                     self.rooks.SKILL.enter(('ULT_TO_SKILL', None))

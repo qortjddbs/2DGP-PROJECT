@@ -42,9 +42,6 @@ def init():
 
 
 def check_collision(player1, player2):
-    """
-    player1의 공격 히트박스와 player2의 피격 바운딩 박스 충돌 체크
-    """
     hitbox = player1.get_hitbox()
     bbox = player2.get_bb()
 
