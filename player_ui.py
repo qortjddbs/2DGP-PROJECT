@@ -15,7 +15,7 @@ class PlayerUI:
 
         # 폰트 로드
         self.font = load_font('ENCR10B.TTF', 30)  # 크기 30
-        self.mini_font = load_font('ENCR10B.TTF', 20)  # 크기 20
+        self.mini_font = load_font('ENCR10B.TTF', 15)  # 크기 20
 
         # UI 위치 설정
         if player_num == 1:
@@ -74,10 +74,10 @@ class PlayerUI:
             # 플레이어 위치에도 표시 - 캐릭터별로 다르게 처리
             if self.character_type == 'Rooks':
                 # Rooks일 때
-                self.mini_font.draw(text_x, text_y, 'P1', (255, 0, 0))
+                self.mini_font.draw(text_x - 10, text_y - 110, 'P1', (255, 0, 0))
             elif self.character_type == 'Murloc':
                 # Murloc일 때
-                self.mini_font.draw(text_x, text_y, 'P1', (255, 0, 0))
+                self.mini_font.draw(text_x - 85, text_y - 20, 'P1', (255, 0, 0))
         else:
             # 화면 오른쪽 위에도 표시
             self.font.draw(self.text_x, self.text_y, 'P2', (0, 0, 255))
@@ -85,7 +85,7 @@ class PlayerUI:
             # 플레이어 위치에도 표시 - 캐릭터별로 다르게 처리
             if self.character_type == 'Rooks':
                 # Rooks일 때
-                self.mini_font.draw(text_x, text_y, 'P2', (0, 0, 255))
+                self.mini_font.draw(text_x - 10, text_y - 110, 'P2', (0, 0, 255))
             elif self.character_type == 'Murloc':
                 # Murloc일 때
-                self.mini_font.draw(text_x, text_y, 'P2', (0, 0, 255))
+                self.mini_font.draw(text_x - 85, text_y - 20, 'P2', (0, 0, 255))
