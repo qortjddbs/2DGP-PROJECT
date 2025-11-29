@@ -16,6 +16,12 @@ selected_p2 = None
 player1 = None
 player2 = None
 
+def set_selected_characters(p1, p2):
+    """캐릭터 선택 모드에서 호출"""
+    global selected_p1, selected_p2
+    selected_p1 = p1
+    selected_p2 = p2
+
 def handle_events():
     event_list = get_events()
     for event in event_list:
@@ -24,25 +30,33 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.push_mode(pause_mode)
         else:
-            player1.handle_event(event)
-            player2.handle_event(event)
+            if player1:
+                player1.handle_event(event)
+            if player2:
+                player2.handle_event(event)
 
 def init():
     global player1, player2
 
+    # player1 생성 (항상 player_num=1)
     if selected_p1 == 'Rooks':
-        player1 = Rooks()
+        player1 = Rooks(player_num=1)
     elif selected_p1 == 'Murloc':
-        player1 = Murloc()
+        player1 = Murloc(player_num=1)
+    else:
+        print(f"[Warning] Player1 선택값이 없습니다. 기본값 Rooks 사용")
+        player1 = Rooks(player_num=1)
 
     game_world.add_object(player1, 1)
 
+    # player2 생성 (항상 player_num=2)
     if selected_p2 == 'Rooks':
-        player2 = Rooks()
-        player2.x = 600  # P2 시작 위치
+        player2 = Rooks(player_num=2)
     elif selected_p2 == 'Murloc':
-        player2 = Murloc()
-        player2.x = 600
+        player2 = Murloc(player_num=2)
+    else:
+        print(f"[Warning] Player2 선택값이 없습니다. 기본값 Murloc 사용")
+        player2 = Murloc(player_num=2)
 
     game_world.add_object(player2, 1)
 
@@ -50,13 +64,18 @@ def init():
     game_world.add_object(wilderness, 0)
 
     # 히트 추적용 딕셔너리 초기화
-    player1.hit_log = {}
-    player2.hit_log = {}
+    if player1:
+        player1.hit_log = {}
+    if player2:
+        player2.hit_log = {}
 
 
-def check_collision(player1, player2):
-    hitbox = player1.get_hitbox()
-    bbox = player2.get_bb()
+def check_collision(player_a, player_b):
+    if not player_a or not player_b:
+        return False
+
+    hitbox = player_a.get_hitbox()
+    bbox = player_b.get_bb()
 
     if hitbox is None or bbox is None:
         return False
@@ -75,7 +94,10 @@ def check_collision(player1, player2):
 def update():
     game_world.update()
 
-    # 현재 공격 상태 확인 (player1, player2로 통일)
+    if not player1 or not player2:
+        return
+
+    # 현재 공격 상태 확인
     player1_state = player1.state_machine.cur_state.__class__.__name__
     player2_state = player2.state_machine.cur_state.__class__.__name__
 

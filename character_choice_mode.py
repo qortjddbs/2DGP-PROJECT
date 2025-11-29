@@ -122,9 +122,12 @@ def handle_events():
                         selected_p2 = 'Murloc'
                     elif show_random:
                         selected_p2 = 'Random'
-                    # 두 플레이어의 캐릭터 선택이 완료되면 게임 모드로 전환
-                    play_mode.selected_characters = (selected_p1, selected_p2)
                     print(f'Player 2 selected: {selected_p2}')
+
+                    # play_mode에 선택된 캐릭터 전달
+                    play_mode.set_selected_characters(selected_p1, selected_p2)
+
+                    # 게임 모드로 전환
                     game_framework.pop_mode()
                     game_framework.change_mode(play_mode)
 
@@ -134,14 +137,27 @@ def draw():
     background_image.draw(277, 200)
     if show_back_red:
         back_red_image.draw(275, 380) # type : ignore
-    elif show_rooks:
-        rooks_pick_image.draw(120, 270)
-    elif show_murloc:
-        murloc_pick_image.draw(120, 270)
-    elif show_random:
-        random_pick_image.draw(120, 270)
+    elif selection_step == 1 and (show_rooks or show_murloc or show_random):
+        # P1 선택 중일 때는 (120, 270)에 표시
+        if show_rooks:
+            rooks_pick_image.draw(120, 270)
+        elif show_murloc:
+            murloc_pick_image.draw(120, 270)
+        elif show_random:
+            random_pick_image.draw(120, 270)
+    elif selection_step == 2 and (show_rooks or show_murloc or show_random):
+        # P2 선택 중일 때는 (430, 270)에 표시
+        if show_rooks:
+            rooks_pick_image.draw(430, 270)
+        elif show_murloc:
+            murloc_pick_image.draw(430, 270)
+        elif show_random:
+            random_pick_image.draw(430, 270)
+
     if not show_back_red:
         back_image.draw(275, 380)  # type : ignore
+
+    # P1이 선택되었으면 (120, 270)에 표시
     if selected_p1:
         if selected_p1 == 'Rooks':
             rooks_pick_image.draw(120, 270)
