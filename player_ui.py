@@ -17,15 +17,15 @@ class PlayerUI:
         if player_num == 1:
             self.label_x = 60
             self.bar_x = 120
-            self.text_x = 30  # P1 텍스트 위치
+            self.text_x = 0  # P1 텍스트 위치
         else:
             self.label_x = 490
             self.bar_x = 430
-            self.text_x = 520  # P2 텍스트 위치
+            self.text_x = 515  # P2 텍스트 위치
 
         self.hp_y = 380  # 450 -> 380 (화면 높이 400이므로)
         self.mp_y = 360  # 430 -> 360
-        self.text_y = 390  # 텍스트 y 위치
+        self.text_y = 380  # 텍스트 y 위치
 
         # 바의 최대 너비
         self.max_bar_width = 150
