@@ -5,6 +5,9 @@ class PlayerUI:
         self.player = player
         self.player_num = player_num
 
+        # 플레이어가 어떤 캐릭터인지 확인
+        self.character_type = self.player.__class__.__name__  # 'Rooks' 또는 'Murloc'
+
         # UI 이미지 로드
         self.hp_bar = load_image('./Background/Hp Setting/hp_bar.png')  # HP 바
         self.mp_bar = load_image('./Background/Mp Setting/mp_bar.png')  # MP 바
@@ -39,8 +42,6 @@ class PlayerUI:
         hp_ratio = self.player.hp / self.player.max_hp
         if hp_ratio > 0:
             hp_width = int(self.hp_bar.w * hp_ratio)
-            # 왼쪽에서부터 hp_ratio만큼만 잘라서 그리기
-            # clip_draw(소스 left, 소스 bottom, 소스 width, 소스 height, 화면 x, 화면 y)
             clip_x = self.bar_x - self.hp_bar.w // 2 + hp_width // 2
             if self.player_num == 1:
                 self.hp_bar.clip_draw(0, 0, hp_width, self.hp_bar.h, clip_x + 25, self.hp_y)
@@ -64,14 +65,27 @@ class PlayerUI:
             self.label.draw(self.label_x - 75, 372)
 
         # P1, P2 텍스트를 플레이어 위치에 그리기
-        # font.draw(x, y, text, (r, g, b))
+        text_x, text_y = self.player.get_text_position()
+
         if self.player_num == 1:
             # 화면 왼쪽 위에도 표시
             self.font.draw(self.text_x, self.text_y, 'P1', (255, 0, 0))
-            # 플레이어 위치에도 표시
-            self.mini_font.draw(self.player.x, self.player.y, 'P1', (255, 0, 0))
+
+            # 플레이어 위치에도 표시 - 캐릭터별로 다르게 처리
+            if self.character_type == 'Rooks':
+                # Rooks일 때
+                self.mini_font.draw(text_x, text_y, 'P1', (255, 0, 0))
+            elif self.character_type == 'Murloc':
+                # Murloc일 때
+                self.mini_font.draw(text_x, text_y, 'P1', (255, 0, 0))
         else:
             # 화면 오른쪽 위에도 표시
             self.font.draw(self.text_x, self.text_y, 'P2', (0, 0, 255))
-            # 플레이어 위치에도 표시
-            self.mini_font.draw(self.player.x, self.player.y, 'P2', (0, 0, 255))
+
+            # 플레이어 위치에도 표시 - 캐릭터별로 다르게 처리
+            if self.character_type == 'Rooks':
+                # Rooks일 때
+                self.mini_font.draw(text_x, text_y, 'P2', (0, 0, 255))
+            elif self.character_type == 'Murloc':
+                # Murloc일 때
+                self.mini_font.draw(text_x, text_y, 'P2', (0, 0, 255))

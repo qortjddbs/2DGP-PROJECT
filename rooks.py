@@ -801,6 +801,10 @@ class Rooks:
         else:
             return self.x - 12, self.y - 76, self.x + 16, self.y - 48
 
+    def get_text_position(self):
+        """텍스트 표시용 좌표 반환 (캐릭터 머리 위)"""
+        return self.x, self.y + 70
+
     def get_hitbox(self):
         return self.state_machine.cur_state.get_hitbox()
 

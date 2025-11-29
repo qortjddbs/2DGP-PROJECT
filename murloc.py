@@ -767,6 +767,10 @@ class Murloc:
     def get_bb(self):
         return self.x - 13, self.y - 23, self.x + 12, self.y + 2
 
+    def get_text_position(self):
+        """텍스트 표시용 좌표 반환 (캐릭터 머리 위)"""
+        return self.x + 78, self.y + 30
+
     def update(self):
         self.state_machine.update()
 
