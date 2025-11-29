@@ -35,6 +35,8 @@ def init():
     back_image = load_image('./Background/back.png')
     ok_button_image = load_image('./Background/ok.png')
     ok_button_red_image = load_image('./Background/ok(red).png')
+    hp_set = 1
+    mp_set = 1
 
 def finish():
     global hp_image_1, hp_image_2, hp_image_3, mp_image_1, mp_image_2, mp_image_3
@@ -77,10 +79,12 @@ def handle_events():
                 show_ok_red = False
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             if show_back_red:
+                game_framework.pop_mode()
                 game_framework.change_mode(title_mode)
             elif show_ok_red:
                 # 설정 완료, 플레이 모드로 전환
-                play_mode.set_player_stats(hp_set, mp_set)
+                # play_mode.set_player_stats(hp_set, mp_set)
+                game_framework.pop_mode()
                 game_framework.change_mode(play_mode)
             mouse_x = event.x
             mouse_y = 400 - 1 - event.y  # 캔버스 높이가 400
