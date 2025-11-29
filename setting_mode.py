@@ -1,4 +1,6 @@
 from pico2d import *
+
+import character_choice_mode
 import game_framework
 import play_mode
 import title_mode
@@ -93,7 +95,7 @@ def handle_events():
                 # 설정 완료, 플레이 모드로 전환
                 # play_mode.set_player_stats(hp_set, mp_set)
                 game_framework.pop_mode()
-                game_framework.change_mode(play_mode)
+                game_framework.change_mode(character_choice_mode)
             if 180 <= mouse_x <= 260 and 150 <= mouse_y <= 220:
                 hp_set += 1
                 if hp_set > 3:

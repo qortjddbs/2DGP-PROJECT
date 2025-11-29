@@ -9,8 +9,12 @@ from rooks import Rooks
 from murloc import Murloc
 from wilderness import Wilderness
 
-rooks = None
-murloc = None
+# 선택된 캐릭터 저장
+selected_p1 = None
+selected_p2 = None
+
+player1 = None
+player2 = None
 
 def handle_events():
     event_list = get_events()
@@ -20,25 +24,34 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.push_mode(pause_mode)
         else:
-            rooks.handle_event(event)
-            murloc.handle_event(event)
+            player1.handle_event(event)
+            player2.handle_event(event)
 
 def init():
-    global rooks
-    global murloc
+    global player1, player2
 
-    rooks = Rooks()
-    game_world.add_object(rooks, 1)
+    if selected_p1 == 'Rooks':
+        player1 = Rooks()
+    elif selected_p1 == 'Murloc':
+        player1 = Murloc()
 
-    murloc = Murloc()
-    game_world.add_object(murloc, 1)
+    game_world.add_object(player1, 1)
+
+    if selected_p2 == 'Rooks':
+        player2 = Rooks()
+        player2.x = 600  # P2 시작 위치
+    elif selected_p2 == 'Murloc':
+        player2 = Murloc()
+        player2.x = 600
+
+    game_world.add_object(player2, 1)
 
     wilderness = Wilderness()
     game_world.add_object(wilderness, 0)
 
     # 히트 추적용 딕셔너리 초기화
-    rooks.hit_log = {}
-    murloc.hit_log = {}
+    player1.hit_log = {}
+    player2.hit_log = {}
 
 
 def check_collision(player1, player2):
@@ -62,35 +75,32 @@ def check_collision(player1, player2):
 def update():
     game_world.update()
 
-    # 현재 공격 상태 확인
-    rooks_state = rooks.state_machine.cur_state.__class__.__name__
-    murloc_state = murloc.state_machine.cur_state.__class__.__name__
+    # 현재 공격 상태 확인 (player1, player2로 통일)
+    player1_state = player1.state_machine.cur_state.__class__.__name__
+    player2_state = player2.state_machine.cur_state.__class__.__name__
 
-    # Rooks가 Murloc을 공격
-    if check_collision(rooks, murloc):
-        # 공격 ID 생성 (상태 + 진입 시간)
-        attack_id = f"{rooks_state}_{id(rooks.state_machine.cur_state)}"
-
-        if attack_id not in rooks.hit_log:
-            frame = int(rooks.frame)
-            print(f"[HIT] Rooks {rooks_state}(Frame {frame}) -> Murloc")
-            rooks.hit_log[attack_id] = True
+    # player1이 player2를 공격했는지 체크
+    if check_collision(player1, player2):
+        attack_id = f"{player1_state}_{id(player1.state_machine.cur_state)}"
+        if attack_id not in player1.hit_log:
+            frame = int(player1.frame)
+            print(f"[HIT] Player1 {player1_state}(Frame {frame}) -> Player2")
+            player1.hit_log[attack_id] = True
     else:
-        # 충돌이 끝나면 로그 정리
-        if rooks_state not in ['Attack', 'Skill', 'Ult']:
-            rooks.hit_log.clear()
+        # 공격 상태가 아닐 때 로그 정리
+        if player1_state not in ['Attack', 'Skill', 'Ult']:
+            player1.hit_log.clear()
 
-    # Murloc이 Rooks를 공격
-    if check_collision(murloc, rooks):
-        attack_id = f"{murloc_state}_{id(murloc.state_machine.cur_state)}"
-
-        if attack_id not in murloc.hit_log:
-            frame = int(murloc.frame)
-            print(f"[HIT] Murloc {murloc_state}(Frame {frame}) -> Rooks")
-            murloc.hit_log[attack_id] = True
+    # player2가 player1을 공격했는지 체크
+    if check_collision(player2, player1):
+        attack_id = f"{player2_state}_{id(player2.state_machine.cur_state)}"
+        if attack_id not in player2.hit_log:
+            frame = int(player2.frame)
+            print(f"[HIT] Player2 {player2_state}(Frame {frame}) -> Player1")
+            player2.hit_log[attack_id] = True
     else:
-        if murloc_state not in ['Attack', 'Skill', 'Ult']:
-            murloc.hit_log.clear()
+        if player2_state not in ['Attack', 'Skill', 'Ult']:
+            player2.hit_log.clear()
 
 def draw():
     clear_canvas()
