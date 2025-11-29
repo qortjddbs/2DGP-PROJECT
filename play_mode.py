@@ -8,6 +8,7 @@ import pause_mode
 from rooks import Rooks
 from murloc import Murloc
 from wilderness import Wilderness
+from player_ui import PlayerUI
 
 # 선택된 캐릭터 저장
 selected_p1 = None
@@ -15,6 +16,8 @@ selected_p2 = None
 
 player1 = None
 player2 = None
+player1_ui = None
+player2_ui = None
 
 def set_selected_characters(p1, p2):
     global selected_p1, selected_p2
@@ -35,7 +38,7 @@ def handle_events():
                 player2.handle_event(event)
 
 def init():
-    global player1, player2
+    global player1, player2, player1_ui, player2_ui
 
     # player1 생성 (항상 player_num=1)
     p1_choice = selected_p1
@@ -69,8 +72,15 @@ def init():
 
     game_world.add_object(player2, 1)
 
+    # 배경
     wilderness = Wilderness()
     game_world.add_object(wilderness, 0)
+
+    # UI 생성 및 추가 (레이어 2)
+    player1_ui = PlayerUI(player1, 1)
+    player2_ui = PlayerUI(player2, 2)
+    game_world.add_object(player1_ui, 2)
+    game_world.add_object(player2_ui, 2)
 
     # 히트 추적용 딕셔너리 초기화
     if player1:
@@ -136,6 +146,7 @@ def update():
 def draw():
     clear_canvas()
     game_world.render()
+
     update_canvas()
 
 
