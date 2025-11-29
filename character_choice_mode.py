@@ -2,6 +2,7 @@ from pico2d import *
 import game_framework
 import play_mode
 import setting_mode
+import title_mode
 
 background_image = None
 logo_image = None
