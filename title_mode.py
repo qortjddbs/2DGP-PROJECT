@@ -1,7 +1,7 @@
 from pico2d import *
 import game_framework
 import play_mode
-import setting_mode
+import rule_mode
 
 font = None
 background_image = None
@@ -48,6 +48,9 @@ def handle_events():
             if 425 <= mouse_x <= 525 and 210 <= mouse_y <= 240:
                 print("시작 버튼 클릭!")
                 game_framework.change_mode(play_mode)
+            elif 425 <= mouse_x <= 525 and 160 <= mouse_y <= 190:
+                print("방법 버튼 클릭!")
+                game_framework.change_mode(rule_mode)
 
 
 def draw():

@@ -1,32 +1,18 @@
 from pico2d import *
 import game_framework
-import play_mode
-import setting_mode
+import title_mode
 
-font = None
-background_image = None
-logo_image = None
-start_button_image = None
-method_button_image = None
 rule_image = None
 
 
 def init():
-    global background_image, logo_image, start_button_image, method_button_image, font
-    background_image = load_image('./Background/시작배경.png')
-    logo_image = load_image('./Background/로고.png')
-    start_button_image = load_image('./Background/시작버튼.png')
-    method_button_image = load_image('./Background/방법버튼.png')
-    font = load_font('ENCR10B.TTF', 20)
+    global rule_image
+    rule_image = load_image('./Background/Key.png')
 
 
 def finish():
-    global background_image, logo_image, start_button_image, method_button_image, font
-    del background_image
-    del logo_image
-    del start_button_image
-    del method_button_image
-    del font
+    global rule_image
+    del rule_image
 
 
 def update():
@@ -45,17 +31,12 @@ def handle_events():
             mouse_y = 400 - 1 - event.y  # 캔버스 높이가 400
             print(f"마우스 클릭: ({mouse_x}, {mouse_y})")
 
-            # 시작 버튼 클릭 영역 체크 (475, 300 중심)
-            if 425 <= mouse_x <= 525 and 210 <= mouse_y <= 240:
-                print("시작 버튼 클릭!")
-                game_framework.change_mode(play_mode)
-
+            if 10 <= mouse_x <= 60 and 370 <= mouse_y <= 390:
+                game_framework.change_mode(title_mode)
+                print(f"Back버튼 클릭!")
 
 def draw():
     clear_canvas()
-    background_image.draw(277, 200)
-    logo_image.draw(200, 200)
-    start_button_image.draw(475, 225)
-    method_button_image.draw(475, 175)
+    rule_image.draw(277, 200)
     update_canvas()
 
