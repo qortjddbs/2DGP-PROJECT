@@ -2,6 +2,7 @@ from pico2d import *
 import game_framework
 import play_mode
 import title_mode
+import mouse_manager
 
 background_image = None
 logo_image = None
@@ -20,7 +21,6 @@ show_ok_red = False
 ok_button_image = None
 ok_button_red_image = None
 cursor_image = None
-mouse_x, mouse_y = 0, 0
 
 def init():
     global background_image, logo_image, back_red_image, back_image, hp_set, mp_set, ok_button_image, ok_button_red_image
@@ -71,9 +71,7 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif event.type == SDL_MOUSEMOTION:
-            # 마우스 클릭 좌표 계산
-            mouse_x = event.x
-            mouse_y = 400 - 1 - event.y  # 캔버스 높이가 400
+            mouse_manager.update_position(event.x, 400 - 1 - event.y)
 
             if 485 <= mouse_x <= 545 and 5 <= mouse_y <= 25:
                 show_back_red = True
@@ -83,7 +81,7 @@ def handle_events():
                 show_back_red = False
                 show_ok_red = False
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
-            print(mouse_x, mouse_y)
+            mouse_x, mouse_y = mouse_manager.get_position()
             if show_back_red:
                 game_framework.pop_mode()
                 game_framework.change_mode(title_mode)
@@ -92,8 +90,6 @@ def handle_events():
                 # play_mode.set_player_stats(hp_set, mp_set)
                 game_framework.pop_mode()
                 game_framework.change_mode(play_mode)
-            mouse_x = event.x
-            mouse_y = 400 - 1 - event.y  # 캔버스 높이가 400
             if 180 <= mouse_x <= 260 and 150 <= mouse_y <= 220:
                 hp_set += 1
                 if hp_set > 3:
@@ -108,6 +104,7 @@ def draw():
     clear_canvas()
     background_image.draw(277, 200)
     logo_image.clip_draw(0, 0, 372, 184, 110, 350, 200, 80)
+    mouse_x, mouse_y = mouse_manager.get_position()
     if hp_set == 1:
         hp_image_1.draw(205, 200)
     elif hp_set == 2:
