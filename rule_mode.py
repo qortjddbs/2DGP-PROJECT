@@ -8,6 +8,7 @@ background_image = None
 logo_image = None
 start_button_image = None
 method_button_image = None
+rule_image = None
 
 
 def init():
