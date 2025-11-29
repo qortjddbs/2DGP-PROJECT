@@ -19,10 +19,12 @@ mp_set = 1
 show_ok_red = False
 ok_button_image = None
 ok_button_red_image = None
+cursor_image = None
+mouse_x, mouse_y = 0, 0
 
 def init():
     global background_image, logo_image, back_red_image, back_image, hp_set, mp_set, ok_button_image, ok_button_red_image
-    global hp_image_1, hp_image_2, hp_image_3, mp_image_1, mp_image_2, mp_image_3
+    global hp_image_1, hp_image_2, hp_image_3, mp_image_1, mp_image_2, mp_image_3, cursor_image
     background_image = load_image('./Background/시작배경.png')
     logo_image = load_image('./Background/로고.png')
     hp_image_1 = load_image('./Background/HP Setting/1.png')
@@ -37,9 +39,12 @@ def init():
     ok_button_red_image = load_image('./Background/ok(red).png')
     hp_set = 1
     mp_set = 1
+    cursor_image = load_image('./Background/cursor.png')
+    hide_cursor()
 
 def finish():
-    global hp_image_1, hp_image_2, hp_image_3, mp_image_1, mp_image_2, mp_image_3
+    global hp_image_1, hp_image_2, hp_image_3, mp_image_1, mp_image_2, mp_image_3, cursor_image
+    del cursor_image
     global background_image, logo_image, back_red_image, back_image, ok_button_image, ok_button_red_image
     del background_image
     del logo_image
@@ -53,12 +58,13 @@ def finish():
     del back_image
     del ok_button_image
     del ok_button_red_image
+    show_cursor()
 
 def update():
     pass
 
 def handle_events():
-    global hp_set, mp_set, show_back_red, show_ok_red
+    global hp_set, mp_set, show_back_red, show_ok_red, mouse_x, mouse_y
     event_list = get_events()
     for event in event_list:
         if event.type == SDL_QUIT:
@@ -70,14 +76,15 @@ def handle_events():
             mouse_x = event.x
             mouse_y = 400 - 1 - event.y  # 캔버스 높이가 400
 
-            if 470 <= mouse_x <= 530 and 20 <= mouse_y <= 40:
+            if 485 <= mouse_x <= 545 and 5 <= mouse_y <= 25:
                 show_back_red = True
-            elif 245 <= mouse_x <= 300 and 110 <= mouse_y <= 135:
+            elif 260 <= mouse_x <= 310 and 95 <= mouse_y <= 120:
                 show_ok_red = True
             else:
                 show_back_red = False
                 show_ok_red = False
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
+            print(mouse_x, mouse_y)
             if show_back_red:
                 game_framework.pop_mode()
                 game_framework.change_mode(title_mode)
@@ -88,11 +95,11 @@ def handle_events():
                 game_framework.change_mode(play_mode)
             mouse_x = event.x
             mouse_y = 400 - 1 - event.y  # 캔버스 높이가 400
-            if 170 <= mouse_x <= 240 and 160 <= mouse_y <= 235:
+            if 180 <= mouse_x <= 260 and 150 <= mouse_y <= 220:
                 hp_set += 1
                 if hp_set > 3:
                     hp_set = 1
-            elif 300 <= mouse_x <= 370 and 160 <= mouse_y <= 235:
+            elif 315 <= mouse_x <= 390 and 150 <= mouse_y <= 220:
                 mp_set += 1
                 if mp_set > 3:
                     mp_set = 1
@@ -122,4 +129,5 @@ def draw():
         ok_button_red_image.draw(270, 120)
     else:
         ok_button_image.draw(270, 120)
+    cursor_image.draw(mouse_x, mouse_y)
     update_canvas()

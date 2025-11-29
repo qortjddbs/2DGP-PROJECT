@@ -47,7 +47,6 @@ def handle_events():
             else:
                 show_back_red = False
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
-            print(mouse_x, mouse_y)
             if show_back_red:
                 game_framework.change_mode(title_mode)
 
