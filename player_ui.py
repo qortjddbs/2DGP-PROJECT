@@ -12,7 +12,7 @@ class PlayerUI:
 
         # 폰트 로드
         self.font = load_font('ENCR10B.TTF', 30)  # 크기 30
-        self.mini_font = load_font('ENCR10B.TTF', 10)  # 크기 20
+        self.mini_font = load_font('ENCR10B.TTF', 20)  # 크기 20
 
         # UI 위치 설정
         if player_num == 1:
@@ -63,10 +63,15 @@ class PlayerUI:
         else:
             self.label.draw(self.label_x - 75, 372)
 
-        # P1, P2 텍스트 그리기
+        # P1, P2 텍스트를 플레이어 위치에 그리기
         # font.draw(x, y, text, (r, g, b))
         if self.player_num == 1:
+            # 화면 왼쪽 위에도 표시
             self.font.draw(self.text_x, self.text_y, 'P1', (255, 0, 0))
-
+            # 플레이어 위치에도 표시
+            self.mini_font.draw(self.player.x - 5, self.player.y + 20, 'P1', (255, 0, 0))
         else:
+            # 화면 오른쪽 위에도 표시
             self.font.draw(self.text_x, self.text_y, 'P2', (0, 0, 255))
+            # 플레이어 위치에도 표시
+            self.mini_font.draw(self.player.x - 5, self.player.y + 20, 'P2', (0, 0, 255))
