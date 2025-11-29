@@ -107,3 +107,6 @@ def pause():
 def resume():
     pass
 
+
+def set_player_stats(hp_set, mp_set):
+    return None
