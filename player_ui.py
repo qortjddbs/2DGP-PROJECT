@@ -12,6 +12,7 @@ class PlayerUI:
 
         # 폰트 로드
         self.font = load_font('ENCR10B.TTF', 30)  # 크기 30
+        self.mini_font = load_font('ENCR10B.TTF', 10)  # 크기 20
 
         # UI 위치 설정
         if player_num == 1:
@@ -66,5 +67,6 @@ class PlayerUI:
         # font.draw(x, y, text, (r, g, b))
         if self.player_num == 1:
             self.font.draw(self.text_x, self.text_y, 'P1', (255, 0, 0))
+
         else:
             self.font.draw(self.text_x, self.text_y, 'P2', (0, 0, 255))
