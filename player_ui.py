@@ -69,9 +69,9 @@ class PlayerUI:
             # 화면 왼쪽 위에도 표시
             self.font.draw(self.text_x, self.text_y, 'P1', (255, 0, 0))
             # 플레이어 위치에도 표시
-            self.mini_font.draw(self.player.x - 5, self.player.y + 20, 'P1', (255, 0, 0))
+            self.mini_font.draw(self.player.x, self.player.y, 'P1', (255, 0, 0))
         else:
             # 화면 오른쪽 위에도 표시
             self.font.draw(self.text_x, self.text_y, 'P2', (0, 0, 255))
             # 플레이어 위치에도 표시
-            self.mini_font.draw(self.player.x - 5, self.player.y + 20, 'P2', (0, 0, 255))
+            self.mini_font.draw(self.player.x, self.player.y, 'P2', (0, 0, 255))
