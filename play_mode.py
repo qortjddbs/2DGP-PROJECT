@@ -17,7 +17,6 @@ player1 = None
 player2 = None
 
 def set_selected_characters(p1, p2):
-    """캐릭터 선택 모드에서 호출"""
     global selected_p1, selected_p2
     selected_p1 = p1
     selected_p2 = p2
@@ -39,9 +38,14 @@ def init():
     global player1, player2
 
     # player1 생성 (항상 player_num=1)
-    if selected_p1 == 'Rooks':
+    p1_choice = selected_p1
+    if p1_choice == 'Random':
+        p1_choice = random.choice(['Rooks', 'Murloc'])
+        print(f"[Random] Player1 -> {p1_choice}")
+
+    if p1_choice == 'Rooks':
         player1 = Rooks(player_num=1)
-    elif selected_p1 == 'Murloc':
+    elif p1_choice == 'Murloc':
         player1 = Murloc(player_num=1)
     else:
         print(f"[Warning] Player1 선택값이 없습니다. 기본값 Rooks 사용")
@@ -50,9 +54,14 @@ def init():
     game_world.add_object(player1, 1)
 
     # player2 생성 (항상 player_num=2)
-    if selected_p2 == 'Rooks':
+    p2_choice = selected_p2
+    if p2_choice == 'Random':
+        p2_choice = random.choice(['Rooks', 'Murloc'])
+        print(f"[Random] Player2 -> {p2_choice}")
+
+    if p2_choice == 'Rooks':
         player2 = Rooks(player_num=2)
-    elif selected_p2 == 'Murloc':
+    elif p2_choice == 'Murloc':
         player2 = Murloc(player_num=2)
     else:
         print(f"[Warning] Player2 선택값이 없습니다. 기본값 Murloc 사용")
