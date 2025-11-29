@@ -13,20 +13,9 @@ def init():
     logo_image = load_image('./Background/로고.png')
 
 def finish():
-    global hp_image_1, hp_image_2, hp_image_3, mp_image_1, mp_image_2, mp_image_3
-    global background_image, logo_image, back_red_image, back_image, ok_button_image, ok_button_red_image
+    global background_image, logo_image
     del background_image
     del logo_image
-    del hp_image_1
-    del hp_image_2
-    del hp_image_3
-    del mp_image_1
-    del mp_image_2
-    del mp_image_3
-    del back_red_image
-    del back_image
-    del ok_button_image
-    del ok_button_red_image
 
 def update():
     pass
