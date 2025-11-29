@@ -30,8 +30,6 @@ def finish():
     del font
     del cursor_image
 
-    show_cursor()
-
 def update():
     pass
 
@@ -54,8 +52,10 @@ def handle_events():
 
             # 시작 버튼 클릭 영역 체크 (475, 300 중심)
             if 435 <= mouse_x <= 540 and 190 <= mouse_y <= 225:
+                game_framework.pop_mode()
                 game_framework.change_mode(setting_mode)
             elif 440 <= mouse_x <= 540 and 140 <= mouse_y <= 175:
+                game_framework.pop_mode()
                 game_framework.change_mode(rule_mode)
 
 

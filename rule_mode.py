@@ -24,7 +24,6 @@ def finish():
     del back_red_image
     del rule_image
     del back_image
-    show_cursor()
 
 
 def update():
@@ -48,6 +47,7 @@ def handle_events():
                 show_back_red = False
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             if show_back_red:
+                game_framework.pop_mode()
                 game_framework.change_mode(title_mode)
 
 

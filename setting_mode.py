@@ -58,7 +58,6 @@ def finish():
     del back_image
     del ok_button_image
     del ok_button_red_image
-    show_cursor()
 
 def update():
     pass
