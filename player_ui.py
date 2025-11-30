@@ -1,4 +1,5 @@
 from pico2d import *
+import game_framework
 
 class PlayerUI:
     def __init__(self, player, player_num):
@@ -34,8 +35,19 @@ class PlayerUI:
         # 바의 최대 너비
         self.max_bar_width = 150
 
+        # MP 회복 관련 (프레임 독립적)
+        self.mp_recovery_rate = 5.0  # 초당 MP 회복량 (5 MP/초)
+
     def update(self):
-        pass
+        # MP 자동 회복 (프레임 독립적)
+        if self.player.mp < self.player.max_mp:
+            # frame_time만큼의 시간에 비례해서 MP 회복
+            self.player.mp = min(
+                self.player.mp + self.mp_recovery_rate * game_framework.frame_time,
+                self.player.max_mp
+            )
+        else:
+            self.player.mp = self.player.max_mp
 
     def draw(self):
         # HP 비율 계산 및 그리기 (배경 위에 덮어씌우기)

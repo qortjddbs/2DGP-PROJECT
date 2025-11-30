@@ -678,7 +678,7 @@ class Murloc:
         self.max_hp = 100
         self.hp = 100
         self.max_mp = 100
-        self.mp = 100
+        self.mp = 0
 
         self.y_velocity = 0
         self.ground_y = 83
