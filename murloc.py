@@ -761,7 +761,7 @@ class Murloc:
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.jump_key
 
     def ult_down(self, e):
-        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.ult_key
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.ult_key and self.mp >= 40
 
     def skill_down(self, e):
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.skill_key
