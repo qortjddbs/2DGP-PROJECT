@@ -324,7 +324,7 @@ class Attack:
                 elif keys[SDL_GetScancodeFromKey(self.murloc.skill_key)]:
                     self.murloc.state_machine.cur_state = self.murloc.SKILL
                     self.murloc.SKILL.enter(('ATTACK_TO_SKILL', None))
-                elif keys[SDL_GetScancodeFromKey(self.murloc.ult_key)]:
+                elif keys[SDL_GetScancodeFromKey(self.murloc.ult_key)] and self.murloc.mp >= 40:
                     self.murloc.state_machine.cur_state = self.murloc.ULT
                     self.murloc.ULT.enter(('ATTACK_TO_ULT', None))
                 elif self.murloc.dir != 0:
