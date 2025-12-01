@@ -111,6 +111,7 @@ def check_collision(player_a, player_b):
 
 
 def update():
+    global player1, player2
     game_world.update()
 
     if not player1 or not player2:
