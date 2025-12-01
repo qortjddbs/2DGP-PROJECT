@@ -719,6 +719,14 @@ class Rooks:
         self.is_air_action = False
         self.x_locked = False
 
+        self.hit_log = set()  # 공격 히트 로그
+
+        self.damage_values = {
+            'Attack': 2,
+            'Skill': 5,
+            'Ult': 15
+        }
+
         # 플레이어별 키 설정
         if self.player_num == 1:
             self.x, self.y = 90, 135
@@ -812,6 +820,10 @@ class Rooks:
 
     def update(self):
         self.state_machine.update()
+
+    def take_damage(self, damage):
+        self.hp = max(0, self.hp - damage)
+        print(f"Player {self.player_num} took {damage} damage! HP: {self.hp}/{self.max_hp}")
 
     def draw(self):
         self.state_machine.draw()

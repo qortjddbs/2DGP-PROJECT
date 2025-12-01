@@ -689,6 +689,14 @@ class Murloc:
         self.is_air_action = False
         self.x_locked = False
 
+        self.hit_log = set()  # 공격 히트 로그
+
+        self.damage_values = {
+            'Attack' : 10,
+            'Skill' : 25,
+            'Ult' : 50
+        }
+
         # 플레이어별 키 설정
         if self.player_num == 1:
             self.x, self.y = 90, 83
@@ -779,6 +787,10 @@ class Murloc:
 
     def get_hitbox(self):
         return self.state_machine.cur_state.get_hitbox()
+
+    def take_damage(self, damage):
+        self.hp = max(0, self.hp - damage)
+        print(f"P{self.player_num} took {damage} damage! HP: {self.hp}/{self.max_hp}")
 
     def draw(self):
         self.state_machine.draw()

@@ -125,7 +125,19 @@ def update():
         attack_id = f"{player1_state}_{id(player1.state_machine.cur_state)}"
         if attack_id not in player1.hit_log:
             frame = int(player1.frame)
-            print(f"[HIT] Player1 {player1_state}(Frame {frame}) -> Player2")
+
+            # 공격 타입에 따른 데미지 계산
+            damage = 0
+            if player1_state == 'Attack':
+                damage = player1.attack_damage if hasattr(player1, 'attack_damage') else 10
+            elif player1_state == 'Skill':
+                damage = player1.skill_damage if hasattr(player1, 'skill_damage') else 20
+            elif player1_state == 'Ult':
+                damage = player1.ult_damage if hasattr(player1, 'ult_damage') else 30
+
+            # 데미지 적용
+            player2.hp -= damage
+            print(f"[HIT] Player1 {player1_state}(Frame {frame}) -> Player2 (Damage: {damage}, HP: {player2.hp})")
             player1.hit_log[attack_id] = True
     else:
         # 공격 상태가 아닐 때 로그 정리
@@ -137,7 +149,19 @@ def update():
         attack_id = f"{player2_state}_{id(player2.state_machine.cur_state)}"
         if attack_id not in player2.hit_log:
             frame = int(player2.frame)
-            print(f"[HIT] Player2 {player2_state}(Frame {frame}) -> Player1")
+
+            # 공격 타입에 따른 데미지 계산
+            damage = 0
+            if player2_state == 'Attack':
+                damage = player2.attack_damage if hasattr(player2, 'attack_damage') else 10
+            elif player2_state == 'Skill':
+                damage = player2.skill_damage if hasattr(player2, 'skill_damage') else 20
+            elif player2_state == 'Ult':
+                damage = player2.ult_damage if hasattr(player2, 'ult_damage') else 30
+
+            # 데미지 적용
+            player1.hp -= damage
+            print(f"[HIT] Player2 {player2_state}(Frame {frame}) -> Player1 (Damage: {damage}, HP: {player1.hp})")
             player2.hit_log[attack_id] = True
     else:
         if player2_state not in ['Attack', 'Skill', 'Ult']:
