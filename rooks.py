@@ -821,9 +821,18 @@ class Rooks:
     def update(self):
         self.state_machine.update()
 
-    def take_damage(self, damage):
+    def take_damage(self, damage, attacker_x):
+        """피해를 받고 공격자 반대 방향으로 밀려남"""
         self.hp = max(0, self.hp - damage)
         print(f"Player {self.player_num} took {damage} damage! HP: {self.hp}/{self.max_hp}")
+
+        # 공격자의 위치에 따라 밀려나는 방향 결정
+        if attacker_x < self.x:
+            # 공격자가 왼쪽에 있으면 오른쪽으로 밀려남
+            self.x += 10
+        else:
+            # 공격자가 오른쪽에 있으면 왼쪽으로 밀려남
+            self.x -= 10
 
     def draw(self):
         self.state_machine.draw()

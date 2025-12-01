@@ -127,7 +127,7 @@ def update():
             # 데미지 계산 및 적용
             damage = player1.damage_values.get(player1_state, 0)
             if damage > 0:
-                player2.take_damage(damage)
+                player2.take_damage(damage, player1.x)  # 공격자의 x 위치 전달
                 player1.hit_log.add(attack_id)
                 print(f"[HIT] Player1 {player1_state} -> Player2 (Damage: {damage})")
     else:
@@ -143,7 +143,7 @@ def update():
 
             damage = player2.damage_values.get(player2_state, 0)
             if damage > 0:
-                player1.take_damage(damage)
+                player1.take_damage(damage, player2.x)  # 공격자의 x 위치 전달
                 player2.hit_log.add(attack_id)
                 print(f"[HIT] Player2 {player2_state} -> Player1 (Damage: {damage})")
     else:
