@@ -626,7 +626,7 @@ class Ult:
                 elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.SKILL
                     self.rooks.SKILL.enter(('ULT_TO_SKILL', None))
-                elif keys[SDL_GetScancodeFromKey(self.rooks.ult_key)]:
+                elif keys[SDL_GetScancodeFromKey(self.rooks.ult_key)] and self.rooks.mp >= 50:
                     self.rooks.state_machine.cur_state = self.rooks.ULT
                     self.rooks.ULT.enter(('RE_ULT', None))
                 elif left_pressed or right_pressed:
