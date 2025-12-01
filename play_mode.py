@@ -82,11 +82,8 @@ def init():
     game_world.add_object(player1_ui, 2)
     game_world.add_object(player2_ui, 2)
 
-    # 히트 추적용 딕셔너리 초기화
-    if player1:
-        player1.hit_log = {}
-    if player2:
-        player2.hit_log = {}
+    # 히트 로그는 각 캐릭터 클래스에서 이미 set()으로 초기화되어 있음
+    # 여기서 다시 초기화할 필요 없음
 
 
 def check_collision(player_a, player_b):
