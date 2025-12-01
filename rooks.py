@@ -583,6 +583,8 @@ class Ult:
         elif right_pressed and not left_pressed:
             self.rooks.face_dir = 1
 
+        self.rooks.mp -= 50
+
     def exit(self, e):
         self.rooks.x_locked = False
 
