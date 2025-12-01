@@ -104,7 +104,7 @@ class Jump:
             self.murloc.state_machine.cur_state = self.murloc.SKILL
             self.murloc.SKILL.enter(('AIR_SKILL_HELD', None))
             return  # JUMP.do()를 즉시 종료
-        if ult_pressed:
+        if ult_pressed and self.murloc.mp >= 40:
             self.murloc.state_machine.cur_state = self.murloc.ULT
             self.murloc.ULT.enter(('AIR_ULT_HELD', None))
             return  # JUMP.do()를 즉시 종료
