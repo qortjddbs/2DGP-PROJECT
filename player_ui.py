@@ -13,6 +13,7 @@ class PlayerUI:
         self.hp_bar = load_image('./Background/Hp Setting/hp_bar.png')  # HP 바
         self.mp_bar = load_image('./Background/Mp Setting/mp_bar.png')  # MP 바
         self.label = load_image(f'./Background/player{player_num}.png')
+        self.gray_bar = load_image('./Background/gray_bar.png')  # 회색 바 (배경)
 
         # 폰트 로드
         self.font = load_font('ENCR10B.TTF', 30)  # 크기 30
@@ -50,6 +51,13 @@ class PlayerUI:
             self.player.mp = self.player.max_mp
 
     def draw(self):
+        # 회색 바 그리기 (배경)
+        if self.player_num == 1:
+            self.gray_bar.draw(self.bar_x + 25, self.hp_y)
+            self.gray_bar.draw(self.bar_x + 10, self.mp_y)
+        else:
+            self.gray_bar.draw(self.bar_x - 25, self.hp_y)
+            self.gray_bar.draw(self.bar_x - 10, self.mp_y)
         # HP 비율 계산 및 그리기 (배경 위에 덮어씌우기)
         hp_ratio = self.player.hp / self.player.max_hp
         if hp_ratio > 0:
@@ -64,11 +72,16 @@ class PlayerUI:
         mp_ratio = self.player.mp / self.player.max_mp
         if mp_ratio > 0:
             mp_width = int(self.mp_bar.w * mp_ratio)
-            clip_x = self.bar_x - self.mp_bar.w // 2 + mp_width // 2
+
             if self.player_num == 1:
+                # P1: 왼쪽부터 차오름
+                clip_x = self.bar_x - self.mp_bar.w // 2 + mp_width // 2
                 self.mp_bar.clip_draw(0, 0, mp_width, self.mp_bar.h, clip_x + 16, self.mp_y)
             else:
-                self.mp_bar.clip_draw(0, 0, mp_width, self.mp_bar.h, clip_x - 16, self.mp_y)
+                # P2: 오른쪽부터 차오름 (이미지의 오른쪽 끝부터 클리핑)
+                clip_start_x = self.mp_bar.w - mp_width
+                clip_x = self.bar_x + self.mp_bar.w // 2 - mp_width // 2
+                self.mp_bar.clip_draw(clip_start_x, 0, mp_width, self.mp_bar.h, clip_x - 16, self.mp_y)
 
         # 라벨 그리기
         if self.player_num == 1:
