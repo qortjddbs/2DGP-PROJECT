@@ -77,7 +77,7 @@ class Jump:
             self.rooks.state_machine.cur_state = self.rooks.SKILL
             self.rooks.SKILL.enter(('AIR_SKILL_HELD', None))
             return  # JUMP.do()를 즉시 종료
-        elif ult_pressed:
+        elif ult_pressed and self.rooks.mp >= 50:
             self.rooks.state_machine.cur_state = self.rooks.ULT
             self.rooks.ULT.enter(('AIR_ULT_HELD', None))
             return  # JUMP.do()를 즉시 종료
@@ -103,7 +103,7 @@ class Jump:
             self.rooks.state_machine.cur_state = self.rooks.SKILL
             self.rooks.SKILL.enter(('AIR_SKILL_HELD', None))
             return  # JUMP.do()를 즉시 종료
-        if ult_pressed:
+        if ult_pressed and self.rooks.mp >= 50:
             self.rooks.state_machine.cur_state = self.rooks.ULT
             self.rooks.ULT.enter(('AIR_ULT_HELD', None))
             return  # JUMP.do()를 즉시 종료
@@ -322,7 +322,7 @@ class Attack:
                 elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.SKILL
                     self.rooks.SKILL.enter(('ATTACK_TO_SKILL', None))
-                elif keys[SDL_GetScancodeFromKey(self.rooks.ult_key)]:
+                elif keys[SDL_GetScancodeFromKey(self.rooks.ult_key)] and self.rooks.mp >= 50:
                     self.rooks.state_machine.cur_state = self.rooks.ULT
                     self.rooks.ULT.enter(('ATTACK_TO_ULT', None))
                 elif self.rooks.dir != 0:
@@ -496,7 +496,7 @@ class Skill:
                 elif keys[SDL_GetScancodeFromKey(self.rooks.skill_key)]:
                     self.rooks.state_machine.cur_state = self.rooks.SKILL
                     self.rooks.SKILL.enter(('RE_SKILL', None))
-                elif keys[SDL_GetScancodeFromKey(self.rooks.ult_key)]:
+                elif keys[SDL_GetScancodeFromKey(self.rooks.ult_key)] and self.rooks.mp >= 50:
                     self.rooks.state_machine.cur_state = self.rooks.ULT
                     self.rooks.ULT.enter(('SKILL_TO_ULT', None))
                 elif self.rooks.dir != 0:
@@ -555,6 +555,8 @@ class Ult:
         self.rooks = rooks
 
     def enter(self, e):
+        self.rooks.mp -= 50
+
         self.rooks.hit_log.clear()  # 새 스킬 시작 시 로그 초기화
         print('Ult State Entered with event:', e)
         # [FIX 1] 공중/지상 체크를 프레임 체크 밖으로 이동
@@ -582,8 +584,6 @@ class Ult:
             self.rooks.face_dir = -1
         elif right_pressed and not left_pressed:
             self.rooks.face_dir = 1
-
-        self.rooks.mp -= 50
 
     def exit(self, e):
         self.rooks.x_locked = False
@@ -777,7 +777,7 @@ class Rooks:
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.jump_key
 
     def ult_down(self, e):
-        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.ult_key
+        return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.ult_key and self.mp >= 50
 
     def skill_down(self, e):
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.skill_key
