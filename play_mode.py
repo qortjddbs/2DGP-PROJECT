@@ -127,19 +127,12 @@ def update():
         if attack_id not in player1.hit_log:
             frame = int(player1.frame)
 
-            # 공격 타입에 따른 데미지 계산
-            damage = 0
-            if player1_state == 'Attack':
-                damage = player1.attack_damage if hasattr(player1, 'attack_damage') else 10
-            elif player1_state == 'Skill':
-                damage = player1.skill_damage if hasattr(player1, 'skill_damage') else 20
-            elif player1_state == 'Ult':
-                damage = player1.ult_damage if hasattr(player1, 'ult_damage') else 30
-
-            # 데미지 적용
-            player2.hp -= damage
-            print(f"[HIT] Player1 {player1_state}(Frame {frame}) -> Player2 (Damage: {damage}, HP: {player2.hp})")
-            player1.hit_log[attack_id] = True
+            # 데미지 계산 및 적용
+            damage = player1.damage_values.get(player1_state, 0)
+            if damage > 0:
+                player2.take_damage(damage)
+                player1.hit_log.add(attack_id)
+                print(f"[HIT] Player1 {player1_state} -> Player2 (Damage: {damage})")
     else:
         # 공격 상태가 아닐 때 로그 정리
         if player1_state not in ['Attack', 'Skill', 'Ult']:
@@ -151,19 +144,11 @@ def update():
         if attack_id not in player2.hit_log:
             frame = int(player2.frame)
 
-            # 공격 타입에 따른 데미지 계산
-            damage = 0
-            if player2_state == 'Attack':
-                damage = player2.attack_damage if hasattr(player2, 'attack_damage') else 10
-            elif player2_state == 'Skill':
-                damage = player2.skill_damage if hasattr(player2, 'skill_damage') else 20
-            elif player2_state == 'Ult':
-                damage = player2.ult_damage if hasattr(player2, 'ult_damage') else 30
-
-            # 데미지 적용
-            player1.hp -= damage
-            print(f"[HIT] Player2 {player2_state}(Frame {frame}) -> Player1 (Damage: {damage}, HP: {player1.hp})")
-            player2.hit_log[attack_id] = True
+            damage = player2.damage_values.get(player2_state, 0)
+            if damage > 0:
+                player1.take_damage(damage)
+                player2.hit_log.add(attack_id)
+                print(f"[HIT] Player2 {player2_state} -> Player1 (Damage: {damage})")
     else:
         if player2_state not in ['Attack', 'Skill', 'Ult']:
             player2.hit_log.clear()
