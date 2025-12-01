@@ -522,20 +522,6 @@ class Ult:
         self.murloc = murloc
 
     def enter(self, e):
-        # MP 체크
-        if self.murloc.mp < 40:  # Skill MP 소모량
-            # MP 부족 시 이전 상태로 복귀
-            if self.murloc.y > self.murloc.ground_y:
-                self.murloc.state_machine.cur_state = self.murloc.JUMP
-                self.murloc.JUMP.enter(('INSUFFICIENT_MP_AIR', None))
-            elif self.murloc.dir != 0:
-                self.murloc.state_machine.cur_state = self.murloc.RUN
-                self.murloc.RUN.enter(('INSUFFICIENT_MP_RUN', None))
-            else:
-                self.murloc.state_machine.cur_state = self.murloc.IDLE
-                self.murloc.IDLE.enter(('INSUFFICIENT_MP', None))
-            return
-
         self.murloc.mp -= 40
 
         self.murloc.hit_log.clear()  # 새 공격 시작 시 로그 초기화
