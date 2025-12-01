@@ -574,19 +574,6 @@ class Ult:
         if self.murloc.manual_frame:
             return
 
-        if self.murloc.mp < 40:  # Skill MP 소모량
-            # MP 부족 시 이전 상태로 복귀
-            if self.murloc.y > self.murloc.ground_y:
-                self.murloc.state_machine.cur_state = self.murloc.JUMP
-                self.murloc.JUMP.enter(('INSUFFICIENT_MP_AIR', None))
-            elif self.murloc.dir != 0:
-                self.murloc.state_machine.cur_state = self.murloc.RUN
-                self.murloc.RUN.enter(('INSUFFICIENT_MP_RUN', None))
-            else:
-                self.murloc.state_machine.cur_state = self.murloc.IDLE
-                self.murloc.IDLE.enter(('INSUFFICIENT_MP', None))
-            return
-
 
         # [FIX 4] 공중 궁극기일 경우에만 중력 적용
         if self.murloc.is_air_action:
