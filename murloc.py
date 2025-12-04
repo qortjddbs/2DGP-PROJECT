@@ -677,7 +677,7 @@ class Murloc:
             # Ult: 12장
             Murloc.images['Ult'] = [load_image(f"./Character/murloc/Ult ({i}).png") for i in range(1, 13)]
 
-    def __init__(self, player_num=2):
+    def __init__(self, player_num=2, max_hp=100, mp_increase=5):
         # 디버그 모드 추가
         self.debug_mode = False  # F1 키로 토글
         self.manual_frame = False  # F2 키로 토글

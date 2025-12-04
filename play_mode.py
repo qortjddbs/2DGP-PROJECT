@@ -20,6 +20,8 @@ player1 = None
 player2 = None
 player1_ui = None
 player2_ui = None
+hp_setting = 1
+mp_setting = 1
 
 def set_selected_characters(p1, p2):
     global selected_p1, selected_p2
@@ -40,7 +42,7 @@ def handle_events():
                 player2.handle_event(event)
 
 def init():
-    global player1, player2, player1_ui, player2_uie
+    global player1, player2, player1_ui, player2_ui
 
     # player1 생성 (항상 player_num=1)
     p1_choice = selected_p1
@@ -178,5 +180,7 @@ def resume():
 
 
 def set_player_stats(hp_set, mp_set):
-    return None
+    global hp_setting, mp_setting
+    hp_setting = hp_set
+    mp_setting = mp_set
 
