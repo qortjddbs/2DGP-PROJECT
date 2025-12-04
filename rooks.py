@@ -387,6 +387,10 @@ class Skill:
         self.rooks.hit_log.clear()  # 새 스킬 시작 시 로그 초기화
         self.dash_applied = False
         print('Skill State Entered with event:', e)
+
+        # 공격 사운드 재생
+        sound_manager.play_character_sound('Rooks', 'skill')
+
         # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
         keys = SDL_GetKeyboardState(None)
         up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
