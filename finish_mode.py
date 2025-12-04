@@ -13,23 +13,18 @@ player1_name_image = None
 player2_name_image = None
 rooks_pick_image = None
 murloc_pick_image = None
-show_rooks = False
-show_murloc = False
-show_random = False
 font = None
 
 selected_p1 = None
 selected_p2 = None
-selection_step = 1  #  1: P1 선택 중, 2: P2 선택 중
 
 def init():
-    global background_image, back_red_image, back_image, show_back_red, cursor_image, show_rooks, show_murloc, show_random
+    global background_image, back_red_image, back_image, show_back_red, cursor_image
     global player1_name_image, player2_name_image
     global rooks_pick_image, murloc_pick_image
-    global selected_p1, selected_p2, selection_step, font
+    global selected_p1, selected_p2, font
     selected_p1 = None
     selected_p2 = None
-    selection_step = 1
 
     player1_name_image = load_image('./Character/p1.png')
     player2_name_image = load_image('./Character/p2.png')
@@ -40,9 +35,6 @@ def init():
     rooks_pick_image = load_image('./Character/Rooks/rooks_pick.png')
     murloc_pick_image = load_image('./Character/Murloc/murloc_pick.png')
     show_back_red = False
-    show_rooks = False
-    show_murloc = False
-    show_random = False
 
     # 폰트 로드
     font = load_font('ENCR10B.TTF', 30)
@@ -67,8 +59,8 @@ def update():
     pass
 
 def handle_events():
-    global selected_p1, selected_p2, selection_step
-    global show_back_red, show_rooks, show_murloc, show_random
+    global selected_p1, selected_p2
+    global show_back_red
 
     event_list = get_events()
     for event in event_list:
@@ -81,49 +73,13 @@ def handle_events():
             mouse_x, mouse_y = mouse_manager.get_position()
             if 260 <= mouse_x <= 320 and 355 <= mouse_y <= 375:
                 show_back_red = True
-            elif 70 <= mouse_x <= 120 and 65 <= mouse_y <= 110:
-                show_rooks = True
-            elif 150 <= mouse_x <= 200 and 65 <= mouse_y <= 110:
-                show_murloc = True
-            elif 250 <= mouse_x <= 325 and 50 <= mouse_y <= 125:
-                show_random = True
             else:
                 show_back_red = False
-                show_rooks = False
-                show_murloc = False
-                show_random = False
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             mouse_manager.update_position(event.x, 400 - 1 - event.y)
-            mouse_x, mouse_y = mouse_manager.get_position()
-
             if show_back_red:
                 game_framework.pop_mode()
                 game_framework.change_mode(title_mode)
-            elif show_rooks or show_murloc or show_random:
-                if selection_step == 1:
-                    if show_rooks:
-                        selected_p1 = 'Rooks'
-                    elif show_murloc:
-                        selected_p1 = 'Murloc'
-                    elif show_random:
-                        selected_p1 = 'Random'
-                    selection_step = 2
-                    print(f'Player 1 selected: {selected_p1}')
-                elif selection_step == 2:
-                    if show_rooks:
-                        selected_p2 = 'Rooks'
-                    elif show_murloc:
-                        selected_p2 = 'Murloc'
-                    elif show_random:
-                        selected_p2 = 'Random'
-                    print(f'Player 2 selected: {selected_p2}')
-
-                    # play_mode에 선택된 캐릭터 전달
-                    play_mode.set_selected_characters(selected_p1, selected_p2)
-
-                    # 게임 모드로 전환
-                    game_framework.pop_mode()
-                    game_framework.change_mode(play_mode)
 
 
 def draw():
@@ -131,23 +87,10 @@ def draw():
     background_image.draw(277, 200)
     if show_back_red:
         back_red_image.draw(275, 380) # type : ignore
-    elif selection_step == 1 and (show_rooks or show_murloc or show_random):
-        # P1 선택 중일 때는 (120, 270)에 표시
-        if show_rooks:
-            rooks_pick_image.draw(120, 270)
-        elif show_murloc:
-            murloc_pick_image.draw(120, 270)
-    elif selection_step == 2 and (show_rooks or show_murloc or show_random):
-        # P2 선택 중일 때는 (430, 270)에 표시
-        if show_rooks:
-            rooks_pick_image.draw(430, 270)
-        elif show_murloc:
-            murloc_pick_image.draw(430, 270)
 
     if not show_back_red:
         back_image.draw(275, 380)  # type : ignore
 
-    # P1이 선택되었으면 (120, 270)에 표시
     if selected_p1:
         if selected_p1 == 'Rooks':
             rooks_pick_image.draw(120, 270)
