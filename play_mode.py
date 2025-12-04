@@ -1,6 +1,7 @@
 import random
 from pico2d import *
 
+import finish_mode
 import game_framework
 import game_world
 import pause_mode
@@ -48,11 +49,8 @@ def init():
 
     if p1_choice == 'Rooks':
         player1 = Rooks(player_num=1)
-    elif p1_choice == 'Murloc':
-        player1 = Murloc(player_num=1)
     else:
-        print(f"[Warning] Player1 선택값이 없습니다. 기본값 Rooks 사용")
-        player1 = Rooks(player_num=1)
+        player1 = Murloc(player_num=1)
 
     game_world.add_object(player1, 1)
 
@@ -64,10 +62,7 @@ def init():
 
     if p2_choice == 'Rooks':
         player2 = Rooks(player_num=2)
-    elif p2_choice == 'Murloc':
-        player2 = Murloc(player_num=2)
     else:
-        print(f"[Warning] Player2 선택값이 없습니다. 기본값 Murloc 사용")
         player2 = Murloc(player_num=2)
 
     game_world.add_object(player2, 1)
@@ -149,6 +144,13 @@ def update():
     else:
         if player2_state not in ['Attack', 'Skill', 'Ult']:
             player2.hit_log.clear()
+
+    # 종료 체크: 어떤 플레이어라도 hp가 0 이하이면 finish_mode로 전환
+    p1_hp = getattr(player1, 'hp', None)
+    p2_hp = getattr(player2, 'hp', None)
+    if (p1_hp is not None and p1_hp <= 0) or (p2_hp is not None and p2_hp <= 0):
+        game_framework.change_mode(finish_mode)
+        return
 
 def draw():
     clear_canvas()
