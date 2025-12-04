@@ -149,6 +149,7 @@ def update():
     p1_hp = getattr(player1, 'hp', None)
     p2_hp = getattr(player2, 'hp', None)
     if (p1_hp is not None and p1_hp <= 0) or (p2_hp is not None and p2_hp <= 0):
+        # game_framework.pop_mode()
         game_framework.change_mode(finish_mode)
         return
 
