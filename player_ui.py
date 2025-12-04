@@ -53,20 +53,24 @@ class PlayerUI:
     def draw(self):
         # 회색 바 그리기 (배경)
         if self.player_num == 1:
-            self.gray_bar.draw(self.bar_x + 25, self.hp_y)
-            self.gray_bar.draw(self.bar_x + 10, self.mp_y)
+            self.gray_bar.draw(self.bar_x, self.hp_y)
+            self.gray_bar.draw(self.bar_x, self.mp_y)
         else:
-            self.gray_bar.draw(self.bar_x - 25, self.hp_y)
-            self.gray_bar.draw(self.bar_x - 10, self.mp_y)
+            self.gray_bar.draw(self.bar_x, self.hp_y)
+            self.gray_bar.draw(self.bar_x, self.mp_y)
         # HP 비율 계산 및 그리기 (배경 위에 덮어씌우기)
         hp_ratio = self.player.hp / self.player.max_hp
         if hp_ratio > 0:
             hp_width = int(self.hp_bar.w * hp_ratio)
-            clip_x = self.bar_x - self.hp_bar.w // 2 + hp_width // 2
             if self.player_num == 1:
+                # P1: 왼쪽부터 차오름, 오른쪽부터 감소
+                clip_x = self.bar_x - self.hp_bar.w // 2 + hp_width // 2
                 self.hp_bar.clip_draw(0, 0, hp_width, self.hp_bar.h, clip_x + 25, self.hp_y)
             else:
-                self.hp_bar.clip_draw(0, 0, hp_width, self.hp_bar.h, clip_x - 25, self.hp_y)
+                # P2: 오른쪽부터 클리핑해서 왼쪽부터 감소하게 표시
+                clip_start_x = self.hp_bar.w - hp_width
+                clip_x = self.bar_x + self.hp_bar.w // 2 - hp_width // 2
+                self.hp_bar.clip_draw(clip_start_x, 0, hp_width, self.hp_bar.h, clip_x - 25, self.hp_y)
 
         # MP 비율 계산 및 그리기
         mp_ratio = self.player.mp / self.player.max_mp
