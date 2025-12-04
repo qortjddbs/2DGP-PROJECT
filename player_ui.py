@@ -53,11 +53,9 @@ class PlayerUI:
     def draw(self):
         # 회색 바 그리기 (배경)
         if self.player_num == 1:
-            self.gray_bar.draw(self.bar_x, self.hp_y)
-            self.gray_bar.draw(self.bar_x, self.mp_y)
+            self.gray_bar.composite_draw(0, 'h', self.bar_x + 25, self.hp_y - 10)
         else:
-            self.gray_bar.draw(self.bar_x, self.hp_y)
-            self.gray_bar.draw(self.bar_x, self.mp_y)
+            self.gray_bar.draw(self.bar_x - 20, self.hp_y - 10)
         # HP 비율 계산 및 그리기 (배경 위에 덮어씌우기)
         hp_ratio = self.player.hp / self.player.max_hp
         if hp_ratio > 0:
