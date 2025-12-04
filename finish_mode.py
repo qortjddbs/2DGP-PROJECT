@@ -15,16 +15,21 @@ rooks_pick_image = None
 murloc_pick_image = None
 font = None
 
-selected_p1 = None
-selected_p2 = None
+winner = None
+p1 = None
+p2 = None
+
+def set_game_result(winner_player, player1, player2):
+    global winner, p1, p2
+    p1 = player1
+    p2 = player2
+    winner = winner_player
 
 def init():
     global background_image, back_red_image, back_image, show_back_red, cursor_image
     global player1_name_image, player2_name_image
     global rooks_pick_image, murloc_pick_image
-    global selected_p1, selected_p2, font
-    selected_p1 = None
-    selected_p2 = None
+    global p1, p2, font
 
     player1_name_image = load_image('./Character/p1.png')
     player2_name_image = load_image('./Character/p2.png')
@@ -59,7 +64,6 @@ def update():
     pass
 
 def handle_events():
-    global selected_p1, selected_p2
     global show_back_red
 
     event_list = get_events()
@@ -71,7 +75,7 @@ def handle_events():
         elif event.type == SDL_MOUSEMOTION:
             mouse_manager.update_position(event.x, 400 - 1 - event.y)
             mouse_x, mouse_y = mouse_manager.get_position()
-            if 260 <= mouse_x <= 320 and 355 <= mouse_y <= 375:
+            if 260 <= mouse_x <= 320 and 0 <= mouse_y <= 20:
                 show_back_red = True
             else:
                 show_back_red = False
@@ -86,16 +90,22 @@ def draw():
     clear_canvas()
     background_image.draw(277, 200)
     if show_back_red:
-        back_red_image.draw(275, 380) # type : ignore
+        back_red_image.draw(275, 20) # type : ignore
 
     if not show_back_red:
-        back_image.draw(275, 380)  # type : ignore
+        back_image.draw(275, 20)  # type : ignore
 
-    if selected_p1:
-        if selected_p1 == 'Rooks':
+    if p1:
+        if p1 == 'Rooks':
             rooks_pick_image.draw(120, 270)
-        elif selected_p1 == 'Murloc':
+        else:
             murloc_pick_image.draw(120, 270)
+
+    if p2:
+        if p2 == 'Rooks':
+            rooks_pick_image.draw(430, 270)
+        else:
+            murloc_pick_image.draw(430, 270)
 
     player1_name_image.draw(120, 200)
     player2_name_image.draw(430, 200)

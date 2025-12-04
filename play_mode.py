@@ -150,8 +150,13 @@ def update():
     p2_hp = getattr(player2, 'hp', None)
     if (p1_hp is not None and p1_hp <= 0) or (p2_hp is not None and p2_hp <= 0):
         # game_framework.pop_mode()
-        game_framework.change_mode(finish_mode)
-        return
+        # 게임 종료 시
+        if player1.hp <= 0:
+            finish_mode.set_game_result(2, selected_p1, selected_p2)  # P2 승리
+            game_framework.change_mode(finish_mode)
+        elif player2.hp <= 0:
+            finish_mode.set_game_result(1, selected_p1, selected_p2)  # P1 승리
+            game_framework.change_mode(finish_mode)
 
 def draw():
     clear_canvas()
