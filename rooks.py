@@ -708,8 +708,8 @@ class Rooks:
         self.player_num = player_num
 
         # HP, MP 시스템 추가
-        self.max_hp = 100
-        self.hp = 100
+        self.max_hp = 10
+        self.hp = 10
         self.max_mp = 100
         self.mp = 0
 
