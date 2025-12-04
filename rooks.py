@@ -843,9 +843,13 @@ class Rooks:
         if attacker_x < self.x:
             # 공격자가 왼쪽에 있으면 오른쪽으로 밀려남
             self.x += 10
+            if self.x > 530:
+                self.x = 530
         else:
             # 공격자가 오른쪽에 있으면 왼쪽으로 밀려남
             self.x -= 10
+            if self.x < 20:
+                self.x = 20
 
     def draw(self):
         self.state_machine.draw()
