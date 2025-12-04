@@ -181,8 +181,8 @@ def draw():
 
     # P1, P2 텍스트 출력 (P1은 빨간색, P2는 파란색)
     if font:
-        font.draw(175, 198, "1P", (255, 0, 0))  # 빨간색
-        font.draw(340, 198, "2P", (0, 0, 255))  # 파란색
+        font.draw(177, 198, "1P", (255, 0, 0))  # 빨간색
+        font.draw(335, 198, "2P", (0, 0, 255))  # 파란색
 
     mouse_x, mouse_y = mouse_manager.get_position()
     cursor_image.draw(mouse_x, mouse_y)
