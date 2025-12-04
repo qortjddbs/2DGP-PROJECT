@@ -7,6 +7,7 @@ import ctypes
 
 import game_framework
 import game_world
+import sound_manager
 
 from state_machine import StateMachine
 
@@ -218,6 +219,10 @@ class Attack:
     def enter(self, e):
         self.murloc.hit_log.clear()  # 새 공격 시작 시 로그 초기화
         print('Attack State Entered with event:', e)
+
+        # 공격 사운드 재생
+        sound_manager.play_character_sound('Murloc', 'attack')
+
         # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
         keys = SDL_GetKeyboardState(None)
         up_pressed = keys[SDL_GetScancodeFromKey(self.murloc.jump_key)]
@@ -526,6 +531,10 @@ class Ult:
 
         self.murloc.hit_log.clear()  # 새 공격 시작 시 로그 초기화
         print('Ult State Entered with event:', e)
+
+        # 궁극기 사운드 재생
+        sound_manager.play_character_sound('Murloc', 'ult')
+
         # [FIX 1] 공중/지상 체크를 프레임 체크 밖으로 이동
         # Attack/Skill.enter와 동일한 구조
         if self.murloc.y > self.murloc.ground_y:

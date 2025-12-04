@@ -3,6 +3,8 @@ import game_framework
 import rule_mode
 import setting_mode
 import mouse_manager
+import game_world
+import sound_manager
 
 font = None
 background_image = None
@@ -24,6 +26,11 @@ def init():
     mouse_manager.update_position(pygame_mouse_pos[0], 400 - 1 - pygame_mouse_pos[1])
     hide_cursor()
 
+    # 사운드 초기화 (한 번만 초기화됨)
+    sound_manager.init()
+    # BGM 재생 (이미 재생 중이면 다시 시작하지 않음)
+    sound_manager.play_title_bgm()
+
 def finish():
     global background_image, logo_image, start_button_image, method_button_image, font, cursor_image
     del background_image
@@ -32,6 +39,9 @@ def finish():
     del method_button_image
     del font
     del cursor_image
+
+    # 사운드 정리는 게임 종료 시에만
+    pass
 
 def update():
     pass
@@ -67,4 +77,3 @@ def draw():
     mouse_x, mouse_y = mouse_manager.get_position()
     cursor_image.draw(mouse_x, mouse_y)
     update_canvas()
-

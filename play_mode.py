@@ -5,6 +5,7 @@ import finish_mode
 import game_framework
 import game_world
 import pause_mode
+import sound_manager
 
 from rooks import Rooks
 from murloc import Murloc
@@ -39,7 +40,7 @@ def handle_events():
                 player2.handle_event(event)
 
 def init():
-    global player1, player2, player1_ui, player2_ui
+    global player1, player2, player1_ui, player2_uie
 
     # player1 생성 (항상 player_num=1)
     p1_choice = selected_p1
@@ -76,9 +77,6 @@ def init():
     player2_ui = PlayerUI(player2, 2)
     game_world.add_object(player1_ui, 2)
     game_world.add_object(player2_ui, 2)
-
-    # 히트 로그는 각 캐릭터 클래스에서 이미 set()으로 초기화되어 있음
-    # 여기서 다시 초기화할 필요 없음
 
 
 def check_collision(player_a, player_b):
@@ -122,8 +120,9 @@ def update():
             # 데미지 계산 및 적용
             damage = player1.damage_values.get(player1_state, 0)
             if damage > 0:
-                player2.take_damage(damage, player1.x)  # 공격자의 x 위치 전달
+                player2.take_damage(damage, player1.x)
                 player1.hit_log.add(attack_id)
+
                 print(f"[HIT] Player1 {player1_state} -> Player2 (Damage: {damage})")
     else:
         # 공격 상태가 아닐 때 로그 정리
@@ -138,8 +137,9 @@ def update():
 
             damage = player2.damage_values.get(player2_state, 0)
             if damage > 0:
-                player1.take_damage(damage, player2.x)  # 공격자의 x 위치 전달
+                player1.take_damage(damage, player2.x)
                 player2.hit_log.add(attack_id)
+
                 print(f"[HIT] Player2 {player2_state} -> Player1 (Damage: {damage})")
     else:
         if player2_state not in ['Attack', 'Skill', 'Ult']:
@@ -149,13 +149,16 @@ def update():
     p1_hp = getattr(player1, 'hp', None)
     p2_hp = getattr(player2, 'hp', None)
     if (p1_hp is not None and p1_hp <= 0) or (p2_hp is not None and p2_hp <= 0):
-        # game_framework.pop_mode()
-        # 게임 종료 시
         if player1.hp <= 0:
-            finish_mode.set_game_result(2, selected_p1, selected_p2)  # P2 승리
+            # 실제 플레이한 캐릭터 타입 확인
+            p1_actual = 'Rooks' if type(player1).__name__ == 'Rooks' else 'Murloc'
+            p2_actual = 'Rooks' if type(player2).__name__ == 'Rooks' else 'Murloc'
+            finish_mode.set_game_result(2, p1_actual, p2_actual)  # P2 승리
             game_framework.change_mode(finish_mode)
         elif player2.hp <= 0:
-            finish_mode.set_game_result(1, selected_p1, selected_p2)  # P1 승리
+            p1_actual = 'Rooks' if type(player1).__name__ == 'Rooks' else 'Murloc'
+            p2_actual = 'Rooks' if type(player2).__name__ == 'Rooks' else 'Murloc'
+            finish_mode.set_game_result(1, p1_actual, p2_actual)  # P1 승리
             game_framework.change_mode(finish_mode)
 
 def draw():
@@ -176,3 +179,4 @@ def resume():
 
 def set_player_stats(hp_set, mp_set):
     return None
+

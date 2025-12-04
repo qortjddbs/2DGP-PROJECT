@@ -3,6 +3,7 @@ import game_framework
 import play_mode
 import title_mode
 import mouse_manager
+import sound_manager
 
 background_image = None
 show_back_red = False
@@ -14,6 +15,7 @@ player2_name_image = None
 rooks_pick_image = None
 murloc_pick_image = None
 font = None
+result_font = None
 
 winner = None
 p1 = None
@@ -29,7 +31,8 @@ def init():
     global background_image, back_red_image, back_image, show_back_red, cursor_image
     global player1_name_image, player2_name_image
     global rooks_pick_image, murloc_pick_image
-    global p1, p2, font
+    global font, result_font
+    # p1, p2, winner는 초기화하지 않음
 
     player1_name_image = load_image('./Character/p1.png')
     player2_name_image = load_image('./Character/p2.png')
@@ -43,10 +46,14 @@ def init():
 
     # 폰트 로드
     font = load_font('ENCR10B.TTF', 30)
+    result_font = load_font('ENCR10B.TTF', 70)
+
+    # BGM은 정지하지 않고 계속 재생
+    # sound_manager.stop_bgm()  <- 이 줄을 제거
 
 def finish():
     global background_image, back_red_image, back_image, cursor_image, rooks_pick_image, murloc_pick_image
-    global player1_name_image, player2_name_image, font
+    global player1_name_image, player2_name_image, font, result_font
     del player1_name_image
     del player2_name_image
     del cursor_image
@@ -58,6 +65,9 @@ def finish():
 
     if font:
         del font
+
+    if result_font:
+        del result_font
 
 
 def update():
@@ -109,6 +119,15 @@ def draw():
 
     player1_name_image.draw(120, 200)
     player2_name_image.draw(430, 200)
+
+    # 승자 표시
+    if result_font and winner:
+        if winner == 1:
+            result_font.draw(30, 130, "WIN!", (0, 0, 0))
+            result_font.draw(340, 130, "LOSE", (0, 0, 0))
+        elif winner == 2:
+            result_font.draw(350, 130, "WIN!", (0, 0, 0))
+            result_font.draw(30, 130, "LOSE", (0, 0, 0))
 
     # P1, P2 텍스트 출력 (P1은 빨간색, P2는 파란색)
     if font:
