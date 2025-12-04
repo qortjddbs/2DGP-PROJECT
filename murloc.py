@@ -692,9 +692,9 @@ class Murloc:
         self.hit_log = set()  # 공격 히트 로그
 
         self.damage_values = {
-            'Attack' : 10,
-            'Skill' : 25,
-            'Ult' : 50
+            'Attack' : 2,
+            'Skill' : 5,
+            'Ult' : 15
         }
 
         # 플레이어별 키 설정
