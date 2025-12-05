@@ -42,7 +42,15 @@ def handle_events():
                 player2.handle_event(event)
 
 def init():
-    global player1, player2, player1_ui, player2_ui
+    global player1, player2, hp_setting, mp_setting, player1_ui , player2_ui
+
+    # HP/MP 설정값 계산 (1=10, 2=15, 3=20 등)
+    max_hp_value = hp_setting * 5 + 5  # 또는 원하는 공식
+    mp_increase_value = mp_setting * 2 + 3  # 또는 원하는 공식
+
+    # 캐릭터 생성 시 설정값 전달
+    player1 = Rooks(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
+    player2 = Murloc(player_num=2, max_hp=max_hp_value, mp_increase=mp_increase_value)
 
     # player1 생성 (항상 player_num=1)
     p1_choice = selected_p1
@@ -183,4 +191,3 @@ def set_player_stats(hp_set, mp_set):
     global hp_setting, mp_setting
     hp_setting = hp_set
     mp_setting = mp_set
-

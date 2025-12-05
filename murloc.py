@@ -225,15 +225,8 @@ class Attack:
 
         # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
         keys = SDL_GetKeyboardState(None)
-        up_pressed = keys[SDL_GetScancodeFromKey(self.murloc.jump_key)]
         left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
-
-        if self.murloc.y == self.murloc.ground_y and up_pressed:
-            # Attack 상태 진입을 취소하고 JUMP로 감
-            self.murloc.state_machine.cur_state = self.murloc.JUMP
-            self.murloc.JUMP.enter(('ATTACK_CANCEL_JUMP', None))
-            return  # Attack.enter()를 여기서 중단
 
         # (점프가 안 눌렸거나, 공중 공격일 때만 아래 로직 실행)
         if self.murloc.y > self.murloc.ground_y:
@@ -265,7 +258,6 @@ class Attack:
         pass
 
     def do(self):
-        # 수동 프레임 모드일 때는 자동 진행 중단
         if self.murloc.manual_frame:
             return
 
@@ -274,11 +266,9 @@ class Attack:
         right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
         up_pressed = keys[SDL_GetScancodeFromKey(self.murloc.jump_key)]
 
-        if not self.murloc.is_air_action and up_pressed:
-            # 지상에서 공격 중에 점프 키가 눌렸다면, 공격 취소하고 JUMP로 감
-            self.murloc.state_machine.cur_state = self.murloc.JUMP
-            self.murloc.JUMP.enter(('ATTACK_CANCEL_JUMP', None))
-            return  # Attack.do()를 여기서 중단
+        if not self.murloc.is_air_action and up_pressed and self.murloc.y == self.murloc.ground_y:
+            self.murloc.y_velocity = 500
+            self.murloc.is_air_action = True
 
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
         if self.murloc.is_air_action:
@@ -427,11 +417,9 @@ class Skill:
         keys = SDL_GetKeyboardState(None)
         up_pressed = keys[SDL_GetScancodeFromKey(self.murloc.jump_key)]
 
-        if not self.murloc.is_air_action and up_pressed:
-            # 지상에서 공격 중에 점프 키가 눌렸다면, 공격 취소하고 JUMP로 감
-            self.murloc.state_machine.cur_state = self.murloc.JUMP
-            self.murloc.JUMP.enter(('SKILL_CANCEL_JUMP', None))
-            return
+        if not self.murloc.is_air_action and up_pressed and self.murloc.y == self.murloc.ground_y:
+            self.murloc.y_velocity = 500
+            self.murloc.is_air_action = True
 
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
         if self.murloc.is_air_action:
@@ -745,8 +733,8 @@ class Murloc:
             {
                 self.IDLE : {self.jump_down: self.JUMP, self.ult_down: self.ULT, self.skill_down: self.SKILL, self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
                 self.RUN : {self.jump_down: self.JUMP, self.ult_down: self.ULT, self.skill_down: self.SKILL, self.attack_down: self.ATTACK, self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
-                self.ATTACK : {self.jump_down: self.JUMP, self.left_down: self.ATTACK, self.right_down: self.ATTACK, self.left_up: self.ATTACK, self.right_up: self.ATTACK},
-                self.SKILL : {self.jump_down: self.JUMP},
+                self.ATTACK : {},
+                self.SKILL : {},
                 self.ULT : {},
                 self.JUMP : {self.attack_down: self.ATTACK, self.skill_down: self.SKILL, self.ult_down: self.ULT}
             }

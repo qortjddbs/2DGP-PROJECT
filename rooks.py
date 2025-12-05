@@ -224,20 +224,12 @@ class Attack:
         sound_manager.play_character_sound('Rooks', 'attack')
 
         keys = SDL_GetKeyboardState(None)
-        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
-
-        if self.rooks.y == self.rooks.ground_y and up_pressed:
-            # Attack 상태 진입을 취소하고 JUMP로 감
-            self.rooks.state_machine.cur_state = self.rooks.JUMP
-            self.rooks.JUMP.enter(('ATTACK_CANCEL_JUMP', None))
-            return  # Attack.enter()를 여기서 중단
 
         # (점프가 안 눌렸거나, 공중 공격일 때만 아래 로직 실행)
         if self.rooks.y > self.rooks.ground_y:
             self.rooks.is_air_action = True
-        # (이하 원본 코드의 else/elif는 버그를 유발하므로 삭제)
         else:
             self.rooks.is_air_action = False
             self.rooks.y_velocity = 0
@@ -272,11 +264,9 @@ class Attack:
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
         up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
 
-        if not self.rooks.is_air_action and up_pressed:
-            # 지상에서 공격 중에 점프 키가 눌렸다면, 공격 취소하고 JUMP로 감
-            self.rooks.state_machine.cur_state = self.rooks.JUMP
-            self.rooks.JUMP.enter(('ATTACK_CANCEL_JUMP', None))
-            return  # Attack.do()를 여기서 중단
+        if not self.rooks.is_air_action and up_pressed and self.rooks.y == self.rooks.ground_y:
+            self.rooks.y_velocity = 500
+            self.rooks.is_air_action = True
 
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
         if self.rooks.is_air_action:
@@ -393,15 +383,8 @@ class Skill:
 
         # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
         keys = SDL_GetKeyboardState(None)
-        up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
-
-        if self.rooks.y == self.rooks.ground_y and up_pressed:
-            # Attack 상태 진입을 취소하고 JUMP로 감
-            self.rooks.state_machine.cur_state = self.rooks.JUMP
-            self.rooks.JUMP.enter(('SKILL_CANCEL_JUMP', None))
-            return
 
         # (점프가 안 눌렸거나, 공중 공격일 때만 아래 로직 실행)
         if self.rooks.y > self.rooks.ground_y:
@@ -441,11 +424,9 @@ class Skill:
         right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
         up_pressed = keys[SDL_GetScancodeFromKey(self.rooks.jump_key)]
 
-        if not self.rooks.is_air_action and up_pressed:
-            # 지상에서 공격 중에 점프 키가 눌렸다면, 공격 취소하고 JUMP로 감
-            self.rooks.state_machine.cur_state = self.rooks.JUMP
-            self.rooks.JUMP.enter(('SKILL_CANCEL_JUMP', None))
-            return
+        if not self.rooks.is_air_action and up_pressed and self.rooks.y == self.rooks.ground_y:
+            self.rooks.y_velocity = 500
+            self.rooks.is_air_action = True
 
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
         if self.rooks.is_air_action:
@@ -707,7 +688,7 @@ class Rooks:
             # Ult: 15장 (1~15)
             Rooks.images['Ult'] = [load_image(f"./Character/Rooks/Ult ({i}).png") for i in range(1, 16)]
 
-    def __init__(self, player_num=1):
+    def __init__(self, player_num=1, max_hp=100, mp_increase=5):
         # 디버그 모드 추가
         self.debug_mode = False  # F1 키로 토글
         self.manual_frame = False  # F2 키로 토글
@@ -720,11 +701,12 @@ class Rooks:
 
         self.player_num = player_num
 
-        # HP, MP 시스템 추가
-        self.max_hp = 10
-        self.hp = 10
+        # HP, MP 시스템 - 매개변수 사용
+        self.max_hp = max_hp  # 하드코딩된 값 대신 매개변수 사용
+        self.hp = max_hp
         self.max_mp = 100
         self.mp = 0
+        self.mp_increase = mp_increase  # 매개변수 사용
 
         self.y_velocity = 0
         self.ground_y = 135
@@ -775,8 +757,8 @@ class Rooks:
             {
                 self.IDLE : {self.jump_down: self.JUMP, self.ult_down: self.ULT, self.skill_down: self.SKILL, self.left_down: self.RUN, self.right_down: self.RUN, self.attack_down: self.ATTACK, self.left_up: self.RUN, self.right_up: self.RUN},
                 self.RUN : {self.jump_down: self.JUMP, self.ult_down: self.ULT, self.skill_down: self.SKILL, self.attack_down: self.ATTACK, self.left_up: self.IDLE, self.right_up: self.IDLE, self.left_down: self.IDLE, self.right_down: self.IDLE},
-                self.ATTACK : {self.jump_down: self.JUMP, self.left_down: self.ATTACK, self.right_down: self.ATTACK, self.left_up: self.ATTACK, self.right_up: self.ATTACK},
-                self.SKILL : {self.jump_down: self.JUMP, self.left_down: self.SKILL, self.right_down: self.SKILL, self.left_up: self.SKILL, self.right_up: self.SKILL},
+                self.ATTACK : {},
+                self.SKILL : {},
                 self.ULT : {},
                 self.JUMP : {self.attack_down: self.ATTACK, self.skill_down: self.SKILL, self.ult_down: self.ULT}
             }
