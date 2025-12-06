@@ -709,7 +709,8 @@ class Rooks:
         self.mp_increase = mp_increase  # 매개변수 사용
 
         self.y_velocity = 0
-        self.ground_y = 135
+        # self.ground_y = 135
+        self.ground_y = 130  # 플랫폼 높이를 고려하여 약간 낮춤
 
         self.is_air_action = False
         self.x_locked = False
@@ -724,7 +725,7 @@ class Rooks:
 
         # 플레이어별 키 설정
         if self.player_num == 1:
-            self.x, self.y = 90, 135
+            self.x, self.y = 90, 130
             self.face_dir = 1
             self.left_key = SDLK_a
             self.right_key = SDLK_d
@@ -734,7 +735,7 @@ class Rooks:
             self.jump_key = SDLK_w
         elif self.player_num == 2:
             from sdl2 import SDLK_LEFT, SDLK_RIGHT, SDLK_RETURN
-            self.x, self.y = 450, 135
+            self.x, self.y = 450, 130
             self.face_dir = -1
             self.left_key = SDLK_LEFT
             self.right_key = SDLK_RIGHT
@@ -764,16 +765,63 @@ class Rooks:
             }
         )
 
+        self.map_platforms = []  # 맵의 플랫폼 정보 저장
+        self.on_platform = False  # 플랫폼 위에 있는지 여부
+
+    def set_map(self, temple_map):
+        """맵 정보 설정"""
+        self.map_platforms = temple_map.get_platforms()
+
+    def check_platform_collision(self):
+        """플랫폼과의 충돌 체크 - 위에서 내려올 때만 충돌"""
+        if self.y_velocity > 0:  # 올라가는 중이면 통과
+            return None
+
+        bb = self.get_bb()
+        char_x1, char_y1, char_x2, char_y2 = bb
+
+        # 캐릭터의 하단 중심점 사용
+        char_center_x = (char_x1 + char_x2) / 2
+        char_bottom_y = char_y1
+
+        for plat_x1, plat_y1, plat_x2, plat_y2 in self.map_platforms:
+            # 좌우 겹침 체크
+            if plat_x1 <= char_center_x <= plat_x2:
+                # 캐릭터가 플랫폼 위에서 아래로 떨어지는 중
+                # 이전 프레임에서는 위에 있었고, 현재 프레임에서 플랫폼을 관통했는지 체크
+                if char_bottom_y <= plat_y2 and char_bottom_y + abs(
+                        self.y_velocity * game_framework.frame_time) >= plat_y2:
+                    print(f"[COLLISION] Player {self.player_num} landed on platform at y={plat_y2}")
+                    return plat_y2
+
+        return None
+
     def apply_gravity(self):
         self.y_velocity -= GRAVITY * game_framework.frame_time * 150
         self.y += self.y_velocity * game_framework.frame_time
 
     def check_landing(self):
+        """착지 체크 - 바닥과 플랫폼 모두 체크"""
+        # 플랫폼 충돌 체크
+        platform_y = self.check_platform_collision()
+        if platform_y:
+            bb = self.get_bb()
+            char_height = bb[3] - bb[1]  # 바운딩박스 높이
+            self.y = platform_y + char_height / 2 + (self.y - bb[1])  # 정확한 위치 계산
+            self.y_velocity = 0
+            self.is_air_action = False
+            self.on_platform = True
+            return True
+
+        # 기본 바닥 체크
         if self.y <= self.ground_y:
             self.y = self.ground_y
             self.y_velocity = 0
             self.is_air_action = False
+            self.on_platform = False
             return True
+
+        self.on_platform = False
         return False
 
     def jump_down(self, e):
@@ -896,6 +944,10 @@ class Rooks:
                 cx, cy = self.last_click_pos
                 draw_line(cx - 10, cy, cx + 10, cy)
                 draw_line(cx, cy - 10, cx, cy + 10)
+
+            # 플랫폼 정보 추가
+            info8 = f"On Platform: {self.on_platform}"
+            self.font.draw(self.x - 60, y_offset - 105, info8, (100, 255, 100))
 
     def handle_event(self, event):
         # 디버그 키 처리
