@@ -47,17 +47,20 @@ class Idle:
 
 class Jump:
     FRAMES_PER_ACTION = 1
+    JUMP_VELOCITY = 400  # 고정된 점프 속도
 
     def __init__(self, rooks):
         self.rooks = rooks
 
     def enter(self, e):
         print('Jump State Entered with event:', e)
-        if self.rooks.y == self.rooks.ground_y:
-            self.rooks.y_velocity = 500
-            self.rooks.apply_gravity()
+        # 점프 조건: 지상에 있거나 플랫폼 위에 있을 때만wwwwwwwwwww
+        if self.rooks.y_velocity == 0:  # 착지 상태에서만 점프 가능
+            self.rooks.y_velocity = self.JUMP_VELOCITY  # 항상 일정한 점프력
+            print(f"[JUMP] Player {self.rooks.player_num} jumped with velocity {self.JUMP_VELOCITY}")
 
         self.rooks.is_air_action = True
+        self.rooks.on_platform = False  # 점프 시 플랫폼 상태 해제
 
         keys = SDL_GetKeyboardState(None)
         left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
@@ -67,23 +70,20 @@ class Jump:
         ult_pressed = keys[SDL_GetScancodeFromKey(self.rooks.ult_key)]
 
         if left_pressed and not right_pressed:
-            self.rooks.dir = self.rooks.face_dir = -1
+            self.rooks.dir = -1
+            self.rooks.face_dir = -1
         elif right_pressed and not left_pressed:
-            self.rooks.dir = self.rooks.face_dir = 1
+            self.rooks.dir = 1
+            self.rooks.face_dir = 1
         elif attack_pressed:
-            self.rooks.state_machine.cur_state = self.rooks.ATTACK
-            self.rooks.ATTACK.enter(('AIR_ATTACK_HELD', None))
-            return  # JUMP.do()를 즉시 종료
+            self.rooks.state_machine.add_event(('INPUT', None))
         elif skill_pressed:
-            self.rooks.state_machine.cur_state = self.rooks.SKILL
-            self.rooks.SKILL.enter(('AIR_SKILL_HELD', None))
-            return  # JUMP.do()를 즉시 종료
+            self.rooks.state_machine.add_event(('INPUT', None))
         elif ult_pressed and self.rooks.mp >= 50:
-            self.rooks.state_machine.cur_state = self.rooks.ULT
-            self.rooks.ULT.enter(('AIR_ULT_HELD', None))
-            return  # JUMP.do()를 즉시 종료
+            self.rooks.state_machine.add_event(('INPUT', None))
         else:
             self.rooks.dir = 0
+
 
     def exit(self, e):
         pass
@@ -711,6 +711,7 @@ class Rooks:
         self.y_velocity = 0
         # self.ground_y = 135
         self.ground_y = 130  # 플랫폼 높이를 고려하여 약간 낮춤
+        self.initial_ground_y = 130
 
         self.is_air_action = False
         self.x_locked = False
@@ -779,23 +780,26 @@ class Rooks:
 
         bb = self.get_bb()
         char_x1, char_y1, char_x2, char_y2 = bb
-
-        # 캐릭터의 하단 중심점 사용
-        char_center_x = (char_x1 + char_x2) / 2
         char_bottom_y = char_y1
 
+        # 가장 높은 플랫폼부터 체크 (우선순위)
+        valid_platforms = []
         for plat_x1, plat_y1, plat_x2, plat_y2 in self.map_platforms:
-            # 좌우 겹침 체크
-            if plat_x1 <= char_center_x <= plat_x2:
-                # 캐릭터가 플랫폼 위에서 아래로 떨어지는 중
-                # 이전 프레임에서는 위에 있었고, 현재 프레임에서 플랫폼을 관통했는지 체크
+            # 양쪽 끝 중 하나라도 플랫폼 범위에 걸치면 충돌
+            left_overlap = plat_x1 <= char_x1 <= plat_x2
+            right_overlap = plat_x1 <= char_x2 <= plat_x2
+
+            if left_overlap or right_overlap:
+                # 캐릭터가 플랫폼을 관통했는지 체크
                 if char_bottom_y <= plat_y2 and char_bottom_y + abs(
                         self.y_velocity * game_framework.frame_time) >= plat_y2:
-                    print(f"[COLLISION] Player {self.player_num} landed on platform at y={plat_y2}")
-                    return plat_y2
+                    valid_platforms.append(plat_y2)
+
+        if valid_platforms:
+            # 가장 높은 플랫폼 선택
+            return max(valid_platforms)
 
         return None
-
     def apply_gravity(self):
         self.y_velocity -= GRAVITY * game_framework.frame_time * 150
         self.y += self.y_velocity * game_framework.frame_time
@@ -806,22 +810,39 @@ class Rooks:
         platform_y = self.check_platform_collision()
         if platform_y:
             bb = self.get_bb()
-            char_height = bb[3] - bb[1]  # 바운딩박스 높이
-            self.y = platform_y + char_height / 2 + (self.y - bb[1])  # 정확한 위치 계산
+            char_height = bb[3] - bb[1]
+            self.y = platform_y + char_height / 2 + (self.y - bb[1])
             self.y_velocity = 0
             self.is_air_action = False
             self.on_platform = True
+            self.ground_y = platform_y  # 착지 시에만 ground_y 업데이트
+            print(f"[PLATFORM] Player {self.player_num} landed on platform at y={platform_y}")
             return True
 
+        # 플랫폼에서 완전히 벗어났는지 체크
+        if self.on_platform:
+            bb = self.get_bb()
+            char_x1, char_x2 = bb[0], bb[2]
+
+            still_on_platform = False
+            for plat_x1, plat_y1, plat_x2, plat_y2 in self.map_platforms:
+                if (plat_x1 <= char_x1 <= plat_x2) or (plat_x1 <= char_x2 <= plat_x2):
+                    still_on_platform = True
+                    break
+
+            if not still_on_platform:
+                self.on_platform = False
+                print(f"[FALL] Player {self.player_num} fell off platform")
+
         # 기본 바닥 체크
-        if self.y <= self.ground_y:
-            self.y = self.ground_y
+        if self.y <= self.initial_ground_y:
+            self.y = self.initial_ground_y
             self.y_velocity = 0
             self.is_air_action = False
             self.on_platform = False
+            self.ground_y = self.initial_ground_y  # 바닥 착지 시 초기값으로 복구
             return True
 
-        self.on_platform = False
         return False
 
     def jump_down(self, e):
