@@ -678,11 +678,12 @@ class Murloc:
 
         self.player_num = player_num
 
-        # HP, MP 시스템 추가
-        self.max_hp = 10
-        self.hp = 10
+        # HP, MP 시스템 - 매개변수 사용
+        self.max_hp = max_hp  # 하드코딩된 값 대신 매개변수 사용
+        self.hp = max_hp
         self.max_mp = 100
         self.mp = 0
+        self.mp_increase = mp_increase  # 매개변수 사용
 
         self.y_velocity = 0
         self.ground_y = 83
