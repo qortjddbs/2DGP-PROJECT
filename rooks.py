@@ -814,6 +814,7 @@ class Rooks:
         return self.state_machine.cur_state.get_hitbox()
 
     def update(self):
+        self.increase_mp()
         self.state_machine.update()
 
     def take_damage(self, damage, attacker_x):

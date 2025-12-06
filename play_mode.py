@@ -46,7 +46,7 @@ def init():
 
     # HP/MP 설정값 계산 (1=10, 2=15, 3=20 등)
     max_hp_value = hp_setting * 50  # 1 : 50, 2 : 100, 3 : 150
-    mp_increase_value = mp_setting * 10  # 또는 원하는 공식
+    mp_increase_value = mp_setting * 3  # 또는 원하는 공식
 
     # 캐릭터 생성 시 설정값 전달
     player1 = Rooks(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
