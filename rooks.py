@@ -688,7 +688,7 @@ class Rooks:
             # Ult: 15장 (1~15)
             Rooks.images['Ult'] = [load_image(f"./Character/Rooks/Ult ({i}).png") for i in range(1, 16)]
 
-    def __init__(self, player_num=1, max_hp=100, mp_increase=5):
+    def __init__(self, player_num=1, max_hp=100, mp_increase=10):
         # 디버그 모드 추가
         self.debug_mode = False  # F1 키로 토글
         self.manual_frame = False  # F2 키로 토글
@@ -832,6 +832,9 @@ class Rooks:
             self.x -= 10
             if self.x < 20:
                 self.x = 20
+
+    def increase_mp(self):
+        self.mp = min(self.max_mp, self.mp + self.mp_increase * game_framework.frame_time)
 
     def draw(self):
         self.state_machine.draw()

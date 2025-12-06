@@ -37,7 +37,7 @@ class PlayerUI:
         self.max_bar_width = 150
 
         # MP 회복 관련 (프레임 독립적)
-        self.mp_recovery_rate = 5.0  # 초당 MP 회복량 (5 MP/초)
+        self.mp_recovery_rate = 10.0  # 초당 MP 회복량 (5 MP/초)
 
     def update(self):
         # MP 자동 회복 (프레임 독립적)

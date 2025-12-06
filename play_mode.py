@@ -45,8 +45,8 @@ def init():
     global player1, player2, hp_setting, mp_setting, player1_ui , player2_ui
 
     # HP/MP 설정값 계산 (1=10, 2=15, 3=20 등)
-    max_hp_value = hp_setting * 5 + 5  # 또는 원하는 공식
-    mp_increase_value = mp_setting * 2 + 3  # 또는 원하는 공식
+    max_hp_value = hp_setting * 50  # 1 : 50, 2 : 100, 3 : 150
+    mp_increase_value = mp_setting * 5  # 또는 원하는 공식
 
     # 캐릭터 생성 시 설정값 전달
     player1 = Rooks(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
@@ -59,9 +59,9 @@ def init():
         print(f"[Random] Player1 -> {p1_choice}")
 
     if p1_choice == 'Rooks':
-        player1 = Rooks(player_num=1)
+        player1 = Rooks(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
     else:
-        player1 = Murloc(player_num=1)
+        player1 = Murloc(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
 
     game_world.add_object(player1, 1)
 
@@ -72,9 +72,9 @@ def init():
         print(f"[Random] Player2 -> {p2_choice}")
 
     if p2_choice == 'Rooks':
-        player2 = Rooks(player_num=2)
+        player2 = Rooks(player_num=2, max_hp=max_hp_value, mp_increase=mp_increase_value)
     else:
-        player2 = Murloc(player_num=2)
+        player2 = Murloc(player_num=2, max_hp=max_hp_value, mp_increase=mp_increase_value)
 
     game_world.add_object(player2, 1)
 

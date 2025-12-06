@@ -39,8 +39,8 @@ def init():
     back_image = load_image('./Background/back.png')
     ok_button_image = load_image('./Background/ok.png')
     ok_button_red_image = load_image('./Background/ok(red).png')
-    hp_set = 1
-    mp_set = 1
+    hp_set = 2
+    mp_set = 2
     cursor_image = load_image('./Background/cursor.png')
     import pygame
     pygame_mouse_pos = pygame.mouse.get_pos()
