@@ -10,6 +10,7 @@ import sound_manager
 from rooks import Rooks
 from murloc import Murloc
 from wilderness import Wilderness
+from golden_temple import Temple
 from player_ui import PlayerUI
 
 # 선택된 캐릭터 저장
@@ -79,8 +80,10 @@ def init():
     game_world.add_object(player2, 1)
 
     # 배경
-    wilderness = Wilderness()
-    game_world.add_object(wilderness, 0)
+    # wilderness = Wilderness()
+    # game_world.add_object(wilderness, 0)
+    temple = Temple()
+    game_world.add_object(temple, 0)
 
     # UI 생성 및 추가 (레이어 2)
     player1_ui = PlayerUI(player1, 1)
