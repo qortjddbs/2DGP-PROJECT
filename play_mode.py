@@ -43,7 +43,7 @@ def handle_events():
                 player2.handle_event(event)
 
 def init():
-    global player1, player2, hp_setting, mp_setting, player1_ui , player2_ui
+    global player1, player2, hp_setting, mp_setting, player1_ui , player2_ui, current_map
 
     # HP/MP 설정값 계산 (1=10, 2=15, 3=20 등)
     max_hp_value = hp_setting * 50  # 1 : 50, 2 : 100, 3 : 150
@@ -81,31 +81,24 @@ def init():
 
     # 배경
     map_choice = random.choice(['Wilderness', 'Temple'])
+    current_map = map_choice  # 현재 맵 저장
     print(f"Selected Map: {map_choice}")
 
     if map_choice == 'Wilderness':
-        # 황야 맵 생성
         background = Wilderness()
         game_world.add_object(background, 0)
-        # Wilderness는 플랫폼이 없으므로 set_platforms를 호출하지 않음
-        # (캐릭터 내부에서 platforms 속성이 없으면 기본 바닥(y=83) 처리함)
-
-    else:  # Temple
-        # 황금 사원 맵 생성
+    else:
         background = Temple()
         game_world.add_object(background, 0)
-
-        # Temple일 경우에만 플랫폼 정보를 가져와서 캐릭터에게 전달
         platforms = background.get_platforms()
         player1.set_platforms(platforms)
         player2.set_platforms(platforms)
 
-    # 3. UI 생성 및 추가 (기존 코드 유지)
+    # UI 생성
     player1_ui = PlayerUI(player1, 1)
     player2_ui = PlayerUI(player2, 2)
     game_world.add_object(player1_ui, 2)
     game_world.add_object(player2_ui, 2)
-
 
 def check_collision(player_a, player_b):
     if not player_a or not player_b:
@@ -129,7 +122,7 @@ def check_collision(player_a, player_b):
 
 
 def update():
-    global player1, player2
+    global player1, player2, current_map
     game_world.update()
 
     if not player1 or not player2:
@@ -181,12 +174,12 @@ def update():
             # 실제 플레이한 캐릭터 타입 확인
             p1_actual = 'Rooks' if type(player1).__name__ == 'Rooks' else 'Murloc'
             p2_actual = 'Rooks' if type(player2).__name__ == 'Rooks' else 'Murloc'
-            finish_mode.set_game_result(2, p1_actual, p2_actual)  # P2 승리
+            finish_mode.set_game_result(2, p1_actual, p2_actual, current_map)  # P2 승리
             game_framework.change_mode(finish_mode)
         elif player2.hp <= 0:
             p1_actual = 'Rooks' if type(player1).__name__ == 'Rooks' else 'Murloc'
             p2_actual = 'Rooks' if type(player2).__name__ == 'Rooks' else 'Murloc'
-            finish_mode.set_game_result(1, p1_actual, p2_actual)  # P1 승리
+            finish_mode.set_game_result(1, p1_actual, p2_actual, current_map)  # P1 승리
             game_framework.change_mode(finish_mode)
 
 def draw():

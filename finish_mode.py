@@ -16,13 +16,17 @@ rooks_pick_image = None
 murloc_pick_image = None
 font = None
 result_font = None
+wilderness_icon_image = None
+golden_temple_icon_image = None
 
 winner = None
 p1 = None
 p2 = None
+played_map = None
 
-def set_game_result(winner_player, player1, player2):
-    global winner, p1, p2
+def set_game_result(winner_player, player1, player2, map_name):
+    global winner, p1, p2, played_map
+    played_map = map_name
     p1 = player1
     p2 = player2
     winner = winner_player
@@ -32,6 +36,7 @@ def init():
     global player1_name_image, player2_name_image
     global rooks_pick_image, murloc_pick_image
     global font, result_font
+    global wilderness_icon_image, golden_temple_icon_image
     # p1, p2, winner는 초기화하지 않음
 
     player1_name_image = load_image('./Character/p1.png')
@@ -42,6 +47,8 @@ def init():
     back_image = load_image('./Background/back.png')
     rooks_pick_image = load_image('./Character/Rooks/rooks_pick.png')
     murloc_pick_image = load_image('./Character/Murloc/murloc_pick.png')
+    wilderness_icon_image = load_image('./Maps/황야_아이콘.png')
+    golden_temple_icon_image = load_image('./Maps/외딴사원_아이콘.png')
     show_back_red = False
 
     # 폰트 로드
@@ -62,6 +69,8 @@ def finish():
     del background_image
     del rooks_pick_image
     del murloc_pick_image
+    del wilderness_icon_image
+    del golden_temple_icon_image
 
     if font:
         del font
@@ -97,8 +106,17 @@ def handle_events():
 
 
 def draw():
+    global played_map
+
     clear_canvas()
     background_image.draw(277, 200)
+
+    # 플레이한 맵 이미지 로드
+    if played_map == 'Wilderness':
+        wilderness_icon_image.draw (275, 350)  # type : ignore
+    else:  # Temple
+        golden_temple_icon_image.draw (275, 350)  # type : ignore
+
     if show_back_red:
         back_red_image.draw(275, 20) # type : ignore
 
