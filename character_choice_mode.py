@@ -148,16 +148,20 @@ def draw():
         # P1 선택 중일 때는 (120, 270)에 표시
         if show_rooks:
             rooks_pick_image.draw(120, 270)
+            font.draw(75, 350, "Rooks", (255, 255, 255))  # 빨간색
         elif show_murloc:
             murloc_pick_image.draw(120, 270)
+            font.draw(70, 350, "Murloc", (255, 255, 255))  # 빨간색
         elif show_random:
             random_pick_image.draw(120, 270)
     elif selection_step == 2 and (show_rooks or show_murloc or show_random):
         # P2 선택 중일 때는 (430, 270)에 표시
         if show_rooks:
             rooks_pick_image.draw(430, 270)
+            font.draw(385, 350, "Rooks", (255, 255, 255))  # 빨간색
         elif show_murloc:
             murloc_pick_image.draw(430, 270)
+            font.draw(380, 350, "Murloc", (255, 255, 255))  # 빨간색
         elif show_random:
             random_pick_image.draw(430, 270)
 
