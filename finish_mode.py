@@ -108,14 +108,18 @@ def draw():
     if p1:
         if p1 == 'Rooks':
             rooks_pick_image.draw(120, 270)
+            font.draw(75, 350, "Rooks", (255, 255, 255))  # 빨간색
         else:
             murloc_pick_image.draw(120, 270)
+            font.draw(70, 350, "Murloc", (255, 255, 255))  # 빨간색
 
     if p2:
         if p2 == 'Rooks':
             rooks_pick_image.draw(430, 270)
+            font.draw(385, 350, "Rooks", (255, 255, 255))  # 빨간색
         else:
             murloc_pick_image.draw(430, 270)
+            font.draw(380, 350, "Murloc", (255, 255, 255))  # 빨간색
 
     player1_name_image.draw(120, 200)
     player2_name_image.draw(430, 200)
