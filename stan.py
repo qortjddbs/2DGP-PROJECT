@@ -43,7 +43,7 @@ class Idle:
     def draw(self):
         visual_y = self.stan.y - 3
         if self.stan.face_dir == -1:
-            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 78, visual_y)
+            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 108, visual_y)
         else:
             self.stan.images['Idle'][0].draw(self.stan.x + 108, visual_y)
 
@@ -160,9 +160,9 @@ class Jump:
     def draw(self):
         visual_y = self.stan.y - 3
         if self.stan.face_dir == -1:
-            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 30, visual_y)
+            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 108, visual_y)
         else:
-            self.stan.images['Idle'][0].draw(self.stan.x + 30, visual_y)
+            self.stan.images['Idle'][0].draw(self.stan.x + 108, visual_y)
 
     def get_hitbox(self):
         pass
@@ -221,10 +221,11 @@ class Run:
                     self.stan.IDLE.enter(('LAND_FROM_RUN', None))
 
     def draw(self):
+        visual_y = self.stan.y - 3
         if self.stan.face_dir == -1:
-            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
+            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 108, visual_y)
         else:
-            self.stan.images['Idle'][0].draw(self.stan.x + 78, self.stan.y)
+            self.stan.images['Idle'][0].draw(self.stan.x + 108, visual_y)
 
     def get_hitbox(self):
         pass
@@ -353,9 +354,9 @@ class Attack:
     def draw(self):
         frame_index = min(int(self.stan.frame), 15)
         if self.stan.face_dir == -1:
-            self.stan.images['Attack'][frame_index].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
+            self.stan.images['Attack'][frame_index].composite_draw(0, 'h', self.stan.x - 108, self.stan.y - 3)
         else:
-            self.stan.images['Attack'][frame_index].draw(self.stan.x + 78, self.stan.y)
+            self.stan.images['Attack'][frame_index].draw(self.stan.x + 108, self.stan.y - 3)
 
     def get_hitbox(self):
         frame = int(self.stan.frame)
@@ -367,15 +368,15 @@ class Attack:
             0: None,  # 준비 동작
             1: None,  # 준비 동작
             2: None,
-            3: (-5, -12, 1, -10),  # 준비 동작
-            4: (-3, -12, 3, -10),  # 가속 시작
-            5: (5, -12, 11, -10),  # 최대 속도
-            6: (15, -12, 21, -10),  # 감속 시작
-            7: (25, -12, 31, -10),  # 공격 끝
+            3: (24, -16, 30, -14),  # 준비 동작
+            4: (26, -16, 32, -14),  # 가속 시작
+            5: (34, -16, 40, -14),  # 최대 속도
+            6: (46, -16, 52, -14),  # 감속 시작
+            7: (54, -16, 60, -14),  # 공격 끝
             8: None,  # 회수 시작
-            9: (-2, -5, 4, -3),  # 회수 중
-            10: (9, -5, 15, -3),  # 회수 중
-            11: (16, -5, 22, -3),  # 회수 중
+            9: (28, -7, 34, -5),  # 회수 중
+            10: (37, -7, 43, -5),  # 회수 중
+            11: (45, -7, 51, -5),  # 회수 중
             12: None,  # 회수 중
             13: None,  # 회수 중
             14: None,  # 회수 중
@@ -813,7 +814,7 @@ class Stan:
 
     def get_bb(self):
         if self.face_dir == 1:
-            return self.x - 15, self.y - 24, self.x + 15, self.y + 4
+            return self.x - 25, self.y - 24, self.x + 25, self.y + 4
         else:
             return self.x - 15, self.y - 24, self.x + 15, self.y + 4
 
