@@ -33,16 +33,20 @@ class Idle:
         pass
 
     def do(self):
-        pass
+        # 가장자리에서 벗어나면 중력 적용
+        if self.rooks.is_air_action:
+            self.rooks.apply_gravity()
+            self.rooks.check_platform_collision()
 
     def draw(self):
+        visual_y = self.rooks.y + 52
         if self.rooks.face_dir == -1:
-            self.rooks.images['Idle'][0].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][0].composite_draw(0, 'h', self.rooks.x, visual_y)
         else:
-            self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][0].draw(self.rooks.x, visual_y)
 
     def get_hitbox(self):
-        return None
+        pass
 
 
 class Jump:
@@ -126,8 +130,8 @@ class Jump:
                 self.rooks.dir = 0
 
             self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
-            if self.rooks.x < 20:
-                self.rooks.x = 20
+            if self.rooks.x < 15:
+                self.rooks.x = 15
             elif self.rooks.x > 530:
                 self.rooks.x = 530
 
@@ -135,7 +139,7 @@ class Jump:
             self.rooks.dir = 0
 
         # 3. 착지 확인
-        if self.rooks.check_landing():
+        if self.rooks.check_platform_collision():
             keys = SDL_GetKeyboardState(None)
             left_pressed = keys[SDL_GetScancodeFromKey(self.rooks.left_key)]
             right_pressed = keys[SDL_GetScancodeFromKey(self.rooks.right_key)]
@@ -155,10 +159,11 @@ class Jump:
                 self.rooks.IDLE.enter(('LAND_IDLE', None))
 
     def draw(self):
+        visual_y = self.rooks.y + 52
         if self.rooks.face_dir == -1:
-            self.rooks.images['Idle'][0].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][0].composite_draw(0, 'h', self.rooks.x, visual_y)
         else:
-            self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][0].draw(self.rooks.x, visual_y)
 
     def get_hitbox(self):
         return None
@@ -195,16 +200,31 @@ class Run:
             # 둘 다 안 눌려있으면 멈춤
             self.rooks.dir = 0
         self.rooks.x += self.rooks.dir * RUN_SPEED_PPS * game_framework.frame_time
-        if self.rooks.x < 20:
-            self.rooks.x = 20
+        if self.rooks.x < 15:
+            self.rooks.x = 15
         elif self.rooks.x > 530:
             self.rooks.x = 530
 
+        # 가장자리에서 벗어나면 중력 적용
+        if self.rooks.is_air_action:
+            self.rooks.apply_gravity()
+            # 착지 체크
+            if self.rooks.check_platform_collision():
+                # [FIX] 착지했는데 이동 키가 여전히 눌려있다면? -> RUN 유지
+                if left_pressed or right_pressed:
+                    # 아무것도 안 함 (RUN 상태 유지, is_air_action은 check_platform_collision에서 False가 됨)
+                    pass
+                else:
+                    # 이동 키가 안 눌려있다면 -> IDLE로 전환
+                    self.rooks.state_machine.cur_state = self.rooks.IDLE
+                    self.rooks.IDLE.enter(('LAND_FROM_RUN', None))
+
     def draw(self):
+        visual_y = self.rooks.y + 52
         if self.rooks.face_dir == -1:
-            self.rooks.images['Idle'][0].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][0].composite_draw(0, 'h', self.rooks.x, visual_y)
         else:
-            self.rooks.images['Idle'][0].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Idle'][0].draw(self.rooks.x, visual_y)
 
     def get_hitbox(self):
         return None
@@ -271,7 +291,7 @@ class Attack:
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
         if self.rooks.is_air_action:
             self.rooks.apply_gravity()
-            if self.rooks.check_landing():
+            if self.rooks.check_platform_collision():
                 pass
 
         # 2. 좌우 이동 로직
@@ -330,10 +350,11 @@ class Attack:
 
     def draw(self):
         frame_index = min(int(self.rooks.frame), 10)
+        visual_y = self.rooks.y + 52
         if self.rooks.face_dir == -1:
-            self.rooks.images['Attack'][frame_index].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Attack'][frame_index].composite_draw(0, 'h', self.rooks.x, visual_y)
         else:
-            self.rooks.images['Attack'][frame_index].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Attack'][frame_index].draw(self.rooks.x, visual_y)
 
     def get_hitbox(self):
         frame = int(self.rooks.frame)
@@ -343,12 +364,12 @@ class Attack:
         # 프레임별 히트박스 정의 (캐릭터 중심 기준)
         hitbox_data = {
             0: None,  # 준비 동작
-            1: (-16, -71, -8, -64),  # 75 ~ 80, 65 ~ 70
-            2: (-6, -68, 1, -61),  # 80 -> 90, 65 -> 68
-            3: (2, -65, 10, -56),  # 휘두르기 시작
-            4: (10, -60, 18, -52),  # 93 -> 100, 72 -> 75
-            5: (10, -60, 18, -52),  # 93 -> 100, 72 -> 75
-            6: (10, -60, 18, -52),  # 감속 시작
+            1: (-16, -71 + 52, -8, -64 + 52),  # 75 ~ 80, 65 ~ 70
+            2: (-6, -68 + 52, 1, -61 + 52),  # 80 -> 90, 65 -> 68
+            3: (2, -65 + 52, 10, -56 + 52),  # 휘두르기 시작
+            4: (10, -60 + 52, 18, -52 + 52),  # 93 -> 100, 72 -> 75
+            5: (10, -60 + 52, 18, -52 + 52),  # 93 -> 100, 72 -> 75
+            6: (10, -60 + 52, 18, -52 + 52),  # 감속 시작
             7: None,  # 공격 끝
             8: None,  # 회수 시작
             9: None,  # 회수 중
@@ -431,7 +452,7 @@ class Skill:
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
         if self.rooks.is_air_action:
             self.rooks.apply_gravity()
-            if self.rooks.check_landing():
+            if self.rooks.check_platform_collision():
                 pass
 
         # 2. 좌우 이동 로직
@@ -499,10 +520,11 @@ class Skill:
 
     def draw(self):
         frame_index = min(int(self.rooks.frame), 13)
+        visual_y = self.rooks.y + 52
         if self.rooks.face_dir == -1:
-            self.rooks.images['Skill'][frame_index].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Skill'][frame_index].composite_draw(0, 'h', self.rooks.x, visual_y)
         else:
-            self.rooks.images['Skill'][frame_index].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Skill'][frame_index].draw(self.rooks.x, visual_y)
 
     def get_hitbox(self):
         frame = int(self.rooks.frame)
@@ -517,10 +539,10 @@ class Skill:
             3: None,  # 휘두르기 시작
             4: None,  # 93 -> 100, 72 -> 75
             5: None,  # 93 -> 100, 72 -> 75
-            6: (-28, -90, 52, -40),  # 62 ~ 142, 45 ~ 95
-            7: (-28, -90, 92, -40),  # 62 ~ 182, 45 ~ 95
-            8: (15, -90, 92, -40),  # 105 ~ 182, 45 ~ 95
-            9: (50, -90, 92, -40),  # 140 ~ 182, 45 ~ 95
+            6: (-28, -90 + 52, 52, -40 + 52),  # 62 ~ 142, 45 ~ 95
+            7: (-28, -90 + 52, 92, -40 + 52),  # 62 ~ 182, 45 ~ 95
+            8: (15, -90 + 52, 92, -40 + 52),  # 105 ~ 182, 45 ~ 95
+            9: (50, -90 + 52, 92, -40 + 52),  # 140 ~ 182, 45 ~ 95
             10: None,  # 대기 복귀
             11: None,
             12: None,
@@ -589,7 +611,7 @@ class Ult:
         # 공중 궁극기일 경우에만 중력 적용
         if self.rooks.is_air_action:
             self.rooks.apply_gravity()
-            if self.rooks.check_landing():
+            if self.rooks.check_platform_collision():
                 pass
 
         # 3. 애니메이션 프레임 업데이트
@@ -633,10 +655,11 @@ class Ult:
 
     def draw(self):
         frame_index = min(int(self.rooks.frame), 14)
+        visual_y = self.rooks.y + 52
         if self.rooks.face_dir == -1:
-            self.rooks.images['Ult'][frame_index].composite_draw(0, 'h', self.rooks.x, self.rooks.y)
+            self.rooks.images['Ult'][frame_index].composite_draw(0, 'h', self.rooks.x, visual_y)
         else:
-            self.rooks.images['Ult'][frame_index].draw(self.rooks.x, self.rooks.y)
+            self.rooks.images['Ult'][frame_index].draw(self.rooks.x, visual_y)
 
     def get_hitbox(self):
         frame = int(self.rooks.frame)
@@ -652,11 +675,11 @@ class Ult:
             4: None,  # 93 -> 100, 72 -> 75
             5: None,  # 93 -> 100, 72 -> 75
             6: None,  # 62 ~ 142, 45 ~ 95
-            7: (-90, -70, 75, 85),  # 0 ~ 165, 65 ~ 220
-            8: (-90, -70, 75, 85),  # 105 ~ 182, 45 ~ 95
-            9: (-90, -70, 75, 85),  # 140 ~ 182, 45 ~ 95
-            10: (-90, -70, 75, 85),  # 대기 복귀
-            11: (-90, -70, 75, 85), # 여기까지
+            7: (-90, -70 + 52, 75, 85 + 52),  # 0 ~ 165, 65 ~ 220
+            8: (-90, -70 + 52, 75, 85 + 52),  # 105 ~ 182, 45 ~ 95
+            9: (-90, -70 + 52, 75, 85 + 52),  # 140 ~ 182, 45 ~ 95
+            10: (-90, -70 + 52, 75, 85 + 52),  # 대기 복귀
+            11: (-90, -70 + 52, 75, 85 + 52), # 여기까지
             12: None,
             13: None,
             14: None
@@ -709,7 +732,7 @@ class Rooks:
         self.mp_increase = mp_increase  # 매개변수 사용
 
         self.y_velocity = 0
-        self.ground_y = 135
+        self.ground_y = 83
 
         self.is_air_action = False
         self.x_locked = False
@@ -724,7 +747,7 @@ class Rooks:
 
         # 플레이어별 키 설정
         if self.player_num == 1:
-            self.x, self.y = 90, 135
+            self.x, self.y = 90, 83
             self.face_dir = 1
             self.left_key = SDLK_a
             self.right_key = SDLK_d
@@ -734,7 +757,7 @@ class Rooks:
             self.jump_key = SDLK_w
         elif self.player_num == 2:
             from sdl2 import SDLK_LEFT, SDLK_RIGHT, SDLK_RETURN
-            self.x, self.y = 450, 135
+            self.x, self.y = 450, 83
             self.face_dir = -1
             self.left_key = SDLK_LEFT
             self.right_key = SDLK_RIGHT
@@ -802,13 +825,13 @@ class Rooks:
 
     def get_bb(self):
         if self.face_dir == 1:
-            return self.x - 17, self.y - 76, self.x + 10, self.y - 48
+            return self.x - 17, self.y - 24, self.x + 10, self.y + 4
         else:
-            return self.x - 12, self.y - 76, self.x + 16, self.y - 48
+            return self.x - 12, self.y - 24, self.x + 16, self.y + 4
 
     def get_text_position(self):
         """텍스트 표시용 좌표 반환 (캐릭터 머리 위)"""
-        return self.x, self.y + 70
+        return self.x, self.y + 122
 
     def get_hitbox(self):
         return self.state_machine.cur_state.get_hitbox()
@@ -816,6 +839,9 @@ class Rooks:
     def update(self):
         self.increase_mp()
         self.state_machine.update()
+
+        if not self.is_air_action:
+            self.check_platform_edge()
 
     def take_damage(self, damage, attacker_x):
         """피해를 받고 공격자 반대 방향으로 밀려남"""
@@ -935,3 +961,75 @@ class Rooks:
             return
 
         self.state_machine.handle_state_event(('INPUT', event))
+
+    def set_platforms(self, platforms):
+        """맵의 플랫폼 정보 설정"""
+        self.platforms = platforms
+
+    def check_platform_collision(self):
+        """플랫폼과의 충돌 체크 및 착지 처리"""
+        # 1. 플랫폼 데이터가 없으면 기본 바닥 체크만 수행
+        if not hasattr(self, 'platforms'):
+            return self.check_landing()
+
+        # 2. 캐릭터의 현재 바운딩 박스 가져오기
+        char_left, char_bottom, char_right, char_top = self.get_bb()
+
+        # [중요] 아래로 떨어지는 중일 때만 플랫폼 위에 착지 가능 (상향 점프 중에는 통과)
+        if self.y_velocity <= 0:
+            for x1, y1, x2, y2 in self.platforms:
+                # 1. X축 범위 체크 (AND 연산자로 수정: 캐릭터가 플랫폼 너비 안에 있어야 함)
+                if char_right > x1 and char_left < x2:
+
+                    # [FIX] 자석 현상 완화: 발이 플랫폼을 '뚫고 지나갔거나', '거의 닿았을 때'만 처리
+                    # y2 - 10 : 발이 플랫폼 안쪽 10px 이내로 들어왔을 때 (뚫고 지나감 방지)
+                    # y2 + 5  : 발이 플랫폼 위 5px 이내일 때 (살짝 떠 있어도 착지 판정)
+                    # 이 값을 줄일수록 더 정교해지지만, 너무 줄이면 빠른 속도로 떨어질 때 뚫고 지나갈 수 있음
+                    if y2 - 10 <= char_bottom <= y2 + 5:
+                        self.y = y2 + 24
+                        self.y_velocity = 0
+                        self.is_air_action = False
+                        self.ground_y = y2 + 24
+                        return True
+
+        # 3. 기본 바닥 체크 (맵의 최하단, 예: y=83)
+        # 맵 밖으로 떨어지는 것을 방지
+        if self.y <= 83:
+            self.y = 83
+            self.y_velocity = 0
+            self.is_air_action = False
+            self.ground_y = 83
+            return True
+
+        return False
+
+    def check_platform_edge(self):
+        """플랫폼 가장자리에서 벗어났는지 체크"""
+        # 플랫폼 정보가 없으면 기본 바닥만 체크
+        if not hasattr(self, 'platforms'):
+            return
+
+        char_left, char_bottom, char_right, char_top = self.get_bb()
+
+        # 현재 내가 밟고 서 있는 플랫폼이 여전히 내 발 밑에 있는지 확인
+        on_platform = False
+
+        # 1. 기본 바닥(y=83) 위에 있다면 떨어질 일이 없음
+        if self.y <= 83 + 5:  # 오차 범위 약간 허용
+            return
+
+        # 2. 플랫폼 리스트 검사
+        for x1, y1, x2, y2 in self.platforms:
+            # 현재 캐릭터의 높이가 이 플랫폼의 높이와 비슷한지 확인 (밟고 있는지)
+            # y2 + 23은 캐릭터가 플랫폼 위에 서 있을 때의 중심 y좌표
+            if abs(self.y - (y2 + 24)) < 10:
+                # 높이는 맞는데, X축 범위도 맞는지 확인
+                if char_right > x1 and char_left < x2:
+                    on_platform = True
+                    break  # 발 밑에 플랫폼이 있음 확인
+
+        # 3. 발 밑에 아무것도 없다면 추락 시작
+        if not on_platform:
+            self.is_air_action = True  # 공중 상태로 전환
+            self.ground_y = 83  # 떨어질 목표 지점을 일단 맨 바닥으로 초기화
+            # (떨어지다가 다른 플랫폼에 걸리면 check_platform_collision에서 다시 잡음)
