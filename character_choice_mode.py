@@ -22,6 +22,7 @@ show_rooks = False
 show_murloc = False
 show_random = False
 font = None
+mini_font = None
 
 selected_p1 = None
 selected_p2 = None
@@ -31,7 +32,7 @@ def init():
     global background_image, back_red_image, back_image, show_back_red, cursor_image, show_rooks, show_murloc, show_random
     global player1_name_image, player2_name_image, rooks_portrait_image, murloc_portrait_image, random_portrait_image
     global rooks_pick_image, murloc_pick_image, random_pick_image
-    global selected_p1, selected_p2, selection_step, font
+    global selected_p1, selected_p2, selection_step, font, mini_font
     selected_p1 = None
     selected_p2 = None
     selection_step = 1
@@ -55,10 +56,11 @@ def init():
 
     # 폰트 로드
     font = load_font('ENCR10B.TTF', 30)
+    mini_font = load_font('ENCR10B.TTF', 10)
 
 def finish():
     global background_image, back_red_image, back_image, cursor_image, rooks_pick_image, murloc_pick_image, random_pick_image
-    global player1_name_image, player2_name_image, rooks_portrait_image, murloc_portrait_image, random_portrait_image, font
+    global player1_name_image, player2_name_image, rooks_portrait_image, murloc_portrait_image, random_portrait_image, font, mini_font
     del player1_name_image
     del player2_name_image
     del cursor_image
@@ -74,6 +76,8 @@ def finish():
 
     if font:
         del font
+    if mini_font:
+        del mini_font
 
 
 def update():
@@ -149,6 +153,7 @@ def draw():
         if show_rooks:
             rooks_pick_image.draw(120, 270)
             font.draw(75, 350, "Rooks", (255, 255, 255))  # 빨간색
+            mini_font.draw(95, 80, "Rooks", (255, 255, 255))  # 빨간색
         elif show_murloc:
             murloc_pick_image.draw(120, 270)
             font.draw(70, 350, "Murloc", (255, 255, 255))  # 빨간색
