@@ -49,11 +49,11 @@ def init():
     max_hp_value = hp_setting * 50  # 1 : 50, 2 : 100, 3 : 150
     mp_increase_value = mp_setting * 3  # 또는 원하는 공식
 
-    # 배경 생성 (캐릭터보다 먼저)
-    temple = Temple()
-    game_world.add_object(temple, 0)
+    # 캐릭터 생성 시 설정값 전달
+    player1 = Rooks(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
+    player2 = Murloc(player_num=2, max_hp=max_hp_value, mp_increase=mp_increase_value)
 
-    # player1 생성
+    # player1 생성 (항상 player_num=1)
     p1_choice = selected_p1
     if p1_choice == 'Random':
         p1_choice = random.choice(['Rooks', 'Murloc'])
@@ -64,10 +64,9 @@ def init():
     else:
         player1 = Murloc(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
 
-    player1.set_map(temple)  # 맵 정보 전달
     game_world.add_object(player1, 1)
 
-    # player2 생성
+    # player2 생성 (항상 player_num=2)
     p2_choice = selected_p2
     if p2_choice == 'Random':
         p2_choice = random.choice(['Rooks', 'Murloc'])
@@ -78,14 +77,20 @@ def init():
     else:
         player2 = Murloc(player_num=2, max_hp=max_hp_value, mp_increase=mp_increase_value)
 
-    player2.set_map(temple)  # 맵 정보 전달
     game_world.add_object(player2, 1)
+
+    # 배경
+    # wilderness = Wilderness()
+    # game_world.add_object(wilderness, 0)
+    temple = Temple()
+    game_world.add_object(temple, 0)
 
     # UI 생성 및 추가 (레이어 2)
     player1_ui = PlayerUI(player1, 1)
     player2_ui = PlayerUI(player2, 2)
     game_world.add_object(player1_ui, 2)
     game_world.add_object(player2_ui, 2)
+
 
 def check_collision(player_a, player_b):
     if not player_a or not player_b:

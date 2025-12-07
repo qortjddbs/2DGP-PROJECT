@@ -745,50 +745,12 @@ class Murloc:
         self.y_velocity -= GRAVITY * game_framework.frame_time * 150
         self.y += self.y_velocity * game_framework.frame_time
 
-    def set_map(self, temple_map):
-        """맵 정보 설정"""
-        self.map_platforms = temple_map.get_platforms()
-        print(f"[DEBUG] Player {self.player_num} platforms loaded: {len(self.map_platforms)}")
-
-    def check_platform_collision(self):
-        """플랫폼과의 충돌 체크 - 위에서 내려올 때만 충돌"""
-        if self.y_velocity > 0:  # 올라가는 중이면 통과
-            return None
-
-        bb = self.get_bb()
-        char_x1, char_y1, char_x2, char_y2 = bb
-        char_center_x = (char_x1 + char_x2) / 2
-        char_bottom_y = char_y1
-
-        for plat_x1, plat_y1, plat_x2, plat_y2 in self.map_platforms:
-            if plat_x1 <= char_center_x <= plat_x2:
-                if char_bottom_y <= plat_y2 and char_bottom_y + abs(
-                        self.y_velocity * game_framework.frame_time) >= plat_y2:
-                    print(f"[COLLISION] Player {self.player_num} landed on platform at y={plat_y2}")
-                    return plat_y2
-
-        return None
-
     def check_landing(self):
-        """착지 체크 - 바닥과 플랫폼 모두 체크"""
-        platform_y = self.check_platform_collision()
-        if platform_y:
-            bb = self.get_bb()
-            char_height = bb[3] - bb[1]
-            self.y = platform_y + char_height / 2 + (self.y - bb[1])
-            self.y_velocity = 0
-            self.is_air_action = False
-            self.on_platform = True
-            return True
-
         if self.y <= self.ground_y:
             self.y = self.ground_y
             self.y_velocity = 0
             self.is_air_action = False
-            self.on_platform = False
             return True
-
-        self.on_platform = False
         return False
 
     def jump_down(self, e):
