@@ -46,7 +46,7 @@ def handle_events():
 def init():
     global player1, player2, hp_setting, mp_setting, player1_ui , player2_ui, current_map
 
-    show_cursor()  # 마우스 커서 표시
+    hide_cursor()  # 마우스 커서 표시
 
     # HP/MP 설정값 계산 (1=10, 2=15, 3=20 등)
     max_hp_value = hp_setting * 50  # 1 : 50, 2 : 100, 3 : 150
@@ -87,21 +87,19 @@ def init():
     game_world.add_object(player2, 1)
 
     # 배경
-    # map_choice = random.choice(['Wilderness', 'Temple'])
-    # current_map = 'map_choice'  # 현재 맵 저장
-    # print(f"Selected Map: {map_choice}")
-    #
-    # if map_choice == 'Wilderness':
-    #     background = Wilderness()
-    #     game_world.add_object(background, 0)
-    # else:
-    #     background = Temple()
-    #     game_world.add_object(background, 0)
-    #     platforms = background.get_platforms()
-    #     player1.set_platforms(platforms)
-    #     player2.set_platforms(platforms)
-    background = Wilderness()
-    game_world.add_object(background, 0)
+    map_choice = random.choice(['Wilderness', 'Temple'])
+    current_map = 'map_choice'  # 현재 맵 저장
+    print(f"Selected Map: {map_choice}")
+
+    if map_choice == 'Wilderness':
+        background = Wilderness()
+        game_world.add_object(background, 0)
+    else:
+        background = Temple()
+        game_world.add_object(background, 0)
+        platforms = background.get_platforms()
+        player1.set_platforms(platforms)
+        player2.set_platforms(platforms)
 
     # UI 생성
     player1_ui = PlayerUI(player1, 1)
@@ -172,13 +170,33 @@ def update():
     if (p1_hp is not None and p1_hp <= 0) or (p2_hp is not None and p2_hp <= 0):
         if player1.hp <= 0:
             # 실제 플레이한 캐릭터 타입 확인
-            p1_actual = 'Rooks' if type(player1).__name__ == 'Rooks' else 'Murloc'
-            p2_actual = 'Rooks' if type(player2).__name__ == 'Rooks' else 'Murloc'
+            if type(player1).__name__ == 'Rooks':
+                p1_actual = 'Rooks'
+            elif type(player1).__name__ == 'Murloc':
+                p1_actual = 'Murloc'
+            else:
+                p1_actual = 'Stan'
+            if type(player2).__name__ == 'Rooks':
+                p2_actual = 'Rooks'
+            elif type(player2).__name__ == 'Murloc':
+                p2_actual = 'Murloc'
+            else:
+                p2_actual = 'Stan'
             finish_mode.set_game_result(2, p1_actual, p2_actual, current_map)  # P2 승리
             game_framework.change_mode(finish_mode)
         elif player2.hp <= 0:
-            p1_actual = 'Rooks' if type(player1).__name__ == 'Rooks' else 'Murloc'
-            p2_actual = 'Rooks' if type(player2).__name__ == 'Rooks' else 'Murloc'
+            if type(player1).__name__ == 'Rooks':
+                p1_actual = 'Rooks'
+            elif type(player1).__name__ == 'Murloc':
+                p1_actual = 'Murloc'
+            else:
+                p1_actual = 'Stan'
+            if type(player2).__name__ == 'Rooks':
+                p2_actual = 'Rooks'
+            elif type(player2).__name__ == 'Murloc':
+                p2_actual = 'Murloc'
+            else:
+                p2_actual = 'Stan'
             finish_mode.set_game_result(1, p1_actual, p2_actual, current_map)  # P1 승리
             game_framework.change_mode(finish_mode)
 

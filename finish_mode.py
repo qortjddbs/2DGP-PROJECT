@@ -14,6 +14,7 @@ player1_name_image = None
 player2_name_image = None
 rooks_pick_image = None
 murloc_pick_image = None
+stan_pick_image = None
 font = None
 result_font = None
 wilderness_icon_image = None
@@ -35,7 +36,7 @@ def init():
     global background_image, back_red_image, back_image, show_back_red, cursor_image
     global player1_name_image, player2_name_image
     global rooks_pick_image, murloc_pick_image
-    global font, result_font
+    global font, result_font, stan_pick_image
     global wilderness_icon_image, golden_temple_icon_image
     # p1, p2, winner는 초기화하지 않음
 
@@ -49,6 +50,7 @@ def init():
     murloc_pick_image = load_image('./Character/Murloc/murloc_pick.png')
     wilderness_icon_image = load_image('./Maps/황야_아이콘.png')
     golden_temple_icon_image = load_image('./Maps/외딴사원_아이콘.png')
+    stan_pick_image = load_image('./Character/Stan/Stan_pick.png')
     show_back_red = False
 
     # 폰트 로드
@@ -60,7 +62,7 @@ def init():
 
 def finish():
     global background_image, back_red_image, back_image, cursor_image, rooks_pick_image, murloc_pick_image
-    global player1_name_image, player2_name_image, font, result_font
+    global player1_name_image, player2_name_image, font, result_font, stan_pick_image
     del player1_name_image
     del player2_name_image
     del cursor_image
@@ -71,6 +73,7 @@ def finish():
     del murloc_pick_image
     del wilderness_icon_image
     del golden_temple_icon_image
+    del stan_pick_image
 
     if font:
         del font
@@ -114,7 +117,7 @@ def draw():
     # 플레이한 맵 이미지 로드
     if played_map == 'Wilderness':
         wilderness_icon_image.draw (275, 350)  # type : ignore
-    else:  # Temple
+    elif played_map == 'Temple':  # Temple
         golden_temple_icon_image.draw (275, 350)  # type : ignore
 
     if show_back_red:
@@ -127,17 +130,23 @@ def draw():
         if p1 == 'Rooks':
             rooks_pick_image.draw(120, 270)
             font.draw(75, 350, "Rooks", (255, 255, 255))  # 빨간색
-        else:
+        elif p1 == 'Murloc':
             murloc_pick_image.draw(120, 270)
             font.draw(70, 350, "Murloc", (255, 255, 255))  # 빨간색
+        else:
+            stan_pick_image.draw(120, 270)
+            font.draw(65, 350, "Stan", (255, 255, 255))
 
     if p2:
         if p2 == 'Rooks':
             rooks_pick_image.draw(430, 270)
             font.draw(385, 350, "Rooks", (255, 255, 255))  # 빨간색
-        else:
+        elif p2 == 'Murloc':
             murloc_pick_image.draw(430, 270)
             font.draw(380, 350, "Murloc", (255, 255, 255))  # 빨간색
+        else:
+            stan_pick_image.draw(430, 270)
+            font.draw(375, 350, "Stan", (255, 255, 255))
 
     player1_name_image.draw(120, 200)
     player2_name_image.draw(430, 200)
