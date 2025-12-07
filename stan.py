@@ -681,7 +681,7 @@ class Ult:
         else:  # 왼쪽
             return x - width, y + dy, x - dx, y + height
 
-class stan:
+class Stan:
     images = None
 
     def load_images(self):

@@ -9,6 +9,7 @@ import sound_manager
 
 from rooks import Rooks
 from murloc import Murloc
+from stan import Stan
 from wilderness import Wilderness
 from golden_temple import Temple
 from player_ui import PlayerUI
@@ -56,26 +57,30 @@ def init():
     # player1 생성 (항상 player_num=1)
     p1_choice = selected_p1
     if p1_choice == 'Random':
-        p1_choice = random.choice(['Rooks', 'Murloc'])
+        p1_choice = random.choice(['Rooks', 'Murloc', 'Stan'])
         print(f"[Random] Player1 -> {p1_choice}")
 
     if p1_choice == 'Rooks':
         player1 = Rooks(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
-    else:
+    elif p1_choice == 'Murloc':
         player1 = Murloc(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
+    else:
+        player1 = Stan(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
 
     game_world.add_object(player1, 1)
 
     # player2 생성 (항상 player_num=2)
     p2_choice = selected_p2
     if p2_choice == 'Random':
-        p2_choice = random.choice(['Rooks', 'Murloc'])
+        p2_choice = random.choice(['Rooks', 'Murloc', 'Stan'])
         print(f"[Random] Player2 -> {p2_choice}")
 
     if p2_choice == 'Rooks':
         player2 = Rooks(player_num=2, max_hp=max_hp_value, mp_increase=mp_increase_value)
-    else:
+    elif p2_choice == 'Murloc':
         player2 = Murloc(player_num=2, max_hp=max_hp_value, mp_increase=mp_increase_value)
+    else:
+        player2 = Stan(player_num=2, max_hp=max_hp_value, mp_increase=mp_increase_value)
 
     game_world.add_object(player2, 1)
 
