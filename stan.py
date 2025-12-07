@@ -730,8 +730,14 @@ class Stan:
 
         self.damage_values = {
             'Attack' : 2,
-            'Skill' : 5,
-            'Ult' : 15
+            'Skill' : 10,
+            'Ult' : 10
+        }
+
+        self.knockback_values = {
+            'Attack' : 50,
+            'Skill' : 80,
+            'Ult' : 200
         }
 
         # 플레이어별 키 설정
@@ -775,6 +781,23 @@ class Stan:
                 self.JUMP : {self.attack_down: self.ATTACK, self.skill_down: self.SKILL, self.ult_down: self.ULT}
             }
         )
+
+    def calculate_damage(self, attack_type, frame):
+        base_damage = self.damage_values.get(attack_type, 0)
+
+        if attack_type == 'Skill':
+            # 프레임이 낮을수록(가까울수록) 강함
+            # 예: 0~5프레임은 100%, 15프레임은 20%
+            factor = max(0.2, 1.0 - (frame / 20.0))
+            return int(base_damage * factor * 2)  # 최대 2배까지
+
+        elif attack_type == 'Ult':
+            # 프레임이 높을수록(멀수록) 강함
+            # 예: 0프레임 100%, 15프레임 300%
+            factor = 1.0 + (frame / 15.0) * 2.0
+            return int(base_damage * factor)
+
+        return base_damage
 
     def apply_gravity(self):
         self.y_velocity -= GRAVITY * game_framework.frame_time * 150
@@ -833,22 +856,30 @@ class Stan:
     def get_hitbox(self):
         return self.state_machine.cur_state.get_hitbox()
 
-    def take_damage(self, damage, attacker_x):
-        """피해를 받고 공격자 반대 방향으로 밀려남"""
+    def take_damage(self, attacker, attack_type):
+        """attacker: 공격자 객체 (Rooks, Murloc, Stan)"""
+
+        # 1. 데미지 계산
+        if hasattr(attacker, 'calculate_damage'):
+            # 공격자가 Stan이면 거리 비례 데미지 계산
+            damage = attacker.calculate_damage(attack_type, attacker.frame)
+        else:
+            # Rooks, Murloc 등은 고정 데미지
+            damage = attacker.damage_values.get(attack_type, 0)
+
         self.hp = max(0, self.hp - damage)
         print(f"P{self.player_num} took {damage} damage! HP: {self.hp}/{self.max_hp}")
 
-        # 공격자의 위치에 따라 밀려나는 방향 결정
-        if attacker_x < self.x:
-            # 공격자가 왼쪽에 있으면 오른쪽으로 밀려남
-            self.x += 10
-            if self.x > 530:
-                self.x = 530
+        # 2. 넉백 처리
+        # 공격자의 knockback_values를 가져오거나, 없으면 기본값 10
+        knockback = getattr(attacker, 'knockback_values', {}).get(attack_type, 10)
+
+        if attacker.x < self.x:
+            self.x += knockback
+            if self.x > 530: self.x = 530
         else:
-            # 공격자가 오른쪽에 있으면 왼쪽으로 밀려남
-            self.x -= 10
-            if self.x < 20:
-                self.x = 20
+            self.x -= knockback
+            if self.x < 20: self.x = 20
 
     def increase_mp(self):
         self.mp = min(self.max_mp, self.mp + self.mp_increase * game_framework.frame_time)

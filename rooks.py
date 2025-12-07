@@ -843,22 +843,29 @@ class Rooks:
         if not self.is_air_action:
             self.check_platform_edge()
 
-    def take_damage(self, damage, attacker_x):
-        """피해를 받고 공격자 반대 방향으로 밀려남"""
-        self.hp = max(0, self.hp - damage)
-        print(f"Player {self.player_num} took {damage} damage! HP: {self.hp}/{self.max_hp}")
-
-        # 공격자의 위치에 따라 밀려나는 방향 결정
-        if attacker_x < self.x:
-            # 공격자가 왼쪽에 있으면 오른쪽으로 밀려남
-            self.x += 10
-            if self.x > 530:
-                self.x = 530
+    def take_damage(self, attacker, attack_type):
+        # 1. 데미지 계산
+        if hasattr(attacker, 'calculate_damage'):
+            # 공격자가 Stan인 경우
+            damage = attacker.calculate_damage(attack_type, attacker.frame)
         else:
-            # 공격자가 오른쪽에 있으면 왼쪽으로 밀려남
-            self.x -= 10
-            if self.x < 20:
-                self.x = 20
+            # 일반적인 경우
+            damage = attacker.damage_values.get(attack_type, 0)
+
+        self.hp = max(0, self.hp - damage)
+        print(f"P{self.player_num} took {damage} damage! HP: {self.hp}/{self.max_hp}")
+
+        # 2. 넉백 처리
+        # Stan은 knockback_values가 있지만, Rooks/Murloc은 없을 수 있으므로 처리
+        knockback_dict = getattr(attacker, 'knockback_values', {})
+        knockback = knockback_dict.get(attack_type, 10) # 기본 넉백 10
+
+        if attacker.x < self.x:
+            self.x += knockback
+            if self.x > 530: self.x = 530
+        else:
+            self.x -= knockback
+            if self.x < 20: self.x = 20
 
     def increase_mp(self):
         self.mp = min(self.max_mp, self.mp + self.mp_increase * game_framework.frame_time)

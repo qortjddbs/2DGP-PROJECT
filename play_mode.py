@@ -137,40 +137,31 @@ def update():
     if not player1 or not player2:
         return
 
-    # 현재 공격 상태 확인
     player1_state = player1.state_machine.cur_state.__class__.__name__
     player2_state = player2.state_machine.cur_state.__class__.__name__
 
-    # player1이 player2를 공격했는지 체크
+    # [FIX] Player 1 -> Player 2 공격 처리
     if check_collision(player1, player2):
         attack_id = f"{player1_state}_{id(player1.state_machine.cur_state)}"
         if attack_id not in player1.hit_log:
-            frame = int(player1.frame)
+            # take_damage 호출 시 공격자(player1) 객체 자체를 넘깁니다.
+            # 그러면 Stan 클래스 내부에서 프레임이나 거리를 계산할 수 있습니다.
+            player2.take_damage(player1, player1_state)
+            player1.hit_log.add(attack_id)
+            print(f"[HIT] P1({player1_state}) -> P2")
 
-            # 데미지 계산 및 적용
-            damage = player1.damage_values.get(player1_state, 0)
-            if damage > 0:
-                player2.take_damage(damage, player1.x)
-                player1.hit_log.add(attack_id)
-
-                print(f"[HIT] Player1 {player1_state} -> Player2 (Damage: {damage})")
     else:
-        # 공격 상태가 아닐 때 로그 정리
         if player1_state not in ['Attack', 'Skill', 'Ult']:
             player1.hit_log.clear()
 
-    # player2가 player1을 공격했는지 체크
+    # [FIX] Player 2 -> Player 1 공격 처리
     if check_collision(player2, player1):
         attack_id = f"{player2_state}_{id(player2.state_machine.cur_state)}"
         if attack_id not in player2.hit_log:
-            frame = int(player2.frame)
+            player1.take_damage(player2, player2_state)
+            player2.hit_log.add(attack_id)
+            print(f"[HIT] P2({player2_state}) -> P1")
 
-            damage = player2.damage_values.get(player2_state, 0)
-            if damage > 0:
-                player1.take_damage(damage, player2.x)
-                player2.hit_log.add(attack_id)
-
-                print(f"[HIT] Player2 {player2_state} -> Player1 (Damage: {damage})")
     else:
         if player2_state not in ['Attack', 'Skill', 'Ult']:
             player2.hit_log.clear()
