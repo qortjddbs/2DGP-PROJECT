@@ -228,7 +228,7 @@ class Run:
 
 
 class Attack:
-    FRAMES_PER_ACTION = 10
+    FRAMES_PER_ACTION = 16
 
     def __init__(self, stan):
         self.stan = stan
@@ -254,7 +254,7 @@ class Attack:
             self.stan.y_velocity = 0
 
         # 새로운 공격이면 프레임 초기화
-        if self.stan.frame >= 9.9 or self.stan.frame == 0:
+        if self.stan.frame >= 15.9 or self.stan.frame == 0:
             self.stan.frame = 0
 
         if left_pressed and right_pressed:
@@ -316,7 +316,7 @@ class Attack:
         self.stan.frame = (self.stan.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         # 4. 애니메이션 종료 체크
-        if self.stan.frame >= 9.9:
+        if self.stan.frame >= 15.9:
             self.stan.frame = 0
 
             # 5. 종료 시점에 공중이었는지, 지상이었는지 체크
@@ -348,7 +348,7 @@ class Attack:
             return  # do() 종료
 
     def draw(self):
-        frame_index = min(int(self.stan.frame), 9)
+        frame_index = min(int(self.stan.frame), 15)
         if self.stan.face_dir == -1:
             self.stan.images['Attack'][frame_index].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
         else:
@@ -371,6 +371,12 @@ class Attack:
             7: (62, -20, 82, -10),  # 공격 끝
             8: (45, -20, 65, -10),  # 회수 시작
             9: None,  # 회수 중
+            10: None,  # 회수 중
+            11: None,  # 회수 중
+            12: None,  # 회수 중
+            13: None,  # 회수 중
+            14: None,  # 회수 중
+            15: None   # 회수 완료
         }
 
         if frame not in hitbox_data or hitbox_data[frame] is None:
