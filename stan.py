@@ -41,10 +41,12 @@ class Idle:
             self.stan.check_platform_collision()
 
     def draw(self):
+        visual_y = self.stan.y - 3
         if self.stan.face_dir == -1:
-            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
+            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 78, visual_y)
         else:
-            self.stan.images['Idle'][0].draw(self.stan.x + 78, self.stan.y)
+            self.stan.images['Idle'][0].draw(self.stan.x + 108, visual_y)
+
 
     def get_hitbox(self):
         pass
@@ -156,10 +158,11 @@ class Jump:
                 self.stan.IDLE.enter(('LAND_IDLE', None))
 
     def draw(self):
+        visual_y = self.stan.y - 3
         if self.stan.face_dir == -1:
-            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
+            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 30, visual_y)
         else:
-            self.stan.images['Idle'][0].draw(self.stan.x + 78, self.stan.y)
+            self.stan.images['Idle'][0].draw(self.stan.x + 30, visual_y)
 
     def get_hitbox(self):
         pass
@@ -362,17 +365,17 @@ class Attack:
         # 프레임별 히트박스 정의 (캐릭터 중심 기준)
         hitbox_data = {
             0: None,  # 준비 동작
-            1: (45, -20, 65, -10),  # 준비 동작
-            2: (62, -20, 82, -10),  # 공격 시작
-            3: (62, -20, 82, -10),  # 휘두르기 시작
-            4: (62, -20, 82, -10),  # 중간 단계
-            5: (62, -20, 82, -10),  # 최대 범위
-            6: (62, -20, 82, -10),  # 감속 시작
-            7: (62, -20, 82, -10),  # 공격 끝
-            8: (45, -20, 65, -10),  # 회수 시작
-            9: None,  # 회수 중
-            10: None,  # 회수 중
-            11: None,  # 회수 중
+            1: None,  # 준비 동작
+            2: None,
+            3: (-5, -12, 1, -10),  # 준비 동작
+            4: (-3, -12, 3, -10),  # 가속 시작
+            5: (5, -12, 11, -10),  # 최대 속도
+            6: (15, -12, 21, -10),  # 감속 시작
+            7: (25, -12, 31, -10),  # 공격 끝
+            8: None,  # 회수 시작
+            9: (-2, -5, 4, -3),  # 회수 중
+            10: (9, -5, 15, -3),  # 회수 중
+            11: (16, -5, 22, -3),  # 회수 중
             12: None,  # 회수 중
             13: None,  # 회수 중
             14: None,  # 회수 중
@@ -809,7 +812,10 @@ class Stan:
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.attack_key
 
     def get_bb(self):
-        return self.x - 13, self.y - 23, self.x + 12, self.y + 2
+        if self.face_dir == 1:
+            return self.x - 15, self.y - 24, self.x + 15, self.y + 4
+        else:
+            return self.x - 15, self.y - 24, self.x + 15, self.y + 4
 
     def get_text_position(self):
         """텍스트 표시용 좌표 반환 (캐릭터 머리 위)"""
@@ -890,7 +896,7 @@ class Stan:
             if not hasattr(self, 'font'):
                 self.font = load_font('ENCR10B.TTF', 14)
 
-            y_offset = self.y + 60
+            y_offset = self.y + 100
             self.font.draw(self.x - 60, y_offset, info1, (255, 255, 0))
             self.font.draw(self.x - 60, y_offset - 15, info2, (255, 255, 0))
             self.font.draw(self.x - 60, y_offset - 30, info3, (255, 255, 0))

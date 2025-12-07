@@ -46,6 +46,8 @@ def handle_events():
 def init():
     global player1, player2, hp_setting, mp_setting, player1_ui , player2_ui, current_map
 
+    show_cursor()  # 마우스 커서 표시
+
     # HP/MP 설정값 계산 (1=10, 2=15, 3=20 등)
     max_hp_value = hp_setting * 50  # 1 : 50, 2 : 100, 3 : 150
     mp_increase_value = mp_setting * 3  # 또는 원하는 공식
@@ -85,19 +87,21 @@ def init():
     game_world.add_object(player2, 1)
 
     # 배경
-    map_choice = random.choice(['Wilderness', 'Temple'])
-    current_map = map_choice  # 현재 맵 저장
-    print(f"Selected Map: {map_choice}")
-
-    if map_choice == 'Wilderness':
-        background = Wilderness()
-        game_world.add_object(background, 0)
-    else:
-        background = Temple()
-        game_world.add_object(background, 0)
-        platforms = background.get_platforms()
-        player1.set_platforms(platforms)
-        player2.set_platforms(platforms)
+    # map_choice = random.choice(['Wilderness', 'Temple'])
+    # current_map = 'map_choice'  # 현재 맵 저장
+    # print(f"Selected Map: {map_choice}")
+    #
+    # if map_choice == 'Wilderness':
+    #     background = Wilderness()
+    #     game_world.add_object(background, 0)
+    # else:
+    #     background = Temple()
+    #     game_world.add_object(background, 0)
+    #     platforms = background.get_platforms()
+    #     player1.set_platforms(platforms)
+    #     player2.set_platforms(platforms)
+    background = Wilderness()
+    game_world.add_object(background, 0)
 
     # UI 생성
     player1_ui = PlayerUI(player1, 1)
