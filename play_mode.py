@@ -52,7 +52,7 @@ def init():
 
     # 캐릭터 생성 시 설정값 전달
     player1 = Rooks(player_num=1, max_hp=max_hp_value, mp_increase=mp_increase_value)
-    player2 = Murloc(player_num=2, max_hp=max_hp_value, mp_increase=mp_increase_value)
+    player2 = Rooks(player_num=2, max_hp=max_hp_value, mp_increase=mp_increase_value)
 
     # player1 생성 (항상 player_num=1)
     p1_choice = selected_p1

@@ -128,7 +128,7 @@ def handle_events():
             if show_back_red:
                 game_framework.pop_mode()
                 game_framework.change_mode(title_mode)
-            elif show_rooks or show_murloc or show_random:
+            elif show_rooks or show_murloc or show_stan or show_random:
                 if selection_step == 1:
                     if show_rooks:
                         selected_p1 = 'Rooks'
