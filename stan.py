@@ -498,9 +498,9 @@ class Skill:
     def draw(self):
         frame_index = min(int(self.stan.frame), 20)
         if self.stan.face_dir == -1:
-            self.stan.images['Skill'][frame_index].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
+            self.stan.images['Skill'][frame_index].composite_draw(0, 'h', self.stan.x - 108, self.stan.y - 3)
         else:
-            self.stan.images['Skill'][frame_index].draw(self.stan.x + 78, self.stan.y)
+            self.stan.images['Skill'][frame_index].draw(self.stan.x + 108, self.stan.y - 3)
 
     def get_hitbox(self):
         frame = int(self.stan.frame)
@@ -516,12 +516,12 @@ class Skill:
             4: None,  # 중간 단계
             5: None,  # 최대 범위
             6: None,  # 감속 시작
-            7: None,  # 공격 끝
-            8: None,  # 회수 시작
-            9: None,  # 회수 중
-            10: (40, -30, 185, 10), # 275에서 195까지
-            11: (40, -30, 105, 10), # 195에서 145까지
-            12: (40, -30, 55, 10),
+            7: (33, -18, 45, -2),  # 공격 끝
+            8: (37, -22, 55, -2),  # 회수 시작
+            9: (67, -27, 88, 5),  # 회수 중
+            10: None, # 275에서 195까지
+            11: None, # 195에서 145까지
+            12: None,
             13: None,
             14: None,
             15: None,
