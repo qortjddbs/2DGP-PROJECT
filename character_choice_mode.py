@@ -56,7 +56,7 @@ def init():
 
     # 폰트 로드
     font = load_font('ENCR10B.TTF', 30)
-    mini_font = load_font('ENCR10B.TTF', 10)
+    mini_font = load_font('ENCR10B.TTF', 15)
 
 def finish():
     global background_image, back_red_image, back_image, cursor_image, rooks_pick_image, murloc_pick_image, random_pick_image
@@ -146,6 +146,7 @@ def handle_events():
 def draw():
     clear_canvas()
     background_image.draw(277, 200)
+    rooks_portrait_image.draw(80, 100)
     if show_back_red:
         back_red_image.draw(275, 380) # type : ignore
     elif selection_step == 1 and (show_rooks or show_murloc or show_random):
@@ -153,7 +154,7 @@ def draw():
         if show_rooks:
             rooks_pick_image.draw(120, 270)
             font.draw(75, 350, "Rooks", (255, 255, 255))  # 빨간색
-            mini_font.draw(95, 80, "Rooks", (255, 255, 255))  # 빨간색
+            mini_font.draw(58, 100, "Rooks", (0, 0, 0))  # 빨간색
         elif show_murloc:
             murloc_pick_image.draw(120, 270)
             font.draw(70, 350, "Murloc", (255, 255, 255))  # 빨간색
@@ -184,7 +185,7 @@ def draw():
 
     player1_name_image.draw(120, 200)
     player2_name_image.draw(430, 200)
-    rooks_portrait_image.draw(80, 100)
+
     murloc_portrait_image.draw(160, 100)
     random_portrait_image.draw(275, 100)
 
