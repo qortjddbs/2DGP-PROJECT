@@ -88,7 +88,7 @@ def init():
 
     # 배경
     map_choice = random.choice(['Wilderness', 'Temple'])
-    current_map = 'map_choice'  # 현재 맵 저장
+    current_map = map_choice  # 현재 맵 저장
     print(f"Selected Map: {map_choice}")
 
     if map_choice == 'Wilderness':

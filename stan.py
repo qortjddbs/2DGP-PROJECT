@@ -839,7 +839,7 @@ class Stan:
         if self.face_dir == 1:
             return self.x - 25, self.y - 24, self.x + 25, self.y + 4
         else:
-            return self.x - 15, self.y - 24, self.x + 15, self.y + 4
+            return self.x - 25, self.y - 24, self.x + 25, self.y + 4
 
     def get_text_position(self):
         """텍스트 표시용 좌표 반환 (캐릭터 머리 위)"""

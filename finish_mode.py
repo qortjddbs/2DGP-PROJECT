@@ -62,7 +62,7 @@ def init():
 
 def finish():
     global background_image, back_red_image, back_image, cursor_image, rooks_pick_image, murloc_pick_image
-    global player1_name_image, player2_name_image, font, result_font, stan_pick_image
+    global player1_name_image, player2_name_image, font, result_font, stan_pick_image, wilderness_icon_image, golden_temple_icon_image
     del player1_name_image
     del player2_name_image
     del cursor_image
@@ -109,7 +109,7 @@ def handle_events():
 
 
 def draw():
-    global played_map
+    global played_map, wilderness_icon_image, golden_temple_icon_image
 
     clear_canvas()
     background_image.draw(277, 200)
@@ -117,7 +117,7 @@ def draw():
     # 플레이한 맵 이미지 로드
     if played_map == 'Wilderness':
         wilderness_icon_image.draw (275, 350)  # type : ignore
-    elif played_map == 'Temple':  # Temple
+    else:  # Temple
         golden_temple_icon_image.draw (275, 350)  # type : ignore
 
     if show_back_red:

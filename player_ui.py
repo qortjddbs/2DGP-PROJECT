@@ -105,6 +105,9 @@ class PlayerUI:
             elif self.character_type == 'Murloc':
                 # Murloc일 때
                 self.mini_font.draw(text_x - 85, text_y - 20, 'P1', (255, 0, 0))
+            else:
+                # 기타 캐릭터일 때 (기본 위치)
+                self.mini_font.draw(text_x - 85, text_y - 20, 'P1', (255, 0, 0))
         else:
             # 화면 오른쪽 위에도 표시
             self.font.draw(self.text_x, self.text_y, 'P2', (0, 0, 255))
@@ -115,4 +118,7 @@ class PlayerUI:
                 self.mini_font.draw(text_x - 10, text_y - 110, 'P2', (0, 0, 255))
             elif self.character_type == 'Murloc':
                 # Murloc일 때
+                self.mini_font.draw(text_x - 85, text_y - 20, 'P2', (0, 0, 255))
+            else:
+                # 기타 캐릭터일 때 (기본 위치)
                 self.mini_font.draw(text_x - 85, text_y - 20, 'P2', (0, 0, 255))
