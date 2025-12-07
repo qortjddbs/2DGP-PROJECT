@@ -391,7 +391,7 @@ class Attack:
 
 
 class Skill:
-    FRAMES_PER_ACTION = 17
+    FRAMES_PER_ACTION = 21
 
     def __init__(self, stan):
         self.stan = stan
@@ -454,7 +454,7 @@ class Skill:
         self.stan.frame = (self.stan.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         # 4. 애니메이션 종료 체크
-        if self.stan.frame >= 16.9:
+        if self.stan.frame >= 20.9:
             self.stan.frame = 0
             self.stan.x_locked = False
 
@@ -478,7 +478,7 @@ class Skill:
                 elif keys[SDL_GetScancodeFromKey(self.stan.skill_key)]:
                     self.stan.state_machine.cur_state = self.stan.SKILL
                     self.stan.SKILL.enter(('RE_SKILL', None))
-                elif keys[SDL_GetScancodeFromKey(self.stan.ult_key)] and self.stan.mp >= 40:
+                elif keys[SDL_GetScancodeFromKey(self.stan.ult_key)] and self.stan.mp >= 35:
                     self.stan.state_machine.cur_state = self.stan.ULT
                     self.stan.ULT.enter(('SKILL_TO_ULT', None))
                 elif left_pressed and right_pressed:
@@ -492,7 +492,7 @@ class Skill:
                     self.stan.IDLE.enter(('SKILL_TO_IDLE', None))
 
     def draw(self):
-        frame_index = min(int(self.stan.frame), 16)
+        frame_index = min(int(self.stan.frame), 20)
         if self.stan.face_dir == -1:
             self.stan.images['Skill'][frame_index].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
         else:
@@ -522,6 +522,10 @@ class Skill:
             14: None,
             15: None,
             16: None,
+            17: None,
+            18: None,
+            19: None,
+            20: None   # 회수 완료
         }
 
         if frame not in hitbox_data or hitbox_data[frame] is None:
@@ -536,13 +540,13 @@ class Skill:
 
 # 기력 40소모
 class Ult:
-    FRAMES_PER_ACTION = 12
+    FRAMES_PER_ACTION = 16
 
     def __init__(self, stan):
         self.stan = stan
 
     def enter(self, e):
-        self.stan.mp -= 40
+        self.stan.mp -= 35
 
         self.stan.hit_log.clear()  # 새 공격 시작 시 로그 초기화
         print('Ult State Entered with event:', e)
@@ -597,7 +601,7 @@ class Ult:
         self.stan.frame = (self.stan.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         # 4. 애니메이션 종료 체크
-        if self.stan.frame >= 11.9:
+        if self.stan.frame >= 15.9:
             self.stan.frame = 0
             self.stan.x_locked = False  # 애니메이션 끝났으니 잠금 해제
 
@@ -621,7 +625,7 @@ class Ult:
                 elif keys[SDL_GetScancodeFromKey(self.stan.skill_key)]:
                     self.stan.state_machine.cur_state = self.stan.SKILL
                     self.stan.SKILL.enter(('ULT_TO_SKILL', None))
-                elif keys[SDL_GetScancodeFromKey(self.stan.ult_key)] and self.stan.mp >= 40:
+                elif keys[SDL_GetScancodeFromKey(self.stan.ult_key)] and self.stan.mp >= 35:
                     self.stan.state_machine.cur_state = self.stan.ULT
                     self.stan.ULT.enter(('RE_ULT', None))
                 elif left_pressed and right_pressed:
@@ -636,7 +640,7 @@ class Ult:
             return  # do() 종료
 
     def draw(self):
-        frame_index = min(int(self.stan.frame), 11)
+        frame_index = min(int(self.stan.frame), 15)
         if self.stan.face_dir == -1:
             self.stan.images['Ult'][frame_index].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
         else:
@@ -660,7 +664,11 @@ class Ult:
             8: (95, 2, 182, 20),  # 130 -> 185, 215 -> 271 / 101 -> 85, 115 -> 103
             9: (148, 16, 230, -21),  # 185 -> 238, 271 -> 319 / 85 -> 99, 103 -> 62
             10: (165, 21, 235, -34), # 238 -> 255, 319 -> 324 / 99 -> 104, 62 -> 49
-            11: None
+            11: None,
+            12: None,
+            13: None,
+            14: None,
+            15: None   # 회수 완료
         }
 
         if frame not in hitbox_data or hitbox_data[frame] is None:
