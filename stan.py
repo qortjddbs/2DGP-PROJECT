@@ -674,13 +674,13 @@ class stan:
         if stan.images == None:
             stan.images = {}
             # Idle: 1장
-            stan.images['Idle'] = [load_image("./Character/stan/Idle (1).png")]
-            # Attack: 10장
-            stan.images['Attack'] = [load_image(f"./Character/stan/Attack ({i}).png") for i in range(1, 11)]
-            # Skill: 17장
-            stan.images['Skill'] = [load_image(f"./Character/stan/Skill ({i}).png") for i in range(1, 18)]
-            # Ult: 12장
-            stan.images['Ult'] = [load_image(f"./Character/stan/Ult ({i}).png") for i in range(1, 13)]
+            stan.images['Idle'] = [load_image("./Character/stan/Idle.png")]
+            # Attack: 16장
+            stan.images['Attack'] = [load_image(f"./Character/stan/Attack ({i}).png") for i in range(1, 17)]
+            # Skill: 21장
+            stan.images['Skill'] = [load_image(f"./Character/stan/Skill ({i}).png") for i in range(1, 22)]
+            # Ult: 16장
+            stan.images['Ult'] = [load_image(f"./Character/stan/Ult ({i}).png") for i in range(1, 17)]
 
     def __init__(self, player_num=2, max_hp=100, mp_increase=10):
         # 디버그 모드 추가
