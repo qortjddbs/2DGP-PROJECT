@@ -35,7 +35,10 @@ class Idle:
         pass
 
     def do(self):
-        pass
+        # 가장자리에서 벗어나면 중력 적용
+        if self.murloc.is_air_action:
+            self.murloc.apply_gravity()
+            self.murloc.check_platform_collision()
 
     def draw(self):
         if self.murloc.face_dir == -1:
@@ -127,8 +130,8 @@ class Jump:
                 self.murloc.dir = 0
 
             self.murloc.x += self.murloc.dir * RUN_SPEED_PPS * game_framework.frame_time
-            if self.murloc.x < 20:
-                self.murloc.x = 20
+            if self.murloc.x < 15:
+                self.murloc.x = 15
             elif self.murloc.x > 530:
                 self.murloc.x = 530
 
@@ -195,10 +198,24 @@ class Run:
             # 둘 다 안 눌려있으면 멈춤
             self.murloc.dir = 0
         self.murloc.x += self.murloc.dir * RUN_SPEED_PPS * game_framework.frame_time
-        if self.murloc.x < 20:
-            self.murloc.x = 20
+        if self.murloc.x < 15:
+            self.murloc.x = 15
         elif self.murloc.x > 530:
             self.murloc.x = 530
+
+        # 가장자리에서 벗어나면 중력 적용
+        if self.murloc.is_air_action:
+            self.murloc.apply_gravity()
+            # 착지 체크
+            if self.murloc.check_platform_collision():
+                # [FIX] 착지했는데 이동 키가 여전히 눌려있다면? -> RUN 유지
+                if left_pressed or right_pressed:
+                    # 아무것도 안 함 (RUN 상태 유지, is_air_action은 check_platform_collision에서 False가 됨)
+                    pass
+                else:
+                    # 이동 키가 안 눌려있다면 -> IDLE로 전환
+                    self.murloc.state_machine.cur_state = self.murloc.IDLE
+                    self.murloc.IDLE.enter(('LAND_FROM_RUN', None))
 
     def draw(self):
         if self.murloc.face_dir == -1:
@@ -290,8 +307,8 @@ class Attack:
 
         # 공격하면서도 이동
         self.murloc.x += self.murloc.dir * RUN_SPEED_PPS * game_framework.frame_time
-        if self.murloc.x < 20:
-            self.murloc.x = 20
+        if self.murloc.x < 15:
+            self.murloc.x = 15
         elif self.murloc.x > 530:
             self.murloc.x = 530
 
@@ -786,10 +803,11 @@ class Murloc:
 
     def update(self):
         self.increase_mp()
-        prev_x = self.x
         self.state_machine.update()
-        if prev_x != self.x and not self.is_air_action:
-            self.check_platform_edge()  # X 좌표 변경 시 가장자리 체크
+
+        # 지상에 있을 때 항상 가장자리 체크
+        if not self.is_air_action:
+            self.check_platform_edge()
 
     def get_hitbox(self):
         return self.state_machine.cur_state.get_hitbox()
@@ -918,63 +936,69 @@ class Murloc:
         self.platforms = platforms
 
     def check_platform_collision(self):
-        """플랫폼과의 충돌 체크 및 착지 처리"""
-        # 1. 플랫폼 데이터가 없으면 기본 바닥 체크만 수행
-        if not hasattr(self, 'platforms'):
-            return self.check_landing()
+            """플랫폼과의 충돌 체크 및 착지 처리"""
+            # 1. 플랫폼 데이터가 없으면 기본 바닥 체크만 수행
+            if not hasattr(self, 'platforms'):
+                return self.check_landing()
 
-        # 2. 캐릭터의 현재 바운딩 박스 가져오기
-        char_left, char_bottom, char_right, char_top = self.get_bb()
+            # 2. 캐릭터의 현재 바운딩 박스 가져오기
+            char_left, char_bottom, char_right, char_top = self.get_bb()
 
-        # 3. 아래로 떨어지는 중일 때만 플랫폼 충돌 체크
-        if self.y_velocity <= 0:
-            for x1, y1, x2, y2 in self.platforms:
-                # 4. X축 범위 체크: 캐릭터가 플랫폼 위에 있는지
-                if char_right > x1 and char_left < x2:
-                    # 5. Y축 충돌 체크: 발이 플랫폼에 닿았는지
-                    if char_bottom <= y2 and char_bottom + abs(self.y_velocity) >= y2:
-                        # 6. 착지 처리
-                        self.y = y2 + 23  # 플랫폼 위로 위치 조정
-                        self.y_velocity = 0  # 낙하 속도 초기화
-                        self.is_air_action = False  # 공중 상태 해제
-                        self.ground_y = y2 + 23  # 현재 바닥 높이 저장
-                        return True
+            # [중요] 아래로 떨어지는 중일 때만 플랫폼 위에 착지 가능 (상향 점프 중에는 통과)
+            if self.y_velocity <= 0:
+                for x1, y1, x2, y2 in self.platforms:
+                    # 1. X축 범위 체크 (AND 연산자로 수정: 캐릭터가 플랫폼 너비 안에 있어야 함)
+                    if char_right > x1 and char_left < x2:
 
-        # 7. 기본 바닥 체크 (y=83)
-        if self.y <= 83:
-            self.y = 83
-            self.y_velocity = 0
-            self.is_air_action = False
-            self.ground_y = 83
-            return True
+                        # [FIX] 자석 현상 완화: 발이 플랫폼을 '뚫고 지나갔거나', '거의 닿았을 때'만 처리
+                        # y2 - 10 : 발이 플랫폼 안쪽 10px 이내로 들어왔을 때 (뚫고 지나감 방지)
+                        # y2 + 5  : 발이 플랫폼 위 5px 이내일 때 (살짝 떠 있어도 착지 판정)
+                        # 이 값을 줄일수록 더 정교해지지만, 너무 줄이면 빠른 속도로 떨어질 때 뚫고 지나갈 수 있음
+                        if y2 - 10 <= char_bottom <= y2 + 5:
+                            self.y = y2 + 23
+                            self.y_velocity = 0
+                            self.is_air_action = False
+                            self.ground_y = y2 + 23
+                            return True
 
-        return False
+            # 3. 기본 바닥 체크 (맵의 최하단, 예: y=83)
+            # 맵 밖으로 떨어지는 것을 방지
+            if self.y <= 83:
+                self.y = 83
+                self.y_velocity = 0
+                self.is_air_action = False
+                self.ground_y = 83
+                return True
+
+            return False
 
     def check_platform_edge(self):
-        """플랫폼 가장자리에서 벗어났는지 체크"""
-        if not hasattr(self, 'platforms'):
-            return
+            """플랫폼 가장자리에서 벗어났는지 체크"""
+            # 플랫폼 정보가 없으면 기본 바닥만 체크
+            if not hasattr(self, 'platforms'):
+                return
 
-        char_left, char_bottom, char_right, char_top = self.get_bb()
+            char_left, char_bottom, char_right, char_top = self.get_bb()
 
-        # 1. 현재 서 있는 플랫폼 찾기
-        on_platform = False
+            # 현재 내가 밟고 서 있는 플랫폼이 여전히 내 발 밑에 있는지 확인
+            on_platform = False
 
-        for x1, y1, x2, y2 in self.platforms:
-            platform_y = y2 + 23
+            # 1. 기본 바닥(y=83) 위에 있다면 떨어질 일이 없음
+            if self.y <= 83 + 5:  # 오차 범위 약간 허용
+                return
 
-            # 2. 현재 높이가 플랫폼 높이와 일치하는지 확인
-            if abs(self.y - platform_y) < 5:
-                # 3. X 좌표가 플랫폼 범위 내에 있는지 확인
-                if char_right > x1 and char_left < x2:
-                    on_platform = True
-                    break
+            # 2. 플랫폼 리스트 검사
+            for x1, y1, x2, y2 in self.platforms:
+                # 현재 캐릭터의 높이가 이 플랫폼의 높이와 비슷한지 확인 (밟고 있는지)
+                # y2 + 23은 캐릭터가 플랫폼 위에 서 있을 때의 중심 y좌표
+                if abs(self.y - (y2 + 23)) < 10:
+                    # 높이는 맞는데, X축 범위도 맞는지 확인
+                    if char_right > x1 and char_left < x2:
+                        on_platform = True
+                        break  # 발 밑에 플랫폼이 있음 확인
 
-        # 4. 기본 바닥 확인
-        if self.y <= 83:
-            on_platform = True
-
-        # 5. 플랫폼에서 벗어났으면 떨어지기 시작
-        if not on_platform:
-            self.is_air_action = True
-            self.y_velocity = 0
+            # 3. 발 밑에 아무것도 없다면 추락 시작
+            if not on_platform:
+                self.is_air_action = True  # 공중 상태로 전환
+                self.ground_y = 83  # 떨어질 목표 지점을 일단 맨 바닥으로 초기화
+                # (떨어지다가 다른 플랫폼에 걸리면 check_platform_collision에서 다시 잡음)
