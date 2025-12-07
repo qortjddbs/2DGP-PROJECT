@@ -24,27 +24,27 @@ ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 class Idle:
     FRAMES_PER_ACTION = 1
 
-    def __init__(self, murloc):
-        self.murloc = murloc
+    def __init__(self, stan):
+        self.stan = stan
 
     def enter(self, e):
         print('Idle State Entered with event:', e)
-        self.murloc.dir = 0
+        self.stan.dir = 0
 
     def exit(self, e):
         pass
 
     def do(self):
         # 가장자리에서 벗어나면 중력 적용
-        if self.murloc.is_air_action:
-            self.murloc.apply_gravity()
-            self.murloc.check_platform_collision()
+        if self.stan.is_air_action:
+            self.stan.apply_gravity()
+            self.stan.check_platform_collision()
 
     def draw(self):
-        if self.murloc.face_dir == -1:
-            self.murloc.images['Idle'][0].composite_draw(0, 'h', self.murloc.x - 78, self.murloc.y)
+        if self.stan.face_dir == -1:
+            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
         else:
-            self.murloc.images['Idle'][0].draw(self.murloc.x + 78, self.murloc.y)
+            self.stan.images['Idle'][0].draw(self.stan.x + 78, self.stan.y)
 
     def get_hitbox(self):
         pass
@@ -52,114 +52,114 @@ class Idle:
 class Jump:
     FRAMES_PER_ACTION = 1
 
-    def __init__(self, murloc):
-        self.murloc = murloc
+    def __init__(self, stan):
+        self.stan = stan
 
     def enter(self, e):
         print('Jump State Entered with event:', e)
-        if self.murloc.y == self.murloc.ground_y:
-            self.murloc.y_velocity = 500
-            self.murloc.apply_gravity()
+        if self.stan.y == self.stan.ground_y:
+            self.stan.y_velocity = 500
+            self.stan.apply_gravity()
 
-        self.murloc.is_air_action = True
+        self.stan.is_air_action = True
 
         keys = SDL_GetKeyboardState(None)
-        left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
-        right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
-        attack_pressed = keys[SDL_GetScancodeFromKey(self.murloc.attack_key)]
-        skill_pressed = keys[SDL_GetScancodeFromKey(self.murloc.skill_key)]
-        ult_pressed = keys[SDL_GetScancodeFromKey(self.murloc.ult_key)]
+        left_pressed = keys[SDL_GetScancodeFromKey(self.stan.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.stan.right_key)]
+        attack_pressed = keys[SDL_GetScancodeFromKey(self.stan.attack_key)]
+        skill_pressed = keys[SDL_GetScancodeFromKey(self.stan.skill_key)]
+        ult_pressed = keys[SDL_GetScancodeFromKey(self.stan.ult_key)]
 
         if left_pressed and not right_pressed:
-            self.murloc.dir = self.murloc.face_dir = -1
+            self.stan.dir = self.stan.face_dir = -1
         elif right_pressed and not left_pressed:
-            self.murloc.dir = self.murloc.face_dir = 1
+            self.stan.dir = self.stan.face_dir = 1
         elif attack_pressed:
-            self.murloc.state_machine.cur_state = self.murloc.ATTACK
-            self.murloc.ATTACK.enter(('AIR_ATTACK_HELD', None))
+            self.stan.state_machine.cur_state = self.stan.ATTACK
+            self.stan.ATTACK.enter(('AIR_ATTACK_HELD', None))
             return  # JUMP.do()를 즉시 종료
         elif skill_pressed:
-            self.murloc.state_machine.cur_state = self.murloc.SKILL
-            self.murloc.SKILL.enter(('AIR_SKILL_HELD', None))
+            self.stan.state_machine.cur_state = self.stan.SKILL
+            self.stan.SKILL.enter(('AIR_SKILL_HELD', None))
             return  # JUMP.do()를 즉시 종료
-        elif ult_pressed and self.murloc.mp >= 40:
-            self.murloc.state_machine.cur_state = self.murloc.ULT
-            self.murloc.ULT.enter(('AIR_ULT_HELD', None))
+        elif ult_pressed and self.stan.mp >= 35:
+            self.stan.state_machine.cur_state = self.stan.ULT
+            self.stan.ULT.enter(('AIR_ULT_HELD', None))
             return  # JUMP.do()를 즉시 종료
         else:
-            self.murloc.dir = 0
+            self.stan.dir = 0
 
     def exit(self, e):
         pass
 
     def do(self):
         keys = SDL_GetKeyboardState(None)
-        attack_pressed = keys[SDL_GetScancodeFromKey(self.murloc.attack_key)]
-        skill_pressed = keys[SDL_GetScancodeFromKey(self.murloc.skill_key)]
-        ult_pressed = keys[SDL_GetScancodeFromKey(self.murloc.ult_key)]
+        attack_pressed = keys[SDL_GetScancodeFromKey(self.stan.attack_key)]
+        skill_pressed = keys[SDL_GetScancodeFromKey(self.stan.skill_key)]
+        ult_pressed = keys[SDL_GetScancodeFromKey(self.stan.ult_key)]
 
         # JUMP 상태 전이 테이블(JUMP -> ATTACK)과 동일한 로직을 'do'에 추가
         # (이벤트가 아닌, '눌린 상태'로)
         if attack_pressed:
-            self.murloc.state_machine.cur_state = self.murloc.ATTACK
-            self.murloc.ATTACK.enter(('AIR_ATTACK_HELD', None))
+            self.stan.state_machine.cur_state = self.stan.ATTACK
+            self.stan.ATTACK.enter(('AIR_ATTACK_HELD', None))
             return  # JUMP.do()를 즉시 종료
         if skill_pressed:
-            self.murloc.state_machine.cur_state = self.murloc.SKILL
-            self.murloc.SKILL.enter(('AIR_SKILL_HELD', None))
+            self.stan.state_machine.cur_state = self.stan.SKILL
+            self.stan.SKILL.enter(('AIR_SKILL_HELD', None))
             return  # JUMP.do()를 즉시 종료
-        if ult_pressed and self.murloc.mp >= 40:
-            self.murloc.state_machine.cur_state = self.murloc.ULT
-            self.murloc.ULT.enter(('AIR_ULT_HELD', None))
+        if ult_pressed and self.stan.mp >= 35:
+            self.stan.state_machine.cur_state = self.stan.ULT
+            self.stan.ULT.enter(('AIR_ULT_HELD', None))
             return  # JUMP.do()를 즉시 종료
 
         # 1. 중력 적용
-        self.murloc.apply_gravity()
+        self.stan.apply_gravity()
 
         # 2. 공중에서 좌우 이동 (Air Control)
-        if not self.murloc.x_locked:
-            left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
-            right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
+        if not self.stan.x_locked:
+            left_pressed = keys[SDL_GetScancodeFromKey(self.stan.left_key)]
+            right_pressed = keys[SDL_GetScancodeFromKey(self.stan.right_key)]
 
             if left_pressed and not right_pressed:
-                self.murloc.dir = self.murloc.face_dir = -1
+                self.stan.dir = self.stan.face_dir = -1
             elif right_pressed and not left_pressed:
-                self.murloc.dir = self.murloc.face_dir = 1
+                self.stan.dir = self.stan.face_dir = 1
             else:
                 # 키를 떼면 공중에서 해당 방향으로의 이동을 멈춤
-                self.murloc.dir = 0
+                self.stan.dir = 0
 
-            self.murloc.x += self.murloc.dir * RUN_SPEED_PPS * game_framework.frame_time
-            if self.murloc.x < 15:
-                self.murloc.x = 15
-            elif self.murloc.x > 530:
-                self.murloc.x = 530
+            self.stan.x += self.stan.dir * RUN_SPEED_PPS * game_framework.frame_time
+            if self.stan.x < 15:
+                self.stan.x = 15
+            elif self.stan.x > 530:
+                self.stan.x = 530
 
         else:   # x_locked 상태면 좌우 이동 불가
-            self.murloc.dir = 0
+            self.stan.dir = 0
 
         # 3. 착지 확인
-        if self.murloc.check_platform_collision():
+        if self.stan.check_platform_collision():
             keys = SDL_GetKeyboardState(None)
-            left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
-            right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
-            up_pressed = keys[SDL_GetScancodeFromKey(self.murloc.jump_key)]
+            left_pressed = keys[SDL_GetScancodeFromKey(self.stan.left_key)]
+            right_pressed = keys[SDL_GetScancodeFromKey(self.stan.right_key)]
+            up_pressed = keys[SDL_GetScancodeFromKey(self.stan.jump_key)]
 
             if up_pressed:
-                self.murloc.state_machine.cur_state = self.murloc.JUMP
-                self.murloc.JUMP.enter(('LAND_JUMP', None))  # enter에서 y==ground_y 체크
+                self.stan.state_machine.cur_state = self.stan.JUMP
+                self.stan.JUMP.enter(('LAND_JUMP', None))  # enter에서 y==ground_y 체크
             elif left_pressed or right_pressed:
-                self.murloc.state_machine.cur_state = self.murloc.RUN
-                self.murloc.RUN.enter(('LAND_RUN', None))
+                self.stan.state_machine.cur_state = self.stan.RUN
+                self.stan.RUN.enter(('LAND_RUN', None))
             else:
-                self.murloc.state_machine.cur_state = self.murloc.IDLE
-                self.murloc.IDLE.enter(('LAND_IDLE', None))
+                self.stan.state_machine.cur_state = self.stan.IDLE
+                self.stan.IDLE.enter(('LAND_IDLE', None))
 
     def draw(self):
-        if self.murloc.face_dir == -1:
-            self.murloc.images['Idle'][0].composite_draw(0, 'h', self.murloc.x - 78, self.murloc.y)
+        if self.stan.face_dir == -1:
+            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
         else:
-            self.murloc.images['Idle'][0].draw(self.murloc.x + 78, self.murloc.y)
+            self.stan.images['Idle'][0].draw(self.stan.x + 78, self.stan.y)
 
     def get_hitbox(self):
         pass
@@ -169,59 +169,59 @@ class Jump:
 class Run:
     FRAMES_PER_ACTION = 1
 
-    def __init__(self, murloc):
-        self.murloc = murloc
+    def __init__(self, stan):
+        self.stan = stan
 
     def enter(self, e):
         print('Run State Entered with event:', e)
-        self.murloc.frame = 0
-        if self.murloc.left_down(e) or self.murloc.right_up(e):
-            self.murloc.dir = self.murloc.face_dir = -1
-        elif self.murloc.right_down(e) or self.murloc.left_up(e):
-            self.murloc.dir = self.murloc.face_dir = 1
+        self.stan.frame = 0
+        if self.stan.left_down(e) or self.stan.right_up(e):
+            self.stan.dir = self.stan.face_dir = -1
+        elif self.stan.right_down(e) or self.stan.left_up(e):
+            self.stan.dir = self.stan.face_dir = 1
 
     def exit(self, e):
         pass
 
     def do(self):
         keys = SDL_GetKeyboardState(None)
-        left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
-        right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
+        left_pressed = keys[SDL_GetScancodeFromKey(self.stan.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.stan.right_key)]
         if left_pressed and right_pressed:
             # 둘 다 눌려있으면 멈춤
-            self.murloc.dir = 0
+            self.stan.dir = 0
         elif left_pressed and not right_pressed:
-            self.murloc.dir = self.murloc.face_dir = -1
+            self.stan.dir = self.stan.face_dir = -1
         elif right_pressed and not left_pressed:
-            self.murloc.dir = self.murloc.face_dir = 1
+            self.stan.dir = self.stan.face_dir = 1
         else:
             # 둘 다 안 눌려있으면 멈춤
-            self.murloc.dir = 0
-        self.murloc.x += self.murloc.dir * RUN_SPEED_PPS * game_framework.frame_time
-        if self.murloc.x < 15:
-            self.murloc.x = 15
-        elif self.murloc.x > 530:
-            self.murloc.x = 530
+            self.stan.dir = 0
+        self.stan.x += self.stan.dir * RUN_SPEED_PPS * game_framework.frame_time
+        if self.stan.x < 15:
+            self.stan.x = 15
+        elif self.stan.x > 530:
+            self.stan.x = 530
 
         # 가장자리에서 벗어나면 중력 적용
-        if self.murloc.is_air_action:
-            self.murloc.apply_gravity()
+        if self.stan.is_air_action:
+            self.stan.apply_gravity()
             # 착지 체크
-            if self.murloc.check_platform_collision():
+            if self.stan.check_platform_collision():
                 # [FIX] 착지했는데 이동 키가 여전히 눌려있다면? -> RUN 유지
                 if left_pressed or right_pressed:
                     # 아무것도 안 함 (RUN 상태 유지, is_air_action은 check_platform_collision에서 False가 됨)
                     pass
                 else:
                     # 이동 키가 안 눌려있다면 -> IDLE로 전환
-                    self.murloc.state_machine.cur_state = self.murloc.IDLE
-                    self.murloc.IDLE.enter(('LAND_FROM_RUN', None))
+                    self.stan.state_machine.cur_state = self.stan.IDLE
+                    self.stan.IDLE.enter(('LAND_FROM_RUN', None))
 
     def draw(self):
-        if self.murloc.face_dir == -1:
-            self.murloc.images['Idle'][0].composite_draw(0, 'h', self.murloc.x - 78, self.murloc.y)
+        if self.stan.face_dir == -1:
+            self.stan.images['Idle'][0].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
         else:
-            self.murloc.images['Idle'][0].draw(self.murloc.x + 78, self.murloc.y)
+            self.stan.images['Idle'][0].draw(self.stan.x + 78, self.stan.y)
 
     def get_hitbox(self):
         pass
@@ -230,134 +230,134 @@ class Run:
 class Attack:
     FRAMES_PER_ACTION = 10
 
-    def __init__(self, murloc):
-        self.murloc = murloc
+    def __init__(self, stan):
+        self.stan = stan
 
     def enter(self, e):
-        self.murloc.hit_log.clear()  # 새 공격 시작 시 로그 초기화
+        self.stan.hit_log.clear()  # 새 공격 시작 시 로그 초기화
         print('Attack State Entered with event:', e)
 
         # 공격 사운드 재생
-        sound_manager.play_character_sound('Murloc', 'attack')
+        sound_manager.play_character_sound('stan', 'attack')
 
         # 공격 진입 시 현재 키보드 상태 확인하여 이동 방향 설정
         keys = SDL_GetKeyboardState(None)
-        left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
-        right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
+        left_pressed = keys[SDL_GetScancodeFromKey(self.stan.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.stan.right_key)]
 
         # (점프가 안 눌렸거나, 공중 공격일 때만 아래 로직 실행)
-        if self.murloc.y > self.murloc.ground_y:
-            self.murloc.is_air_action = True
+        if self.stan.y > self.stan.ground_y:
+            self.stan.is_air_action = True
         # (이하 원본 코드의 else/elif는 버그를 유발하므로 삭제)
         else:
-            self.murloc.is_air_action = False
-            self.murloc.y_velocity = 0
+            self.stan.is_air_action = False
+            self.stan.y_velocity = 0
 
         # 새로운 공격이면 프레임 초기화
-        if self.murloc.frame >= 9.9 or self.murloc.frame == 0:
-            self.murloc.frame = 0
+        if self.stan.frame >= 9.9 or self.stan.frame == 0:
+            self.stan.frame = 0
 
         if left_pressed and right_pressed:
             # 둘 다 눌려있으면 멈추되, 바라보는 방향은 마지막 누른 키로
-            self.murloc.dir = 0
-            if self.murloc.left_down(e):
-                self.murloc.face_dir = -1
-            elif self.murloc.right_down(e):
-                self.murloc.face_dir = 1
+            self.stan.dir = 0
+            if self.stan.left_down(e):
+                self.stan.face_dir = -1
+            elif self.stan.right_down(e):
+                self.stan.face_dir = 1
         elif left_pressed and not right_pressed:
-            self.murloc.dir = self.murloc.face_dir = -1
+            self.stan.dir = self.stan.face_dir = -1
         elif right_pressed and not left_pressed:
-            self.murloc.dir = self.murloc.face_dir = 1
+            self.stan.dir = self.stan.face_dir = 1
         else:
-            self.murloc.dir = 0
+            self.stan.dir = 0
 
     def exit(self, e):
         pass
 
     def do(self):
-        if self.murloc.manual_frame:
+        if self.stan.manual_frame:
             return
 
         keys = SDL_GetKeyboardState(None)
-        left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
-        right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
-        up_pressed = keys[SDL_GetScancodeFromKey(self.murloc.jump_key)]
+        left_pressed = keys[SDL_GetScancodeFromKey(self.stan.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.stan.right_key)]
+        up_pressed = keys[SDL_GetScancodeFromKey(self.stan.jump_key)]
 
-        if not self.murloc.is_air_action and up_pressed and self.murloc.y == self.murloc.ground_y:
-            self.murloc.y_velocity = 500
-            self.murloc.is_air_action = True
+        if not self.stan.is_air_action and up_pressed and self.stan.y == self.stan.ground_y:
+            self.stan.y_velocity = 500
+            self.stan.is_air_action = True
 
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
-        if self.murloc.is_air_action:
-            self.murloc.apply_gravity()
-            if self.murloc.check_platform_collision():
+        if self.stan.is_air_action:
+            self.stan.apply_gravity()
+            if self.stan.check_platform_collision():
                 pass
 
         # 2. 좌우 이동 로직
         if left_pressed and right_pressed:
             # 둘 다 눌려있으면 멈춤
-            self.murloc.dir = 0
+            self.stan.dir = 0
         elif left_pressed and not right_pressed:
-            self.murloc.dir = self.murloc.face_dir = -1
+            self.stan.dir = self.stan.face_dir = -1
         elif right_pressed and not left_pressed:
-            self.murloc.dir = self.murloc.face_dir = 1
+            self.stan.dir = self.stan.face_dir = 1
         else:
             # 둘 다 안 눌려있으면 멈춤
-            self.murloc.dir = 0
+            self.stan.dir = 0
 
         # 공격하면서도 이동
-        self.murloc.x += self.murloc.dir * RUN_SPEED_PPS * game_framework.frame_time
-        if self.murloc.x < 15:
-            self.murloc.x = 15
-        elif self.murloc.x > 530:
-            self.murloc.x = 530
+        self.stan.x += self.stan.dir * RUN_SPEED_PPS * game_framework.frame_time
+        if self.stan.x < 15:
+            self.stan.x = 15
+        elif self.stan.x > 530:
+            self.stan.x = 530
 
         # 3. 애니메이션 프레임 업데이트 (기존과 동일)
-        self.murloc.frame = (self.murloc.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+        self.stan.frame = (self.stan.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         # 4. 애니메이션 종료 체크
-        if self.murloc.frame >= 9.9:
-            self.murloc.frame = 0
+        if self.stan.frame >= 9.9:
+            self.stan.frame = 0
 
             # 5. 종료 시점에 공중이었는지, 지상이었는지 체크
-            if self.murloc.is_air_action:
+            if self.stan.is_air_action:
                 # (아직 공중) -> JUMP 상태로 복귀
-                self.murloc.state_machine.cur_state = self.murloc.JUMP
-                self.murloc.JUMP.enter(('FINISH_AIR_ATTACK', None))
+                self.stan.state_machine.cur_state = self.stan.JUMP
+                self.stan.JUMP.enter(('FINISH_AIR_ATTACK', None))
             else:
                 # (지상) -> 키 눌림 상태에 따라 다음 상태 결정
                 keys = SDL_GetKeyboardState(None)
-                if keys[SDL_GetScancodeFromKey(self.murloc.jump_key)]:
-                    self.murloc.state_machine.cur_state = self.murloc.JUMP
-                    self.murloc.JUMP.enter(('FINISH_GROUND_ATTACK_JUMP', None))
-                elif keys[SDL_GetScancodeFromKey(self.murloc.attack_key)]:
-                    self.murloc.state_machine.cur_state = self.murloc.ATTACK
-                    self.murloc.ATTACK.enter(('RE_ATTACK', None))  # 연속 공격
-                elif keys[SDL_GetScancodeFromKey(self.murloc.skill_key)]:
-                    self.murloc.state_machine.cur_state = self.murloc.SKILL
-                    self.murloc.SKILL.enter(('ATTACK_TO_SKILL', None))
-                elif keys[SDL_GetScancodeFromKey(self.murloc.ult_key)] and self.murloc.mp >= 40:
-                    self.murloc.state_machine.cur_state = self.murloc.ULT
-                    self.murloc.ULT.enter(('ATTACK_TO_ULT', None))
-                elif self.murloc.dir != 0:
-                    self.murloc.state_machine.cur_state = self.murloc.RUN
-                    self.murloc.RUN.enter(('ATTACK_TO_RUN', None))
+                if keys[SDL_GetScancodeFromKey(self.stan.jump_key)]:
+                    self.stan.state_machine.cur_state = self.stan.JUMP
+                    self.stan.JUMP.enter(('FINISH_GROUND_ATTACK_JUMP', None))
+                elif keys[SDL_GetScancodeFromKey(self.stan.attack_key)]:
+                    self.stan.state_machine.cur_state = self.stan.ATTACK
+                    self.stan.ATTACK.enter(('RE_ATTACK', None))  # 연속 공격
+                elif keys[SDL_GetScancodeFromKey(self.stan.skill_key)]:
+                    self.stan.state_machine.cur_state = self.stan.SKILL
+                    self.stan.SKILL.enter(('ATTACK_TO_SKILL', None))
+                elif keys[SDL_GetScancodeFromKey(self.stan.ult_key)] and self.stan.mp >= 40:
+                    self.stan.state_machine.cur_state = self.stan.ULT
+                    self.stan.ULT.enter(('ATTACK_TO_ULT', None))
+                elif self.stan.dir != 0:
+                    self.stan.state_machine.cur_state = self.stan.RUN
+                    self.stan.RUN.enter(('ATTACK_TO_RUN', None))
                 else:
-                    self.murloc.state_machine.cur_state = self.murloc.IDLE
-                    self.murloc.IDLE.enter(('ATTACK_TO_IDLE', None))
+                    self.stan.state_machine.cur_state = self.stan.IDLE
+                    self.stan.IDLE.enter(('ATTACK_TO_IDLE', None))
             return  # do() 종료
 
     def draw(self):
-        frame_index = min(int(self.murloc.frame), 9)
-        if self.murloc.face_dir == -1:
-            self.murloc.images['Attack'][frame_index].composite_draw(0, 'h', self.murloc.x - 78, self.murloc.y)
+        frame_index = min(int(self.stan.frame), 9)
+        if self.stan.face_dir == -1:
+            self.stan.images['Attack'][frame_index].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
         else:
-            self.murloc.images['Attack'][frame_index].draw(self.murloc.x + 78, self.murloc.y)
+            self.stan.images['Attack'][frame_index].draw(self.stan.x + 78, self.stan.y)
 
     def get_hitbox(self):
-        frame = int(self.murloc.frame)
-        x, y = self.murloc.x, self.murloc.y
-        face_dir = self.murloc.face_dir
+        frame = int(self.stan.frame)
+        x, y = self.stan.x, self.stan.y
+        face_dir = self.stan.face_dir
 
         # 프레임별 히트박스 정의 (캐릭터 중심 기준)
         hitbox_data = {
@@ -387,115 +387,115 @@ class Attack:
 class Skill:
     FRAMES_PER_ACTION = 17
 
-    def __init__(self, murloc):
-        self.murloc = murloc
+    def __init__(self, stan):
+        self.stan = stan
 
     def enter(self, e):
-        self.murloc.hit_log.clear()  # 새 공격 시작 시 로그 초기화
+        self.stan.hit_log.clear()  # 새 공격 시작 시 로그 초기화
         print('Skill State Entered with event:', e)
 
         # 공격 사운드 재생
-        sound_manager.play_character_sound('Murloc', 'skill')
+        sound_manager.play_character_sound('stan', 'skill')
 
         # [FIX 1] 공중/지상 체크를 프레임 체크 밖으로 이동
         # Attack/Skill.enter와 동일한 구조
-        if self.murloc.y > self.murloc.ground_y:
-            self.murloc.is_air_action = True
+        if self.stan.y > self.stan.ground_y:
+            self.stan.is_air_action = True
         else:
-            self.murloc.is_air_action = False
-            self.murloc.y_velocity = 0
+            self.stan.is_air_action = False
+            self.stan.y_velocity = 0
 
-        self.murloc.x_locked = True
-        self.murloc.frame = 0  # 항상 프레임 리셋
-        self.murloc.dir = 0  # 궁극기는 항상 제자리
+        self.stan.x_locked = True
+        self.stan.frame = 0  # 항상 프레임 리셋
+        self.stan.dir = 0  # 궁극기는 항상 제자리
 
         # (기존의 dir 설정 로직은 얼굴 방향 설정용으로만 사용)
         keys = SDL_GetKeyboardState(None)
-        left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
-        right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
+        left_pressed = keys[SDL_GetScancodeFromKey(self.stan.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.stan.right_key)]
         if left_pressed and right_pressed:
-            if self.murloc.left_down(e):
-                self.murloc.face_dir = -1
-            elif self.murloc.right_down(e):
-                self.murloc.face_dir = 1
+            if self.stan.left_down(e):
+                self.stan.face_dir = -1
+            elif self.stan.right_down(e):
+                self.stan.face_dir = 1
         elif left_pressed and not right_pressed:
-            self.murloc.face_dir = -1
+            self.stan.face_dir = -1
         elif right_pressed and not left_pressed:
-            self.murloc.face_dir = 1
+            self.stan.face_dir = 1
 
     def exit(self, e):
-        self.murloc.x_locked = False
+        self.stan.x_locked = False
 
     def do(self):
         # 수동 프레임 모드일 때는 자동 진행 중단
-        if self.murloc.manual_frame:
+        if self.stan.manual_frame:
             return
 
         keys = SDL_GetKeyboardState(None)
-        up_pressed = keys[SDL_GetScancodeFromKey(self.murloc.jump_key)]
+        up_pressed = keys[SDL_GetScancodeFromKey(self.stan.jump_key)]
 
-        if not self.murloc.is_air_action and up_pressed and self.murloc.y == self.murloc.ground_y:
-            self.murloc.y_velocity = 500
-            self.murloc.is_air_action = True
+        if not self.stan.is_air_action and up_pressed and self.stan.y == self.stan.ground_y:
+            self.stan.y_velocity = 500
+            self.stan.is_air_action = True
 
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
-        if self.murloc.is_air_action:
-            self.murloc.apply_gravity()
-            if self.murloc.check_platform_collision():
+        if self.stan.is_air_action:
+            self.stan.apply_gravity()
+            if self.stan.check_platform_collision():
                 pass
 
         # 3. 애니메이션 프레임 업데이트 (기존과 동일)
-        self.murloc.frame = (self.murloc.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+        self.stan.frame = (self.stan.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         # 4. 애니메이션 종료 체크
-        if self.murloc.frame >= 16.9:
-            self.murloc.frame = 0
-            self.murloc.x_locked = False
+        if self.stan.frame >= 16.9:
+            self.stan.frame = 0
+            self.stan.x_locked = False
 
             # 5. 종료 시점에 공중이었는지, 지상이었는지 체크
-            if self.murloc.is_air_action:
+            if self.stan.is_air_action:
                 # (아직 공중) -> JUMP 상태로 복귀
-                self.murloc.state_machine.cur_state = self.murloc.JUMP
-                self.murloc.JUMP.enter(('FINISH_AIR_SKILL', None))
+                self.stan.state_machine.cur_state = self.stan.JUMP
+                self.stan.JUMP.enter(('FINISH_AIR_SKILL', None))
             else:
                 # (지상) -> 키 눌림 상태에 따라 다음 상태 결정
                 keys = SDL_GetKeyboardState(None)
-                left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
-                right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
+                left_pressed = keys[SDL_GetScancodeFromKey(self.stan.left_key)]
+                right_pressed = keys[SDL_GetScancodeFromKey(self.stan.right_key)]
 
-                if keys[SDL_GetScancodeFromKey(self.murloc.jump_key)]:
-                    self.murloc.state_machine.cur_state = self.murloc.JUMP
-                    self.murloc.JUMP.enter(('FINISH_GROUND_SKILL_JUMP', None))
-                elif keys[SDL_GetScancodeFromKey(self.murloc.attack_key)]:
-                    self.murloc.state_machine.cur_state = self.murloc.ATTACK
-                    self.murloc.ATTACK.enter(('SKILL_TO_ATTACK', None))  # 연속 공격
-                elif keys[SDL_GetScancodeFromKey(self.murloc.skill_key)]:
-                    self.murloc.state_machine.cur_state = self.murloc.SKILL
-                    self.murloc.SKILL.enter(('RE_SKILL', None))
-                elif keys[SDL_GetScancodeFromKey(self.murloc.ult_key)] and self.murloc.mp >= 40:
-                    self.murloc.state_machine.cur_state = self.murloc.ULT
-                    self.murloc.ULT.enter(('SKILL_TO_ULT', None))
+                if keys[SDL_GetScancodeFromKey(self.stan.jump_key)]:
+                    self.stan.state_machine.cur_state = self.stan.JUMP
+                    self.stan.JUMP.enter(('FINISH_GROUND_SKILL_JUMP', None))
+                elif keys[SDL_GetScancodeFromKey(self.stan.attack_key)]:
+                    self.stan.state_machine.cur_state = self.stan.ATTACK
+                    self.stan.ATTACK.enter(('SKILL_TO_ATTACK', None))  # 연속 공격
+                elif keys[SDL_GetScancodeFromKey(self.stan.skill_key)]:
+                    self.stan.state_machine.cur_state = self.stan.SKILL
+                    self.stan.SKILL.enter(('RE_SKILL', None))
+                elif keys[SDL_GetScancodeFromKey(self.stan.ult_key)] and self.stan.mp >= 40:
+                    self.stan.state_machine.cur_state = self.stan.ULT
+                    self.stan.ULT.enter(('SKILL_TO_ULT', None))
                 elif left_pressed and right_pressed:
-                    self.murloc.state_machine.cur_state = self.murloc.IDLE
-                    self.murloc.RUN.enter(('SKILL_TO_IDLE', None))
+                    self.stan.state_machine.cur_state = self.stan.IDLE
+                    self.stan.RUN.enter(('SKILL_TO_IDLE', None))
                 elif left_pressed or right_pressed:
-                    self.murloc.state_machine.cur_state = self.murloc.RUN
-                    self.murloc.RUN.enter(('SKILL_TO_RUN', None))
+                    self.stan.state_machine.cur_state = self.stan.RUN
+                    self.stan.RUN.enter(('SKILL_TO_RUN', None))
                 else:
-                    self.murloc.state_machine.cur_state = self.murloc.IDLE
-                    self.murloc.IDLE.enter(('SKILL_TO_IDLE', None))
+                    self.stan.state_machine.cur_state = self.stan.IDLE
+                    self.stan.IDLE.enter(('SKILL_TO_IDLE', None))
 
     def draw(self):
-        frame_index = min(int(self.murloc.frame), 16)
-        if self.murloc.face_dir == -1:
-            self.murloc.images['Skill'][frame_index].composite_draw(0, 'h', self.murloc.x - 78, self.murloc.y)
+        frame_index = min(int(self.stan.frame), 16)
+        if self.stan.face_dir == -1:
+            self.stan.images['Skill'][frame_index].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
         else:
-            self.murloc.images['Skill'][frame_index].draw(self.murloc.x + 78, self.murloc.y)
+            self.stan.images['Skill'][frame_index].draw(self.stan.x + 78, self.stan.y)
 
     def get_hitbox(self):
-        frame = int(self.murloc.frame)
-        x, y = self.murloc.x, self.murloc.y
-        face_dir = self.murloc.face_dir
+        frame = int(self.stan.frame)
+        x, y = self.stan.x, self.stan.y
+        face_dir = self.stan.face_dir
 
         # 프레임별 히트박스 정의 (캐릭터 중심 기준)
         hitbox_data = {
@@ -532,114 +532,114 @@ class Skill:
 class Ult:
     FRAMES_PER_ACTION = 12
 
-    def __init__(self, murloc):
-        self.murloc = murloc
+    def __init__(self, stan):
+        self.stan = stan
 
     def enter(self, e):
-        self.murloc.mp -= 40
+        self.stan.mp -= 40
 
-        self.murloc.hit_log.clear()  # 새 공격 시작 시 로그 초기화
+        self.stan.hit_log.clear()  # 새 공격 시작 시 로그 초기화
         print('Ult State Entered with event:', e)
 
         # 궁극기 사운드 재생
-        sound_manager.play_character_sound('Murloc', 'ult')
+        sound_manager.play_character_sound('stan', 'ult')
 
         # [FIX 1] 공중/지상 체크를 프레임 체크 밖으로 이동
         # Attack/Skill.enter와 동일한 구조
-        if self.murloc.y > self.murloc.ground_y:
-            self.murloc.is_air_action = True
+        if self.stan.y > self.stan.ground_y:
+            self.stan.is_air_action = True
         else:
-            self.murloc.is_air_action = False
-            self.murloc.y_velocity = 0
+            self.stan.is_air_action = False
+            self.stan.y_velocity = 0
 
-        self.murloc.x_locked = True
-        self.murloc.frame = 0  # 항상 프레임 리셋
-        self.murloc.dir = 0  # 궁극기는 항상 제자리
+        self.stan.x_locked = True
+        self.stan.frame = 0  # 항상 프레임 리셋
+        self.stan.dir = 0  # 궁극기는 항상 제자리
 
         # (기존의 dir 설정 로직은 얼굴 방향 설정용으로만 사용)
         keys = SDL_GetKeyboardState(None)
-        left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
-        right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
+        left_pressed = keys[SDL_GetScancodeFromKey(self.stan.left_key)]
+        right_pressed = keys[SDL_GetScancodeFromKey(self.stan.right_key)]
         if left_pressed and right_pressed:
-            if self.murloc.left_down(e):
-                self.murloc.face_dir = -1
-            elif self.murloc.right_down(e):
-                self.murloc.face_dir = 1
+            if self.stan.left_down(e):
+                self.stan.face_dir = -1
+            elif self.stan.right_down(e):
+                self.stan.face_dir = 1
         elif left_pressed and not right_pressed:
-            self.murloc.face_dir = -1
+            self.stan.face_dir = -1
         elif right_pressed and not left_pressed:
-            self.murloc.face_dir = 1
+            self.stan.face_dir = 1
 
     def exit(self, e):
-        self.murloc.x_locked = False
+        self.stan.x_locked = False
 
     def do(self):
         # 수동 프레임 모드일 때는 자동 진행 중단
-        if self.murloc.manual_frame:
+        if self.stan.manual_frame:
             return
 
 
         # [FIX 4] 공중 궁극기일 경우에만 중력 적용
-        if self.murloc.is_air_action:
-            self.murloc.apply_gravity()
-            if self.murloc.check_platform_collision():
+        if self.stan.is_air_action:
+            self.stan.apply_gravity()
+            if self.stan.check_platform_collision():
                 pass
 
         # [FIX 5] Ult는 좌우 이동 불가 (dir=0이므로 관련 로직 불필요)
 
         # 3. 애니메이션 프레임 업데이트
-        self.murloc.frame = (self.murloc.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
+        self.stan.frame = (self.stan.frame + self.FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
 
         # 4. 애니메이션 종료 체크
-        if self.murloc.frame >= 11.9:
-            self.murloc.frame = 0
-            self.murloc.x_locked = False  # 애니메이션 끝났으니 잠금 해제
+        if self.stan.frame >= 11.9:
+            self.stan.frame = 0
+            self.stan.x_locked = False  # 애니메이션 끝났으니 잠금 해제
 
             # [FIX 6] 종료 시점에 공중/지상 체크 (Attack/Skill.do와 동일)
-            if self.murloc.is_air_action:
+            if self.stan.is_air_action:
                 # (아직 공중) -> JUMP 상태로 복귀
-                self.murloc.state_machine.cur_state = self.murloc.JUMP
-                self.murloc.JUMP.enter(('FINISH_AIR_ULT', None))
+                self.stan.state_machine.cur_state = self.stan.JUMP
+                self.stan.JUMP.enter(('FINISH_AIR_ULT', None))
             else:
                 # (지상) -> 키 눌림 상태에 따라 다음 상태 결정
                 keys = SDL_GetKeyboardState(None)
-                left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
-                right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
+                left_pressed = keys[SDL_GetScancodeFromKey(self.stan.left_key)]
+                right_pressed = keys[SDL_GetScancodeFromKey(self.stan.right_key)]
 
-                if keys[SDL_GetScancodeFromKey(self.murloc.jump_key)]:
-                    self.murloc.state_machine.cur_state = self.murloc.JUMP
-                    self.murloc.JUMP.enter(('FINISH_GROUND_ULT_JUMP', None))
-                elif keys[SDL_GetScancodeFromKey(self.murloc.attack_key)]:
-                    self.murloc.state_machine.cur_state = self.murloc.ATTACK
-                    self.murloc.ATTACK.enter(('ULT_TO_ATTACK', None))  # 연속 공격
-                elif keys[SDL_GetScancodeFromKey(self.murloc.skill_key)]:
-                    self.murloc.state_machine.cur_state = self.murloc.SKILL
-                    self.murloc.SKILL.enter(('ULT_TO_SKILL', None))
-                elif keys[SDL_GetScancodeFromKey(self.murloc.ult_key)] and self.murloc.mp >= 40:
-                    self.murloc.state_machine.cur_state = self.murloc.ULT
-                    self.murloc.ULT.enter(('RE_ULT', None))
+                if keys[SDL_GetScancodeFromKey(self.stan.jump_key)]:
+                    self.stan.state_machine.cur_state = self.stan.JUMP
+                    self.stan.JUMP.enter(('FINISH_GROUND_ULT_JUMP', None))
+                elif keys[SDL_GetScancodeFromKey(self.stan.attack_key)]:
+                    self.stan.state_machine.cur_state = self.stan.ATTACK
+                    self.stan.ATTACK.enter(('ULT_TO_ATTACK', None))  # 연속 공격
+                elif keys[SDL_GetScancodeFromKey(self.stan.skill_key)]:
+                    self.stan.state_machine.cur_state = self.stan.SKILL
+                    self.stan.SKILL.enter(('ULT_TO_SKILL', None))
+                elif keys[SDL_GetScancodeFromKey(self.stan.ult_key)] and self.stan.mp >= 40:
+                    self.stan.state_machine.cur_state = self.stan.ULT
+                    self.stan.ULT.enter(('RE_ULT', None))
                 elif left_pressed and right_pressed:
-                    self.murloc.state_machine.cur_state = self.murloc.IDLE
-                    self.murloc.ULT.enter(('ULT_TO_IDLE', None))
+                    self.stan.state_machine.cur_state = self.stan.IDLE
+                    self.stan.ULT.enter(('ULT_TO_IDLE', None))
                 elif left_pressed or right_pressed:
-                    self.murloc.state_machine.cur_state = self.murloc.RUN
-                    self.murloc.RUN.enter(('ULT_TO_RUN', None))
+                    self.stan.state_machine.cur_state = self.stan.RUN
+                    self.stan.RUN.enter(('ULT_TO_RUN', None))
                 else:
-                    self.murloc.state_machine.cur_state = self.murloc.IDLE
-                    self.murloc.IDLE.enter(('ULT_TO_IDLE', None))
+                    self.stan.state_machine.cur_state = self.stan.IDLE
+                    self.stan.IDLE.enter(('ULT_TO_IDLE', None))
             return  # do() 종료
 
     def draw(self):
-        frame_index = min(int(self.murloc.frame), 11)
-        if self.murloc.face_dir == -1:
-            self.murloc.images['Ult'][frame_index].composite_draw(0, 'h', self.murloc.x - 78, self.murloc.y)
+        frame_index = min(int(self.stan.frame), 11)
+        if self.stan.face_dir == -1:
+            self.stan.images['Ult'][frame_index].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
         else:
-            self.murloc.images['Ult'][frame_index].draw(self.murloc.x + 78, self.murloc.y)
+            self.stan.images['Ult'][frame_index].draw(self.stan.x + 78, self.stan.y)
 
     def get_hitbox(self):
-        frame = int(self.murloc.frame)
-        x, y = self.murloc.x, self.murloc.y
-        face_dir = self.murloc.face_dir
+        frame = int(self.stan.frame)
+        x, y = self.stan.x, self.stan.y
+        face_dir = self.stan.face_dir
 
         # 프레임별 히트박스 정의 (캐릭터 중심 기준)
         hitbox_data = {
@@ -667,20 +667,20 @@ class Ult:
         else:  # 왼쪽
             return x - width, y + dy, x - dx, y + height
 
-class Murloc:
+class stan:
     images = None
 
     def load_images(self):
-        if Murloc.images == None:
-            Murloc.images = {}
+        if stan.images == None:
+            stan.images = {}
             # Idle: 1장
-            Murloc.images['Idle'] = [load_image("./Character/murloc/Idle (1).png")]
+            stan.images['Idle'] = [load_image("./Character/stan/Idle (1).png")]
             # Attack: 10장
-            Murloc.images['Attack'] = [load_image(f"./Character/murloc/Attack ({i}).png") for i in range(1, 11)]
+            stan.images['Attack'] = [load_image(f"./Character/stan/Attack ({i}).png") for i in range(1, 11)]
             # Skill: 17장
-            Murloc.images['Skill'] = [load_image(f"./Character/murloc/Skill ({i}).png") for i in range(1, 18)]
+            stan.images['Skill'] = [load_image(f"./Character/stan/Skill ({i}).png") for i in range(1, 18)]
             # Ult: 12장
-            Murloc.images['Ult'] = [load_image(f"./Character/murloc/Ult ({i}).png") for i in range(1, 13)]
+            stan.images['Ult'] = [load_image(f"./Character/stan/Ult ({i}).png") for i in range(1, 13)]
 
     def __init__(self, player_num=2, max_hp=100, mp_increase=10):
         # 디버그 모드 추가
