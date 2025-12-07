@@ -874,14 +874,14 @@ class Rooks:
         self.state_machine.draw()
 
         # 캐릭터 바운딩 박스
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
 
         # 히트박스
-        hitbox = self.get_hitbox()
-        if hitbox:
-            from pico2d import draw_rectangle as draw_rect
-            x1, y1, x2, y2 = hitbox
-            draw_rect(x1, y1, x2, y2)
+        # hitbox = self.get_hitbox()
+        # if hitbox:
+        #     from pico2d import draw_rectangle as draw_rect
+        #     x1, y1, x2, y2 = hitbox
+        #     draw_rect(x1, y1, x2, y2)
 
         # 디버그 정보 표시
         if self.debug_mode:

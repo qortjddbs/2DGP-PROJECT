@@ -44,5 +44,5 @@ class Temple:
         self.image2.draw(438, 292)
 
         # 디버그용 플랫폼 시각화
-        for x1, y1, x2, y2 in self.platforms:
-            draw_rectangle(x1, y1, x2, y2)
+        # for x1, y1, x2, y2 in self.platforms:
+        #     draw_rectangle(x1, y1, x2, y2)

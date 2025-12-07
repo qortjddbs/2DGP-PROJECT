@@ -730,8 +730,8 @@ class Stan:
 
         self.damage_values = {
             'Attack' : 2,
-            'Skill' : 10,
-            'Ult' : 10
+            'Skill' : 6,
+            'Ult' : 5
         }
 
         self.knockback_values = {
@@ -783,21 +783,53 @@ class Stan:
         )
 
     def calculate_damage(self, attack_type, frame):
+        """공격 타입과 프레임에 따른 데미지 계산"""
         base_damage = self.damage_values.get(attack_type, 0)
 
+        # frame은 float일 수 있으므로 int로 변환
+        int_frame = int(frame)
+
+        # Skill: 프레임별 차등 데미지 (가까울수록 강함)
         if attack_type == 'Skill':
-            # 프레임이 낮을수록(가까울수록) 강함
-            # 예: 0~5프레임은 100%, 15프레임은 20%
-            factor = max(0.2, 1.0 - (frame / 20.0))
-            return int(base_damage * factor * 2)  # 최대 2배까지
+            # 유효 타격 프레임 구간: 7 ~ 9
+            if 7 <= int_frame <= 9:
+                # 7프레임(가장 가까움) -> 8 데미지
+                # 9프레임(가장 멂) -> 3 데미지
+                if int_frame == 7:
+                    return 8
+                elif int_frame == 8:
+                    return 5
+                elif int_frame == 9:
+                    return 3
+            else:
+                return 0  # 그 외 프레임은 데미지 없음 (히트박스가 있어도 데미지 0 처리)
 
+        # Ult: 프레임별 차등 데미지 (멀수록 강함)
         elif attack_type == 'Ult':
-            # 프레임이 높을수록(멀수록) 강함
-            # 예: 0프레임 100%, 15프레임 300%
-            factor = 1.0 + (frame / 15.0) * 2.0
-            return int(base_damage * factor)
+            # 유효 타격 프레임 구간: 6 ~ 9
+            if 6 <= int_frame <= 9:
+                # 6프레임(가장 가까움) -> 10 데미지
+                # 9프레임(가장 멂) -> 20 데미지
+                if int_frame == 6:
+                    return 10
+                elif int_frame == 7:
+                    return 13
+                elif int_frame == 8:
+                    return 16
+                elif int_frame == 9:
+                    return 20
+            else:
+                return 0
 
-        return base_damage
+                # Attack은 거리 기반 데미지 유지
+        elif attack_type == 'Attack':
+            # Attack도 특정 프레임(예: 3~7)에만 데미지 들어가도록 할 수 있음
+            if 3 <= int_frame <= 7:
+                return base_damage
+            else:
+                return 0
+
+        return 0
 
     def apply_gravity(self):
         self.y_velocity -= GRAVITY * game_framework.frame_time * 150
@@ -888,14 +920,14 @@ class Stan:
         self.state_machine.draw()
 
         # 캐릭터 바운딩 박스
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
 
         # 히트박스
-        hitbox = self.get_hitbox()
-        if hitbox:
-            from pico2d import draw_rectangle as draw_rect
-            x1, y1, x2, y2 = hitbox
-            draw_rect(x1, y1, x2, y2)
+        # hitbox = self.get_hitbox()
+        # if hitbox:
+        #     from pico2d import draw_rectangle as draw_rect
+        #     x1, y1, x2, y2 = hitbox
+        #     draw_rect(x1, y1, x2, y2)
 
         # 디버그 정보 표시
         if self.debug_mode:
