@@ -136,7 +136,7 @@ class Jump:
             self.murloc.dir = 0
 
         # 3. 착지 확인
-        if self.murloc.check_landing():
+        if self.murloc.check_platform_collision():
             keys = SDL_GetKeyboardState(None)
             left_pressed = keys[SDL_GetScancodeFromKey(self.murloc.left_key)]
             right_pressed = keys[SDL_GetScancodeFromKey(self.murloc.right_key)]
@@ -273,7 +273,7 @@ class Attack:
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
         if self.murloc.is_air_action:
             self.murloc.apply_gravity()
-            if self.murloc.check_landing():
+            if self.murloc.check_platform_collision():
                 pass
 
         # 2. 좌우 이동 로직
@@ -424,7 +424,7 @@ class Skill:
         # 1. 공중 공격(액션)일 경우에만 중력 적용 및 착지 체크
         if self.murloc.is_air_action:
             self.murloc.apply_gravity()
-            if self.murloc.check_landing():
+            if self.murloc.check_platform_collision():
                 pass
 
         # 3. 애니메이션 프레임 업데이트 (기존과 동일)
@@ -565,7 +565,7 @@ class Ult:
         # [FIX 4] 공중 궁극기일 경우에만 중력 적용
         if self.murloc.is_air_action:
             self.murloc.apply_gravity()
-            if self.murloc.check_landing():
+            if self.murloc.check_platform_collision():
                 pass
 
         # [FIX 5] Ult는 좌우 이동 불가 (dir=0이므로 관련 로직 불필요)
@@ -786,7 +786,10 @@ class Murloc:
 
     def update(self):
         self.increase_mp()
+        prev_x = self.x
         self.state_machine.update()
+        if prev_x != self.x and not self.is_air_action:
+            self.check_platform_edge()  # X 좌표 변경 시 가장자리 체크
 
     def get_hitbox(self):
         return self.state_machine.cur_state.get_hitbox()
@@ -909,3 +912,69 @@ class Murloc:
             return
 
         self.state_machine.handle_state_event(('INPUT', event))
+
+    def set_platforms(self, platforms):
+        """맵의 플랫폼 정보 설정"""
+        self.platforms = platforms
+
+    def check_platform_collision(self):
+        """플랫폼과의 충돌 체크 및 착지 처리"""
+        # 1. 플랫폼 데이터가 없으면 기본 바닥 체크만 수행
+        if not hasattr(self, 'platforms'):
+            return self.check_landing()
+
+        # 2. 캐릭터의 현재 바운딩 박스 가져오기
+        char_left, char_bottom, char_right, char_top = self.get_bb()
+
+        # 3. 아래로 떨어지는 중일 때만 플랫폼 충돌 체크
+        if self.y_velocity <= 0:
+            for x1, y1, x2, y2 in self.platforms:
+                # 4. X축 범위 체크: 캐릭터가 플랫폼 위에 있는지
+                if char_right > x1 and char_left < x2:
+                    # 5. Y축 충돌 체크: 발이 플랫폼에 닿았는지
+                    if char_bottom <= y2 and char_bottom + abs(self.y_velocity) >= y2:
+                        # 6. 착지 처리
+                        self.y = y2 + 23  # 플랫폼 위로 위치 조정
+                        self.y_velocity = 0  # 낙하 속도 초기화
+                        self.is_air_action = False  # 공중 상태 해제
+                        self.ground_y = y2 + 23  # 현재 바닥 높이 저장
+                        return True
+
+        # 7. 기본 바닥 체크 (y=83)
+        if self.y <= 83:
+            self.y = 83
+            self.y_velocity = 0
+            self.is_air_action = False
+            self.ground_y = 83
+            return True
+
+        return False
+
+    def check_platform_edge(self):
+        """플랫폼 가장자리에서 벗어났는지 체크"""
+        if not hasattr(self, 'platforms'):
+            return
+
+        char_left, char_bottom, char_right, char_top = self.get_bb()
+
+        # 1. 현재 서 있는 플랫폼 찾기
+        on_platform = False
+
+        for x1, y1, x2, y2 in self.platforms:
+            platform_y = y2 + 23
+
+            # 2. 현재 높이가 플랫폼 높이와 일치하는지 확인
+            if abs(self.y - platform_y) < 5:
+                # 3. X 좌표가 플랫폼 범위 내에 있는지 확인
+                if char_right > x1 and char_left < x2:
+                    on_platform = True
+                    break
+
+        # 4. 기본 바닥 확인
+        if self.y <= 83:
+            on_platform = True
+
+        # 5. 플랫폼에서 벗어났으면 떨어지기 시작
+        if not on_platform:
+            self.is_air_action = True
+            self.y_velocity = 0

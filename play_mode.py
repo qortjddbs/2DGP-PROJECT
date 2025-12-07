@@ -85,6 +85,11 @@ def init():
     temple = Temple()
     game_world.add_object(temple, 0)
 
+    # 플랫폼 정보를 캐릭터에 전달
+    platforms = temple.get_platforms()
+    player1.set_platforms(platforms)
+    player2.set_platforms(platforms)
+
     # UI 생성 및 추가 (레이어 2)
     player1_ui = PlayerUI(player1, 1)
     player2_ui = PlayerUI(player2, 2)
