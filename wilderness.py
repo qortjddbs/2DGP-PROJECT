@@ -2,7 +2,7 @@ from pico2d import *
 
 class Wilderness:
     def __init__(self):
-        self.image1 = load_image('./Maps/wilderness.png')
+        self.image = load_image('./Maps/wilderness.png')
 
     def update(self):
         pass

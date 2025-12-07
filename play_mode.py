@@ -80,17 +80,27 @@ def init():
     game_world.add_object(player2, 1)
 
     # 배경
-    # wilderness = Wilderness()
-    # game_world.add_object(wilderness, 0)
-    temple = Temple()
-    game_world.add_object(temple, 0)
+    map_choice = random.choice(['Wilderness', 'Temple'])
+    print(f"Selected Map: {map_choice}")
 
-    # 플랫폼 정보를 캐릭터에 전달
-    platforms = temple.get_platforms()
-    player1.set_platforms(platforms)
-    player2.set_platforms(platforms)
+    if map_choice == 'Wilderness':
+        # 황야 맵 생성
+        background = Wilderness()
+        game_world.add_object(background, 0)
+        # Wilderness는 플랫폼이 없으므로 set_platforms를 호출하지 않음
+        # (캐릭터 내부에서 platforms 속성이 없으면 기본 바닥(y=83) 처리함)
 
-    # UI 생성 및 추가 (레이어 2)
+    else:  # Temple
+        # 황금 사원 맵 생성
+        background = Temple()
+        game_world.add_object(background, 0)
+
+        # Temple일 경우에만 플랫폼 정보를 가져와서 캐릭터에게 전달
+        platforms = background.get_platforms()
+        player1.set_platforms(platforms)
+        player2.set_platforms(platforms)
+
+    # 3. UI 생성 및 추가 (기존 코드 유지)
     player1_ui = PlayerUI(player1, 1)
     player2_ui = PlayerUI(player2, 2)
     game_world.add_object(player1_ui, 2)
