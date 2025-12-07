@@ -147,6 +147,8 @@ def draw():
     clear_canvas()
     background_image.draw(277, 200)
     rooks_portrait_image.draw(80, 100)
+    murloc_portrait_image.draw(160, 100)
+    random_portrait_image.draw(275, 100)
     if show_back_red:
         back_red_image.draw(275, 380) # type : ignore
     elif selection_step == 1 and (show_rooks or show_murloc or show_random):
@@ -158,6 +160,7 @@ def draw():
         elif show_murloc:
             murloc_pick_image.draw(120, 270)
             font.draw(70, 350, "Murloc", (255, 255, 255))  # 빨간색
+            mini_font.draw(132, 100, "Murloc", (0, 0, 0))  # 빨간색
         elif show_random:
             random_pick_image.draw(120, 270)
     elif selection_step == 2 and (show_rooks or show_murloc or show_random):
@@ -185,9 +188,6 @@ def draw():
 
     player1_name_image.draw(120, 200)
     player2_name_image.draw(430, 200)
-
-    murloc_portrait_image.draw(160, 100)
-    random_portrait_image.draw(275, 100)
 
     # P1, P2 텍스트 출력 (P1은 빨간색, P2는 파란색)
     if font:
