@@ -646,9 +646,9 @@ class Ult:
     def draw(self):
         frame_index = min(int(self.stan.frame), 15)
         if self.stan.face_dir == -1:
-            self.stan.images['Ult'][frame_index].composite_draw(0, 'h', self.stan.x - 78, self.stan.y)
+            self.stan.images['Ult'][frame_index].composite_draw(0, 'h', self.stan.x - 108, self.stan.y - 3)
         else:
-            self.stan.images['Ult'][frame_index].draw(self.stan.x + 78, self.stan.y)
+            self.stan.images['Ult'][frame_index].draw(self.stan.x + 108, self.stan.y - 3)
 
     def get_hitbox(self):
         frame = int(self.stan.frame)
@@ -661,13 +661,13 @@ class Ult:
             1: None,  # 준비 동작
             2: None,  # 공격 시작
             3: None,  # 휘두르기 시작
-            4: (-78, -17, -1, 24),  # 12 ~ 89, 66 ~ 107
-            5: (-49, -9, 31, 26),  # 12 -> 38, 89 -> 120 / 66 -> 74, 107 -> 109
-            6: (0, 6, 82, 29),  # 38 -> 90, 120 -> 171 / 74 -> 89, 109 -> 112
-            7: (40, 18, 126, 32),  # 90 -> 130, 171 -> 215 / 89 -> 101, 112 -> 115
-            8: (95, 2, 182, 20),  # 130 -> 185, 215 -> 271 / 101 -> 85, 115 -> 103
-            9: (148, 16, 230, -21),  # 185 -> 238, 271 -> 319 / 85 -> 99, 103 -> 62
-            10: (165, 21, 235, -34), # 238 -> 255, 319 -> 324 / 99 -> 104, 62 -> 49
+            4: None,  # 12 ~ 89, 66 ~ 107
+            5: None,  # 12 -> 38, 89 -> 120 / 66 -> 74, 107 -> 109
+            6: (37, -10, 74, -9),  # 38 -> 90, 120 -> 171 / 74 -> 89, 109 -> 112
+            7: (91, -10, 130, -9),  # 90 -> 130, 171 -> 215 / 89 -> 101, 112 -> 115
+            8: (157, -10, 193, -9),  # 130 -> 185, 215 -> 271 / 101 -> 85, 115 -> 103
+            9: (204, -10, 241, -9),  # 185 -> 238, 271 -> 319 / 85 -> 99, 103 -> 62
+            10: None, # 238 -> 255, 319 -> 324 / 99 -> 104, 62 -> 49
             11: None,
             12: None,
             13: None,
