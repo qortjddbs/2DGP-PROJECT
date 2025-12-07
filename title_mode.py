@@ -14,6 +14,7 @@ method_button_image = None
 cursor_image = None
 
 def init():
+    # 커밋 되나?
     global background_image, logo_image, start_button_image, method_button_image, font, cursor_image
     background_image = load_image('./Background/시작배경.png')
     logo_image = load_image('./Background/로고.png')
