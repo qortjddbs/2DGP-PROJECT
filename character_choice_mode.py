@@ -173,15 +173,15 @@ def draw():
         if show_rooks:
             rooks_pick_image.draw(120, 270)
             font.draw(75, 350, "Rooks", (255, 255, 255))
-            mini_font.draw(88, 100, "Rooks", (0, 0, 0))
+            mini_font.draw(88, 100, "Rooks", (0, 0, 255))
         elif show_murloc:
             murloc_pick_image.draw(120, 270)
             font.draw(65, 350, "Murloc", (255, 255, 255))
-            mini_font.draw(192, 100, "Murloc", (0, 0, 0))
+            mini_font.draw(192, 100, "Murloc", (255, 0, 255))
         elif show_stan:
             stan_pick_image.draw(120, 270)
             font.draw(80, 350, "Stan", (255, 255, 255))
-            mini_font.draw(310, 100, "Stan", (0, 0, 0))
+            mini_font.draw(312, 100, "Stan", (255, 0, 0))
         elif show_random:
             random_pick_image.draw(120, 270)
     elif selection_step == 2 and (show_rooks or show_murloc or show_stan or show_random):

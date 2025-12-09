@@ -132,8 +132,8 @@ class Jump:
                 self.stan.dir = 0
 
             self.stan.x += self.stan.dir * RUN_SPEED_PPS * game_framework.frame_time
-            if self.stan.x < 15:
-                self.stan.x = 15
+            if self.stan.x < 10:
+                self.stan.x = 10
             elif self.stan.x > 530:
                 self.stan.x = 530
 
@@ -201,8 +201,8 @@ class Run:
             # 둘 다 안 눌려있으면 멈춤
             self.stan.dir = 0
         self.stan.x += self.stan.dir * RUN_SPEED_PPS * game_framework.frame_time
-        if self.stan.x < 15:
-            self.stan.x = 15
+        if self.stan.x < 10:
+            self.stan.x = 10
         elif self.stan.x > 530:
             self.stan.x = 530
 
@@ -311,8 +311,8 @@ class Attack:
 
         # 공격하면서도 이동
         self.stan.x += self.stan.dir * RUN_SPEED_PPS * game_framework.frame_time
-        if self.stan.x < 15:
-            self.stan.x = 15
+        if self.stan.x < 10:
+            self.stan.x = 10
         elif self.stan.x > 530:
             self.stan.x = 530
 
