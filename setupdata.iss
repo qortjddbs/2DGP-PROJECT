@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 ; Non-commercial use only
 
-#define MyAppName "BounceAttack2022180016"
+#define MyAppName "BounceAttack"
 #define MyAppVersion "1.5"
 #define MyAppPublisher "My Company, Inc."
 #define MyAppURL "https://www.example.com/"
@@ -11,7 +11,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{5AF0E2FC-7B63-4D78-8A43-7284EAC631AE}
+AppId={{B122B98D-C170-4BC8-A9EE-B7028DB51BE1}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -19,7 +19,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={autopf}\BounceAttack_2022180016
 UninstallDisplayIcon={app}\{#MyAppExeName}
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
 ; on anything but x64 and Windows 11 on Arm.
@@ -33,8 +33,8 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=C:\2DGP\2DGP-PROJECT
-OutputBaseFilename=BounceAttackSetup2022180016
+OutputDir=C:\2DGP\2DGP-PROJECT\Temp
+OutputBaseFilename=Game_2022180016_Setup
 SolidCompression=yes
 WizardStyle=modern dark
 
@@ -59,3 +59,4 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 
 [Dirs]
 Name: {app}; Permissions: users-full
+
