@@ -794,7 +794,7 @@ class Murloc:
         return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == self.attack_key
 
     def get_bb(self):
-        return self.x - 13, self.y - 23, self.x + 12, self.y + 2
+        return self.x - 13, self.y - 23, self.x + 12, self.y + 5
 
     def get_text_position(self):
         """텍스트 표시용 좌표 반환 (캐릭터 머리 위)"""
@@ -882,13 +882,13 @@ class Murloc:
             if not hasattr(self, 'font'):
                 self.font = load_font('ENCR10B.TTF', 14)
 
-            y_offset = self.y + 60
-            self.font.draw(self.x - 60, y_offset, info1, (255, 255, 0))
-            self.font.draw(self.x - 60, y_offset - 15, info2, (255, 255, 0))
-            self.font.draw(self.x - 60, y_offset - 30, info3, (255, 255, 0))
-            self.font.draw(self.x - 60, y_offset - 45, info4, (255, 255, 0))
-            self.font.draw(self.x - 60, y_offset - 60, info5, (255, 255, 0))
-            self.font.draw(self.x - 60, y_offset - 75, info6, (0, 255, 255))
+            y_offset = self.y + 120
+            self.font.draw(self.x - 60, y_offset, info1, (0, 0, 0))
+            self.font.draw(self.x - 60, y_offset - 15, info2, (0, 0, 0))
+            self.font.draw(self.x - 60, y_offset - 30, info3, (0, 0, 0))
+            self.font.draw(self.x - 60, y_offset - 45, info4, (0, 0, 0))
+            self.font.draw(self.x - 60, y_offset - 60, info5, (0, 0, 0))
+            self.font.draw(self.x - 60, y_offset - 75, info6, (0, 0, 0))
             self.font.draw(self.x - 60, y_offset - 90, info7, (255, 100, 100))
 
             # 클릭 위치에 십자선 표시
