@@ -184,19 +184,24 @@ def draw():
             mini_font.draw(312, 100, "Stan", (255, 0, 0))
         elif show_random:
             random_pick_image.draw(120, 270)
+            mini_font.draw(412, 100, "Random", (100, 100, 100))
     elif selection_step == 2 and (show_rooks or show_murloc or show_stan or show_random):
         # P2 선택 중일 때는 (430, 270)에 표시
         if show_rooks:
             rooks_pick_image.draw(430, 270)
             font.draw(385, 350, "Rooks", (255, 255, 255))
+            mini_font.draw(88, 100, "Rooks", (0, 0, 255))
         elif show_murloc:
             murloc_pick_image.draw(430, 270)
             font.draw(380, 350, "Murloc", (255, 255, 255))
+            mini_font.draw(192, 100, "Murloc", (255, 0, 255))
         elif show_stan:
             stan_pick_image.draw(430, 270)
             font.draw(390, 350, "Stan", (255, 255, 255))
+            mini_font.draw(312, 100, "Stan", (255, 0, 0))
         elif show_random:
             random_pick_image.draw(430, 270)
+            mini_font.draw(412, 100, "Random", (100, 100, 100))
 
     if not show_back_red:
         back_image.draw(275, 380)  # type : ignore
