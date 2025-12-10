@@ -930,88 +930,88 @@ class Stan:
         #     draw_rect(x1, y1, x2, y2)
 
         # 디버그 정보 표시
-        if self.debug_mode:
-            state_name = self.state_machine.cur_state.__class__.__name__
-            frame_num = int(self.frame)
-            max_frame = self.state_machine.cur_state.FRAMES_PER_ACTION - 1
-
-            # 상태 및 프레임 정보
-            info1 = f"P{self.player_num} {state_name}"
-            info2 = f"Frame: {frame_num}/{max_frame}"
-            info3 = f"Pos: ({int(self.x)}, {int(self.y)})"
-            info4 = f"FaceDir: {'RIGHT' if self.face_dir == 1 else 'LEFT'}"
-
-            if hitbox:
-                info5 = f"Hitbox: ({int(x1)},{int(y1)})-({int(x2)},{int(y2)})"
-            else:
-                info5 = "Hitbox: None"
-
-            if self.manual_frame:
-                info6 = "MANUAL MODE (</> to change frame)"
-            else:
-                info6 = "AUTO MODE (F2 to toggle)"
-
-            # 마우스 클릭 좌표
-            if self.last_click_pos:
-                info7 = f"Last Click: ({self.last_click_pos[0]}, {self.last_click_pos[1]})"
-            else:
-                info7 = "Last Click: None"
-
-            if not hasattr(self, 'font'):
-                self.font = load_font('ENCR10B.TTF', 14)
-
-            y_offset = self.y + 100
-            self.font.draw(self.x - 60, y_offset, info1, (255, 255, 0))
-            self.font.draw(self.x - 60, y_offset - 15, info2, (255, 255, 0))
-            self.font.draw(self.x - 60, y_offset - 30, info3, (255, 255, 0))
-            self.font.draw(self.x - 60, y_offset - 45, info4, (255, 255, 0))
-            self.font.draw(self.x - 60, y_offset - 60, info5, (255, 255, 0))
-            self.font.draw(self.x - 60, y_offset - 75, info6, (0, 255, 255))
-            self.font.draw(self.x - 60, y_offset - 90, info7, (255, 100, 100))
-
-            # 클릭 위치에 십자선 표시
-            if self.last_click_pos:
-                from pico2d import draw_line
-                cx, cy = self.last_click_pos
-                draw_line(cx - 10, cy, cx + 10, cy)
-                draw_line(cx, cy - 10, cx, cy + 10)
+        # if self.debug_mode:
+        #     state_name = self.state_machine.cur_state.__class__.__name__
+        #     frame_num = int(self.frame)
+        #     max_frame = self.state_machine.cur_state.FRAMES_PER_ACTION - 1
+        #
+        #     # 상태 및 프레임 정보
+        #     info1 = f"P{self.player_num} {state_name}"
+        #     info2 = f"Frame: {frame_num}/{max_frame}"
+        #     info3 = f"Pos: ({int(self.x)}, {int(self.y)})"
+        #     info4 = f"FaceDir: {'RIGHT' if self.face_dir == 1 else 'LEFT'}"
+        #
+        #     if hitbox:
+        #         info5 = f"Hitbox: ({int(x1)},{int(y1)})-({int(x2)},{int(y2)})"
+        #     else:
+        #         info5 = "Hitbox: None"
+        #
+        #     if self.manual_frame:
+        #         info6 = "MANUAL MODE (</> to change frame)"
+        #     else:
+        #         info6 = "AUTO MODE (F2 to toggle)"
+        #
+        #     # 마우스 클릭 좌표
+        #     if self.last_click_pos:
+        #         info7 = f"Last Click: ({self.last_click_pos[0]}, {self.last_click_pos[1]})"
+        #     else:
+        #         info7 = "Last Click: None"
+        #
+        #     if not hasattr(self, 'font'):
+        #         self.font = load_font('ENCR10B.TTF', 14)
+        #
+        #     y_offset = self.y + 100
+        #     self.font.draw(self.x - 60, y_offset, info1, (255, 255, 0))
+        #     self.font.draw(self.x - 60, y_offset - 15, info2, (255, 255, 0))
+        #     self.font.draw(self.x - 60, y_offset - 30, info3, (255, 255, 0))
+        #     self.font.draw(self.x - 60, y_offset - 45, info4, (255, 255, 0))
+        #     self.font.draw(self.x - 60, y_offset - 60, info5, (255, 255, 0))
+        #     self.font.draw(self.x - 60, y_offset - 75, info6, (0, 255, 255))
+        #     self.font.draw(self.x - 60, y_offset - 90, info7, (255, 100, 100))
+        #
+        #     # 클릭 위치에 십자선 표시
+        #     if self.last_click_pos:
+        #         from pico2d import draw_line
+        #         cx, cy = self.last_click_pos
+        #         draw_line(cx - 10, cy, cx + 10, cy)
+        #         draw_line(cx, cy - 10, cx, cy + 10)
 
     def handle_event(self, event):
         # 디버그 키 처리
-        if event.type == SDL_KEYDOWN:
-            if event.key == SDLK_F1:
-                self.debug_mode = not self.debug_mode
-                print(f"Debug Mode: {'ON' if self.debug_mode else 'OFF'}")
-                return
-            elif event.key == SDLK_F2:
-                self.manual_frame = not self.manual_frame
-                if self.manual_frame:
-                    self.frame_step = 0.0
-                print(f"Manual Frame Mode: {'ON' if self.manual_frame else 'OFF'}")
-                return
-            elif self.manual_frame:
-                # 수동 프레임 진행
-                if event.key == SDLK_PERIOD:  # '>' 키
-                    max_frame = self.state_machine.cur_state.FRAMES_PER_ACTION - 1
-                    self.frame_step = min(self.frame_step + 1, max_frame)
-                    self.frame = self.frame_step
-                    print(f"Frame: {int(self.frame_step)}")
-                    return
-                elif event.key == SDLK_COMMA:  # '<' 키
-                    self.frame_step = max(self.frame_step - 1, 0)
-                    self.frame = self.frame_step
-                    print(f"Frame: {int(self.frame_step)}")
-                    return
-
-        # 마우스 클릭 처리
-        if self.debug_mode and event.type == SDL_MOUSEBUTTONDOWN:
-            # pico2d의 이벤트는 SDL2 이벤트를 래핑한 것
-            # x, y 좌표는 event.x, event.y로 직접 접근
-            mouse_x = getattr(event, 'x', 0)
-            mouse_y = getattr(event, 'y', 0)
-            self.last_click_pos = (mouse_x, 400 - mouse_y)  # Y좌표 반전
-            print(f"Mouse Click: ({self.last_click_pos[0]}, {self.last_click_pos[1]})")
-            return
+        # if event.type == SDL_KEYDOWN:
+        #     if event.key == SDLK_F1:
+        #         self.debug_mode = not self.debug_mode
+        #         print(f"Debug Mode: {'ON' if self.debug_mode else 'OFF'}")
+        #         return
+        #     elif event.key == SDLK_F2:
+        #         self.manual_frame = not self.manual_frame
+        #         if self.manual_frame:
+        #             self.frame_step = 0.0
+        #         print(f"Manual Frame Mode: {'ON' if self.manual_frame else 'OFF'}")
+        #         return
+        #     elif self.manual_frame:
+        #         # 수동 프레임 진행
+        #         if event.key == SDLK_PERIOD:  # '>' 키
+        #             max_frame = self.state_machine.cur_state.FRAMES_PER_ACTION - 1
+        #             self.frame_step = min(self.frame_step + 1, max_frame)
+        #             self.frame = self.frame_step
+        #             print(f"Frame: {int(self.frame_step)}")
+        #             return
+        #         elif event.key == SDLK_COMMA:  # '<' 키
+        #             self.frame_step = max(self.frame_step - 1, 0)
+        #             self.frame = self.frame_step
+        #             print(f"Frame: {int(self.frame_step)}")
+        #             return
+        #
+        # # 마우스 클릭 처리
+        # if self.debug_mode and event.type == SDL_MOUSEBUTTONDOWN:
+        #     # pico2d의 이벤트는 SDL2 이벤트를 래핑한 것
+        #     # x, y 좌표는 event.x, event.y로 직접 접근
+        #     mouse_x = getattr(event, 'x', 0)
+        #     mouse_y = getattr(event, 'y', 0)
+        #     self.last_click_pos = (mouse_x, 400 - mouse_y)  # Y좌표 반전
+        #     print(f"Mouse Click: ({self.last_click_pos[0]}, {self.last_click_pos[1]})")
+        #     return
 
         self.state_machine.handle_state_event(('INPUT', event))
 
